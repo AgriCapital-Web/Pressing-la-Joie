@@ -1,14 +1,15 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { ArrowLeft, ShieldCheck, ShieldOff, UserPlus } from "lucide-react";
+import { ArrowLeft, ShieldCheck, ShieldOff } from "lucide-react";
 import { toast } from "sonner";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
+import { formatPrice } from "@/lib/constants";
+import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid } from "recharts";
+import { format, subDays, startOfDay } from "date-fns";
+import { fr } from "date-fns/locale";
 
 interface Manager {
   user_id: string;
@@ -18,46 +19,44 @@ interface Manager {
   role: string;
 }
 
+interface Order {
+  id: number;
+  total: number;
+  is_paid: boolean;
+  created_at: string;
+}
+
 export default function Admin() {
   const { user, role, loading: authLoading } = useAuth();
   const navigate = useNavigate();
   const [managers, setManagers] = useState<Manager[]>([]);
+  const [orders, setOrders] = useState<Order[]>([]);
   const [loading, setLoading] = useState(true);
-  const [showAdd, setShowAdd] = useState(false);
-  const [newEmail, setNewEmail] = useState("");
-  const [newPassword, setNewPassword] = useState("");
-  const [newName, setNewName] = useState("");
-  const [adding, setAdding] = useState(false);
-
-  // Stats
-  const [totalOrders, setTotalOrders] = useState(0);
-  const [totalRevenue, setTotalRevenue] = useState(0);
 
   useEffect(() => {
     if (!authLoading && (!user || role !== "admin")) navigate("/dashboard");
   }, [user, role, authLoading, navigate]);
 
   const fetchData = async () => {
-    // Fetch managers with roles
-    const { data: profiles } = await supabase.from("profiles").select("*");
-    const { data: roles } = await supabase.from("user_roles").select("*");
+    const [profilesRes, rolesRes, ordersRes] = await Promise.all([
+      supabase.from("profiles").select("*"),
+      supabase.from("user_roles").select("*"),
+      supabase.from("orders").select("id, total, is_paid, created_at"),
+    ]);
 
-    if (profiles && roles) {
-      const mgrs = profiles.map((p) => ({
+    if (profilesRes.data && rolesRes.data) {
+      const mgrs = profilesRes.data.map((p) => ({
         user_id: p.user_id,
         display_name: p.display_name,
         email: p.email || "",
         is_active: p.is_active,
-        role: roles.find((r) => r.user_id === p.user_id)?.role || "manager",
+        role: rolesRes.data!.find((r) => r.user_id === p.user_id)?.role || "manager",
       }));
       setManagers(mgrs.filter((m) => m.user_id !== user?.id));
     }
 
-    // Fetch stats
-    const { data: orders } = await supabase.from("orders").select("total, is_paid");
-    if (orders) {
-      setTotalOrders(orders.length);
-      setTotalRevenue(orders.filter((o) => o.is_paid).reduce((s, o) => s + Number(o.total), 0));
+    if (ordersRes.data) {
+      setOrders(ordersRes.data as unknown as Order[]);
     }
     setLoading(false);
   };
@@ -65,6 +64,27 @@ export default function Admin() {
   useEffect(() => {
     if (user && role === "admin") fetchData();
   }, [user, role]);
+
+  const totalOrders = orders.length;
+  const totalRevenue = orders.filter((o) => o.is_paid).reduce((s, o) => s + Number(o.total), 0);
+
+  // Weekly revenue chart data (last 7 days)
+  const weeklyData = useMemo(() => {
+    const days = [];
+    for (let i = 6; i >= 0; i--) {
+      const day = startOfDay(subDays(new Date(), i));
+      const dayStr = day.toDateString();
+      const dayOrders = orders.filter(
+        (o) => o.is_paid && new Date(o.created_at).toDateString() === dayStr
+      );
+      const revenue = dayOrders.reduce((s, o) => s + Number(o.total), 0);
+      days.push({
+        day: format(day, "EEE dd", { locale: fr }),
+        revenue,
+      });
+    }
+    return days;
+  }, [orders]);
 
   const toggleActive = async (managerId: string, currentlyActive: boolean) => {
     const { error } = await supabase
@@ -111,7 +131,31 @@ export default function Admin() {
           </div>
           <div className="rounded-lg bg-card p-6 shadow-card">
             <p className="text-sm text-muted-foreground">Chiffre d'affaires (payé)</p>
-            <p className="text-3xl font-bold tabular-nums text-success">{totalRevenue.toFixed(2)} €</p>
+            <p className="text-3xl font-bold tabular-nums text-success">{formatPrice(totalRevenue)}</p>
+          </div>
+        </div>
+
+        {/* Weekly Chart */}
+        <div className="mb-8 rounded-lg bg-card p-6 shadow-card">
+          <h2 className="mb-4 text-lg font-semibold text-foreground">Chiffre d'affaires hebdomadaire</h2>
+          <div className="h-64">
+            <ResponsiveContainer width="100%" height="100%">
+              <BarChart data={weeklyData}>
+                <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
+                <XAxis dataKey="day" tick={{ fontSize: 12 }} stroke="hsl(var(--muted-foreground))" />
+                <YAxis tick={{ fontSize: 12 }} stroke="hsl(var(--muted-foreground))" tickFormatter={(v) => `${(v / 1000).toFixed(0)}k`} />
+                <Tooltip
+                  formatter={(value: number) => [formatPrice(value), "Recettes"]}
+                  contentStyle={{
+                    backgroundColor: "hsl(var(--card))",
+                    border: "1px solid hsl(var(--border))",
+                    borderRadius: "0.5rem",
+                    color: "hsl(var(--foreground))",
+                  }}
+                />
+                <Bar dataKey="revenue" fill="hsl(var(--primary))" radius={[4, 4, 0, 0]} />
+              </BarChart>
+            </ResponsiveContainer>
           </div>
         </div>
 

@@ -4,9 +4,8 @@ import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Badge } from "@/components/ui/badge";
 import { Search, Plus, LogOut, Users } from "lucide-react";
-import { ORDER_STATUS_LABELS } from "@/lib/constants";
+import { formatPrice } from "@/lib/constants";
 import NewOrderDialog from "@/components/NewOrderDialog";
 import OrderCard from "@/components/OrderCard";
 
@@ -56,7 +55,6 @@ export default function Dashboard() {
     if (user) fetchOrders();
   }, [user]);
 
-  // Realtime subscription
   useEffect(() => {
     const channel = supabase
       .channel("orders-changes")
@@ -70,7 +68,6 @@ export default function Dashboard() {
   const filtered = orders.filter(
     (o) =>
       o.customer_name.toLowerCase().includes(search.toLowerCase()) ||
-      o.ticket_number.toLowerCase().includes(search.toLowerCase()) ||
       o.customer_phone.includes(search)
   );
 
@@ -87,7 +84,6 @@ export default function Dashboard() {
 
   return (
     <div className="min-h-screen bg-background">
-      {/* Top bar */}
       <header className="sticky top-0 z-10 border-b bg-card/80 backdrop-blur-sm">
         <div className="container flex items-center justify-between py-3">
           <div>
@@ -112,7 +108,6 @@ export default function Dashboard() {
       </header>
 
       <div className="container py-6">
-        {/* Stats */}
         <div className="mb-6 grid gap-4 sm:grid-cols-3">
           <div className="rounded-lg bg-card p-4 shadow-card">
             <p className="text-sm text-muted-foreground">En cours</p>
@@ -124,16 +119,15 @@ export default function Dashboard() {
           </div>
           <div className="rounded-lg bg-card p-4 shadow-card">
             <p className="text-sm text-muted-foreground">Caisse du jour</p>
-            <p className="text-2xl font-bold tabular-nums text-success">{todayTotal.toFixed(2)} €</p>
+            <p className="text-2xl font-bold tabular-nums text-success">{formatPrice(todayTotal)}</p>
           </div>
         </div>
 
-        {/* Search */}
         <div className="mb-6 flex gap-3">
           <div className="relative flex-1">
             <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
             <Input
-              placeholder="Rechercher par nom, téléphone ou n° ticket..."
+              placeholder="Rechercher par nom ou téléphone..."
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               className="pl-10"
@@ -145,7 +139,6 @@ export default function Dashboard() {
           </Button>
         </div>
 
-        {/* Orders grid */}
         {filtered.length === 0 ? (
           <div className="rounded-lg bg-card p-12 text-center shadow-card">
             <p className="text-muted-foreground">Aucune commande trouvée</p>
@@ -159,7 +152,6 @@ export default function Dashboard() {
         )}
       </div>
 
-      {/* FAB for mobile */}
       <button
         onClick={() => setShowNewOrder(true)}
         className="fixed bottom-6 right-6 flex h-14 w-14 items-center justify-center rounded-full bg-primary text-primary-foreground shadow-lg transition-transform hover:scale-105 sm:hidden"

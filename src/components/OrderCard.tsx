@@ -1,8 +1,8 @@
 import { supabase } from "@/integrations/supabase/client";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { ORDER_STATUS_LABELS } from "@/lib/constants";
-import { Check, Package, ArrowRight, CreditCard } from "lucide-react";
+import { ORDER_STATUS_LABELS, formatPrice } from "@/lib/constants";
+import { ArrowRight, CreditCard } from "lucide-react";
 import { toast } from "sonner";
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
@@ -36,7 +36,7 @@ export default function OrderCard({ order, onUpdate }: { order: Order; onUpdate:
       .eq("id", order.id);
     if (error) toast.error("Erreur lors de la mise à jour");
     else {
-      toast.success(`Commande ${order.ticket_number} → ${ORDER_STATUS_LABELS[newStatus].label}`);
+      toast.success(`Commande → ${ORDER_STATUS_LABELS[newStatus].label}`);
       onUpdate();
     }
   };
@@ -60,7 +60,7 @@ export default function OrderCard({ order, onUpdate }: { order: Order; onUpdate:
       <div className="mb-3 flex items-start justify-between">
         <div>
           <p className="font-semibold text-foreground">{order.customer_name}</p>
-          <p className="text-xs text-muted-foreground">{order.ticket_number}</p>
+          <p className="text-xs text-muted-foreground">{order.customer_phone}</p>
         </div>
         <Badge variant="secondary" className={statusInfo.color}>
           {statusInfo.label}
@@ -71,14 +71,14 @@ export default function OrderCard({ order, onUpdate }: { order: Order; onUpdate:
         {(order.items as OrderItem[]).map((item, i) => (
           <div key={i} className="flex justify-between text-muted-foreground">
             <span>{item.qty}× {item.name}</span>
-            <span className="tabular-nums">{(item.qty * item.price).toFixed(2)} €</span>
+            <span className="tabular-nums">{formatPrice(item.qty * item.price)}</span>
           </div>
         ))}
       </div>
 
       <div className="mb-3 flex items-center justify-between border-t pt-3">
         <span className="text-sm font-medium text-foreground">Total</span>
-        <span className="text-lg font-bold tabular-nums text-foreground">{Number(order.total).toFixed(2)} €</span>
+        <span className="text-lg font-bold tabular-nums text-foreground">{formatPrice(Number(order.total))}</span>
       </div>
 
       <div className="flex items-center justify-between text-xs text-muted-foreground mb-3">

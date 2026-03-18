@@ -20,7 +20,7 @@ export default function Login() {
     const { error } = await signIn(email, password);
     setLoading(false);
     if (error) {
-      toast.error("Email ou mot de passe incorrect");
+      toast.error("Identifiants incorrects");
     } else {
       navigate("/dashboard");
     }
@@ -37,7 +37,7 @@ export default function Login() {
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
             <Label htmlFor="email">Email</Label>
-            <Input id="email" type="email" value={email} onChange={(e) => setEmail(e.target.value)} required />
+            <Input id="email" type="email" value={email} onChange={(e) => setEmail(e.target.value)} required placeholder="admin@lajoiepressing.ci" />
           </div>
           <div>
             <Label htmlFor="password">Mot de passe</Label>
