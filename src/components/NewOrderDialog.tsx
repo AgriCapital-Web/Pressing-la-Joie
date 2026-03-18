@@ -63,7 +63,7 @@ export default function NewOrderDialog({
     const { error } = await supabase.from("orders").insert([{
       customer_name: customerName.trim(),
       customer_phone: customerPhone.trim(),
-      items: cart as unknown as Record<string, unknown>[],
+      items: JSON.parse(JSON.stringify(cart)),
       total,
       manager_id: user!.id,
     }]);
