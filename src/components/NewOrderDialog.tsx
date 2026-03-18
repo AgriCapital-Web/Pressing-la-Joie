@@ -60,13 +60,13 @@ export default function NewOrderDialog({
       return;
     }
     setSaving(true);
-    const { error } = await supabase.from("orders").insert({
+    const { error } = await supabase.from("orders").insert([{
       customer_name: customerName.trim(),
       customer_phone: customerPhone.trim(),
-      items: cart,
+      items: cart as unknown as Record<string, unknown>[],
       total,
       manager_id: user!.id,
-    });
+    }]);
     setSaving(false);
     if (error) {
       toast.error("Erreur: " + error.message);

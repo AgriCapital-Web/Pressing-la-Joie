@@ -42,12 +42,12 @@ export default function Dashboard() {
       .select("*")
       .order("created_at", { ascending: false });
     if (data) {
-      setOrders(data as Order[]);
+      setOrders(data as unknown as Order[]);
       const today = new Date().toDateString();
-      const todayPaid = data.filter(
-        (o: Order) => o.is_paid && new Date(o.created_at).toDateString() === today
+      const todayPaid = (data as unknown as Order[]).filter(
+        (o) => o.is_paid && new Date(o.created_at).toDateString() === today
       );
-      setTodayTotal(todayPaid.reduce((sum: number, o: Order) => sum + Number(o.total), 0));
+      setTodayTotal(todayPaid.reduce((sum, o) => sum + Number(o.total), 0));
     }
     setLoading(false);
   };
