@@ -5,8 +5,8 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { SERVICE_PRESETS } from "@/lib/constants";
-import { Plus, Minus, X } from "lucide-react";
+import { SERVICE_PRESETS, formatPrice } from "@/lib/constants";
+import { Plus, Minus } from "lucide-react";
 import { toast } from "sonner";
 
 interface CartItem {
@@ -55,6 +55,10 @@ export default function NewOrderDialog({
       toast.error("Nom du client requis");
       return;
     }
+    if (!customerPhone.trim()) {
+      toast.error("Téléphone du client requis");
+      return;
+    }
     if (cart.length === 0) {
       toast.error("Ajoutez au moins un article");
       return;
@@ -91,11 +95,11 @@ export default function NewOrderDialog({
           <div className="grid gap-3 sm:grid-cols-2">
             <div>
               <Label>Nom du client *</Label>
-              <Input value={customerName} onChange={(e) => setCustomerName(e.target.value)} placeholder="Jean Dupont" />
+              <Input value={customerName} onChange={(e) => setCustomerName(e.target.value)} placeholder="Jean Kouamé" />
             </div>
             <div>
-              <Label>Téléphone</Label>
-              <Input value={customerPhone} onChange={(e) => setCustomerPhone(e.target.value)} placeholder="+33 6 ..." />
+              <Label>Téléphone *</Label>
+              <Input value={customerPhone} onChange={(e) => setCustomerPhone(e.target.value)} placeholder="07 XX XX XX XX" />
             </div>
           </div>
 
@@ -111,7 +115,7 @@ export default function NewOrderDialog({
                   onClick={() => addItem(p)}
                   className="text-xs"
                 >
-                  {p.name} — {p.price.toFixed(2)}€
+                  {p.name} — {formatPrice(p.price)}
                 </Button>
               ))}
             </div>
@@ -131,8 +135,8 @@ export default function NewOrderDialog({
                     <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => updateQty(item.name, 1)}>
                       <Plus className="h-3 w-3" />
                     </Button>
-                    <span className="ml-2 w-16 text-right text-sm tabular-nums text-muted-foreground">
-                      {(item.qty * item.price).toFixed(2)} €
+                    <span className="ml-2 w-24 text-right text-sm tabular-nums text-muted-foreground">
+                      {formatPrice(item.qty * item.price)}
                     </span>
                   </div>
                 </div>
@@ -142,9 +146,9 @@ export default function NewOrderDialog({
 
           {/* Total & Submit */}
           <div className="flex items-center justify-between border-t pt-4">
-            <span className="text-lg font-bold text-foreground">Total: {total.toFixed(2)} €</span>
+            <span className="text-lg font-bold text-foreground">Total: {formatPrice(total)}</span>
             <Button onClick={handleSubmit} disabled={saving}>
-              {saving ? "Enregistrement..." : "Enregistrer l'entrée"}
+              {saving ? "Enregistrement..." : "Enregistrer"}
             </Button>
           </div>
         </div>
