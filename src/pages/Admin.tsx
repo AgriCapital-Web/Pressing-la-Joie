@@ -4,7 +4,10 @@ import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { ArrowLeft, ShieldCheck, ShieldOff } from "lucide-react";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { ArrowLeft, ShieldCheck, ShieldOff, UserPlus } from "lucide-react";
 import { toast } from "sonner";
 import { formatPrice } from "@/lib/constants";
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid } from "recharts";
@@ -27,11 +30,16 @@ interface Order {
 }
 
 export default function Admin() {
-  const { user, role, loading: authLoading } = useAuth();
+  const { user, role, session, loading: authLoading } = useAuth();
   const navigate = useNavigate();
   const [managers, setManagers] = useState<Manager[]>([]);
   const [orders, setOrders] = useState<Order[]>([]);
   const [loading, setLoading] = useState(true);
+  const [showCreate, setShowCreate] = useState(false);
+  const [newEmail, setNewEmail] = useState("");
+  const [newPassword, setNewPassword] = useState("");
+  const [newName, setNewName] = useState("");
+  const [creating, setCreating] = useState(false);
 
   useEffect(() => {
     if (!authLoading && (!user || role !== "admin")) navigate("/dashboard");
@@ -68,7 +76,6 @@ export default function Admin() {
   const totalOrders = orders.length;
   const totalRevenue = orders.filter((o) => o.is_paid).reduce((s, o) => s + Number(o.total), 0);
 
-  // Weekly revenue chart data (last 7 days)
   const weeklyData = useMemo(() => {
     const days = [];
     for (let i = 6; i >= 0; i--) {
@@ -98,6 +105,32 @@ export default function Admin() {
     }
   };
 
+  const handleCreateManager = async () => {
+    if (!newEmail || !newPassword || !newName) {
+      toast.error("Tous les champs sont requis");
+      return;
+    }
+    setCreating(true);
+    try {
+      const res = await supabase.functions.invoke("create-manager", {
+        body: { email: newEmail, password: newPassword, displayName: newName },
+      });
+      if (res.error || res.data?.error) {
+        toast.error(res.data?.error || "Erreur lors de la création");
+      } else {
+        toast.success("Gérant créé avec succès !");
+        setNewEmail("");
+        setNewPassword("");
+        setNewName("");
+        setShowCreate(false);
+        fetchData();
+      }
+    } catch {
+      toast.error("Erreur réseau");
+    }
+    setCreating(false);
+  };
+
   if (authLoading || loading) {
     return (
       <div className="flex min-h-screen items-center justify-center bg-background">
@@ -123,7 +156,6 @@ export default function Admin() {
       </header>
 
       <div className="container py-6">
-        {/* Stats */}
         <div className="mb-8 grid gap-4 sm:grid-cols-2">
           <div className="rounded-lg bg-card p-6 shadow-card">
             <p className="text-sm text-muted-foreground">Total commandes</p>
@@ -135,7 +167,6 @@ export default function Admin() {
           </div>
         </div>
 
-        {/* Weekly Chart */}
         <div className="mb-8 rounded-lg bg-card p-6 shadow-card">
           <h2 className="mb-4 text-lg font-semibold text-foreground">Chiffre d'affaires hebdomadaire</h2>
           <div className="h-64">
@@ -159,9 +190,12 @@ export default function Admin() {
           </div>
         </div>
 
-        {/* Managers */}
         <div className="mb-4 flex items-center justify-between">
           <h2 className="text-lg font-semibold text-foreground">Gérants</h2>
+          <Button size="sm" onClick={() => setShowCreate(true)}>
+            <UserPlus className="mr-1 h-4 w-4" />
+            Nouveau gérant
+          </Button>
         </div>
 
         {managers.length === 0 ? (
@@ -194,6 +228,31 @@ export default function Admin() {
           </div>
         )}
       </div>
+
+      <Dialog open={showCreate} onOpenChange={setShowCreate}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle>Créer un compte gérant</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div>
+              <Label>Nom complet</Label>
+              <Input value={newName} onChange={(e) => setNewName(e.target.value)} placeholder="Kouassi Marie" />
+            </div>
+            <div>
+              <Label>Email</Label>
+              <Input type="email" value={newEmail} onChange={(e) => setNewEmail(e.target.value)} placeholder="gerant@lajoiepressing.ci" />
+            </div>
+            <div>
+              <Label>Mot de passe</Label>
+              <Input type="password" value={newPassword} onChange={(e) => setNewPassword(e.target.value)} placeholder="Minimum 6 caractères" />
+            </div>
+            <Button className="w-full" onClick={handleCreateManager} disabled={creating}>
+              {creating ? "Création..." : "Créer le gérant"}
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

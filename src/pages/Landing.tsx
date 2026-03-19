@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
-import { Shirt, Clock, Truck, Shield, Phone, MapPin, ShoppingBag, Plus, Minus } from "lucide-react";
+import { Shirt, Clock, Truck, Shield, Phone, MapPin, ShoppingBag, Plus, Minus, Star, Sparkles, ChevronRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -10,10 +10,16 @@ import { toast } from "sonner";
 import logoImg from "@/assets/logo-lajoie.jpeg";
 
 const features = [
-  { icon: Shirt, title: "Nettoyage Expert", desc: "Soin professionnel pour tous types de vêtements" },
-  { icon: Clock, title: "Service Rapide", desc: "Prêt en 24-48h selon le service" },
-  { icon: Truck, title: "Collecte à domicile", desc: "On vient chercher et livrer vos vêtements" },
-  { icon: Shield, title: "Garantie Qualité", desc: "Satisfaction garantie ou reprise gratuite" },
+  { icon: Sparkles, title: "Nettoyage Expert", desc: "Soin professionnel pour tous types de vêtements et tissus délicats" },
+  { icon: Clock, title: "Service Rapide", desc: "Prêt en 24 à 48h selon le type de service demandé" },
+  { icon: Truck, title: "Collecte & Livraison", desc: "On vient chercher et livrer vos vêtements à domicile" },
+  { icon: Shield, title: "Garantie Qualité", desc: "Satisfaction garantie ou reprise gratuite de votre commande" },
+];
+
+const testimonials = [
+  { name: "Aminata K.", text: "Excellent service ! Mes rideaux n'ont jamais été aussi propres. Je recommande vivement.", stars: 5 },
+  { name: "Moussa D.", text: "Rapide, professionnel et tarifs corrects. La collecte à domicile est un vrai plus.", stars: 5 },
+  { name: "Fatou B.", text: "Mon costume est revenu impeccable. Merci La Joie Pressing !", stars: 5 },
 ];
 
 interface CartItem {
@@ -67,7 +73,7 @@ export default function Landing() {
     if (error) {
       toast.error("Erreur, veuillez réessayer");
     } else {
-      toast.success("Commande envoyée ! Nous vous contacterons pour la collecte.");
+      toast.success("Commande envoyée ! Nous vous contacterons bientôt.");
       setCustomerName("");
       setCustomerPhone("");
       setAddress("");
@@ -78,17 +84,20 @@ export default function Landing() {
 
   return (
     <div className="min-h-screen bg-background">
-      {/* Header */}
-      <header className="border-b bg-card">
-        <div className="container flex items-center justify-between py-4">
+      {/* Navigation */}
+      <header className="sticky top-0 z-50 border-b bg-card/90 backdrop-blur-md">
+        <div className="container flex items-center justify-between py-3">
           <div className="flex items-center gap-3">
-            <img src={logoImg} alt="La Joie Pressing" className="h-12 w-12 rounded-full object-cover" />
-            <div>
-              <h1 className="text-lg font-bold text-foreground">La Joie Pressing</h1>
-              <p className="text-xs text-muted-foreground">La propreté, notre métier</p>
-            </div>
+            <img src={logoImg} alt="La Joie Pressing" className="h-10 w-10 rounded-full object-cover ring-2 ring-primary/20" />
+            <span className="text-lg font-bold text-foreground">La Joie Pressing</span>
           </div>
-          <div className="flex items-center gap-3">
+          <nav className="hidden items-center gap-6 md:flex">
+            <a href="#services" className="text-sm text-muted-foreground transition-colors hover:text-foreground">Services</a>
+            <a href="#tarifs" className="text-sm text-muted-foreground transition-colors hover:text-foreground">Tarifs</a>
+            <a href="#avis" className="text-sm text-muted-foreground transition-colors hover:text-foreground">Avis</a>
+            <a href="#contact" className="text-sm text-muted-foreground transition-colors hover:text-foreground">Contact</a>
+          </nav>
+          <div className="flex items-center gap-2">
             <Link to="/track">
               <Button variant="outline" size="sm">Suivre ma commande</Button>
             </Link>
@@ -100,38 +109,73 @@ export default function Landing() {
         </div>
       </header>
 
-      {/* Hero */}
-      <section className="py-20 text-center">
-        <div className="container max-w-3xl">
-          <img src={logoImg} alt="La Joie Pressing" className="mx-auto mb-8 h-32 w-32 rounded-full object-cover shadow-card" />
-          <h2 className="mb-4 text-4xl font-bold text-foreground">
-            Votre satisfaction, notre fierté.
-          </h2>
-          <p className="mb-8 text-lg text-muted-foreground">
-            Service de pressing professionnel avec collecte et livraison à domicile à Abidjan.
-            Confiez-nous vos vêtements, on s'occupe du reste.
-          </p>
-          <div className="flex justify-center gap-4">
-            <Button size="lg" onClick={() => setShowOrder(true)}>
-              <ShoppingBag className="mr-2 h-5 w-5" />
-              Commander en ligne
-            </Button>
-            <a href="#tarifs">
-              <Button variant="outline" size="lg">Voir les tarifs</Button>
-            </a>
+      {/* Hero Section */}
+      <section className="relative overflow-hidden">
+        <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-transparent to-accent/5" />
+        <div className="container relative py-24 lg:py-32">
+          <div className="mx-auto max-w-3xl text-center">
+            <div className="mb-6 inline-flex items-center gap-2 rounded-full bg-primary/10 px-4 py-1.5 text-sm font-medium text-primary">
+              <Sparkles className="h-4 w-4" />
+              Pressing professionnel à Abidjan
+            </div>
+            <h1 className="mb-6 text-4xl font-extrabold tracking-tight text-foreground sm:text-5xl lg:text-6xl">
+              Vos vêtements méritent{" "}
+              <span className="bg-gradient-to-r from-primary to-primary/60 bg-clip-text text-transparent">
+                le meilleur soin
+              </span>
+            </h1>
+            <p className="mb-10 text-lg text-muted-foreground sm:text-xl">
+              Service de nettoyage à sec professionnel avec collecte et livraison à domicile.
+              Confiez-nous vos vêtements, on s'occupe du reste.
+            </p>
+            <div className="flex flex-col items-center gap-4 sm:flex-row sm:justify-center">
+              <Button size="lg" onClick={() => setShowOrder(true)} className="w-full sm:w-auto text-base px-8">
+                <ShoppingBag className="mr-2 h-5 w-5" />
+                Commander en ligne
+              </Button>
+              <a href="#tarifs">
+                <Button variant="outline" size="lg" className="w-full sm:w-auto text-base px-8">
+                  Voir nos tarifs
+                  <ChevronRight className="ml-1 h-4 w-4" />
+                </Button>
+              </a>
+            </div>
+            <div className="mt-10 flex items-center justify-center gap-8 text-sm text-muted-foreground">
+              <div className="flex items-center gap-1.5">
+                <Clock className="h-4 w-4 text-primary" />
+                24-48h
+              </div>
+              <div className="flex items-center gap-1.5">
+                <Truck className="h-4 w-4 text-primary" />
+                Livraison gratuite
+              </div>
+              <div className="flex items-center gap-1.5">
+                <Shield className="h-4 w-4 text-primary" />
+                Qualité garantie
+              </div>
+            </div>
           </div>
         </div>
       </section>
 
-      {/* Features */}
-      <section className="border-t bg-card py-16">
+      {/* Services */}
+      <section id="services" className="border-t bg-card/50 py-20">
         <div className="container">
-          <div className="grid gap-8 sm:grid-cols-2 lg:grid-cols-4">
-            {features.map((f) => (
-              <div key={f.title} className="rounded-lg bg-background p-6 shadow-card animate-fade-in">
-                <f.icon className="mb-3 h-8 w-8 text-primary" />
-                <h3 className="mb-1 font-semibold text-foreground">{f.title}</h3>
-                <p className="text-sm text-muted-foreground">{f.desc}</p>
+          <div className="mb-12 text-center">
+            <h2 className="mb-3 text-3xl font-bold text-foreground">Pourquoi nous choisir ?</h2>
+            <p className="text-muted-foreground">Un service complet pensé pour votre confort</p>
+          </div>
+          <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
+            {features.map((f, i) => (
+              <div
+                key={f.title}
+                className="group rounded-xl bg-background p-6 shadow-card transition-all duration-300 hover:shadow-card-hover hover:-translate-y-1"
+              >
+                <div className="mb-4 inline-flex rounded-lg bg-primary/10 p-3">
+                  <f.icon className="h-6 w-6 text-primary" />
+                </div>
+                <h3 className="mb-2 font-semibold text-foreground">{f.title}</h3>
+                <p className="text-sm leading-relaxed text-muted-foreground">{f.desc}</p>
               </div>
             ))}
           </div>
@@ -139,33 +183,77 @@ export default function Landing() {
       </section>
 
       {/* Tarifs */}
-      <section id="tarifs" className="py-16">
+      <section id="tarifs" className="py-20">
         <div className="container max-w-3xl">
-          <h2 className="mb-8 text-center text-2xl font-bold text-foreground">Nos Tarifs</h2>
-          <div className="rounded-lg bg-card shadow-card overflow-hidden">
+          <div className="mb-12 text-center">
+            <h2 className="mb-3 text-3xl font-bold text-foreground">Nos Tarifs</h2>
+            <p className="text-muted-foreground">Des prix transparents et accessibles</p>
+          </div>
+          <div className="rounded-xl bg-card shadow-card overflow-hidden">
             <div className="divide-y">
-              {SERVICE_PRESETS.map((s) => (
-                <div key={s.name} className="flex items-center justify-between px-6 py-4">
-                  <span className="font-medium text-foreground">{s.name}</span>
-                  <span className="font-semibold tabular-nums text-primary">
+              {SERVICE_PRESETS.map((s, i) => (
+                <div
+                  key={s.name}
+                  className="flex items-center justify-between px-6 py-4 transition-colors hover:bg-muted/50"
+                >
+                  <div className="flex items-center gap-3">
+                    <Shirt className="h-4 w-4 text-primary/60" />
+                    <span className="font-medium text-foreground">{s.name}</span>
+                  </div>
+                  <span className="font-bold tabular-nums text-primary">
                     {formatPrice(s.price)}
                   </span>
                 </div>
               ))}
             </div>
           </div>
+          <div className="mt-6 text-center">
+            <Button size="lg" onClick={() => setShowOrder(true)}>
+              <ShoppingBag className="mr-2 h-5 w-5" />
+              Commander maintenant
+            </Button>
+          </div>
+        </div>
+      </section>
+
+      {/* Avis */}
+      <section id="avis" className="border-t bg-card/50 py-20">
+        <div className="container">
+          <div className="mb-12 text-center">
+            <h2 className="mb-3 text-3xl font-bold text-foreground">Ce que disent nos clients</h2>
+            <p className="text-muted-foreground">La satisfaction de nos clients est notre priorité</p>
+          </div>
+          <div className="grid gap-6 sm:grid-cols-3">
+            {testimonials.map((t) => (
+              <div key={t.name} className="rounded-xl bg-background p-6 shadow-card">
+                <div className="mb-3 flex gap-0.5">
+                  {Array.from({ length: t.stars }).map((_, i) => (
+                    <Star key={i} className="h-4 w-4 fill-primary text-primary" />
+                  ))}
+                </div>
+                <p className="mb-4 text-sm leading-relaxed text-muted-foreground">"{t.text}"</p>
+                <p className="text-sm font-semibold text-foreground">— {t.name}</p>
+              </div>
+            ))}
+          </div>
         </div>
       </section>
 
       {/* Contact */}
-      <section className="border-t bg-card py-16">
+      <section id="contact" className="py-20">
         <div className="container max-w-2xl text-center">
-          <h2 className="mb-6 text-2xl font-bold text-foreground">Contactez-nous</h2>
+          <h2 className="mb-3 text-3xl font-bold text-foreground">Contactez-nous</h2>
+          <p className="mb-8 text-muted-foreground">Nous sommes à votre disposition</p>
           <div className="flex flex-col items-center gap-4">
-            <div className="flex items-center gap-2 text-muted-foreground">
-              <Phone className="h-4 w-4" />
-              <span>07 59 56 60 87</span>
-            </div>
+            <a
+              href="https://wa.me/2250759566087"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center gap-2 rounded-lg bg-success/10 px-6 py-3 text-success transition-colors hover:bg-success/20"
+            >
+              <Phone className="h-5 w-5" />
+              <span className="font-semibold">07 59 56 60 87</span>
+            </a>
             <div className="flex items-center gap-2 text-muted-foreground">
               <MapPin className="h-4 w-4" />
               <span>Abidjan, Côte d'Ivoire</span>
@@ -175,15 +263,25 @@ export default function Landing() {
       </section>
 
       {/* Footer */}
-      <footer className="border-t py-6 text-center text-sm text-muted-foreground">
-        <p>© {new Date().getFullYear()} La Joie Pressing. Tous droits réservés.</p>
-        <Link to="/login" className="mt-1 inline-block text-xs hover:text-primary">Espace gérant</Link>
+      <footer className="border-t bg-card py-8">
+        <div className="container flex flex-col items-center gap-3 text-center">
+          <div className="flex items-center gap-2">
+            <img src={logoImg} alt="La Joie Pressing" className="h-8 w-8 rounded-full object-cover" />
+            <span className="font-semibold text-foreground">La Joie Pressing</span>
+          </div>
+          <p className="text-sm text-muted-foreground">
+            © {new Date().getFullYear()} La Joie Pressing. Tous droits réservés.
+          </p>
+          <Link to="/login" className="text-xs text-muted-foreground transition-colors hover:text-primary">
+            Espace gérant
+          </Link>
+        </div>
       </footer>
 
       {/* Online Order Modal */}
       {showOrder && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
-          <div className="w-full max-w-lg max-h-[90vh] overflow-y-auto rounded-lg bg-card p-6 shadow-xl animate-fade-in">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4 backdrop-blur-sm">
+          <div className="w-full max-w-lg max-h-[90vh] overflow-y-auto rounded-xl bg-card p-6 shadow-xl animate-fade-in">
             <div className="mb-4 flex items-center justify-between">
               <h3 className="text-lg font-bold text-foreground">Commander en ligne</h3>
               <Button variant="ghost" size="sm" onClick={() => setShowOrder(false)}>✕</Button>

@@ -2,7 +2,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { ORDER_STATUS_LABELS, formatPrice } from "@/lib/constants";
-import { ArrowRight, CreditCard } from "lucide-react";
+import { ArrowRight, CreditCard, MessageCircle } from "lucide-react";
 import { toast } from "sonner";
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
@@ -24,6 +24,36 @@ interface Order {
   is_paid: boolean;
   notes: string;
   created_at: string;
+}
+
+function buildWhatsAppMessage(order: Order): string {
+  const statusLabel = ORDER_STATUS_LABELS[order.status]?.label || order.status;
+  const paymentStatus = order.is_paid ? "✅ *Payé*" : "⏳ *Non payé*";
+  const itemsList = (order.items as OrderItem[])
+    .map((item) => `  • ${item.qty}× ${item.name} — ${formatPrice(item.qty * item.price)}`)
+    .join("\n");
+
+  return `Bonjour *${order.customer_name}* 👋,
+
+Voici une mise à jour de votre commande chez *La Joie Pressing* 🧺
+
+📋 *Détails de la commande :*
+${itemsList}
+
+💰 *Total :* *${formatPrice(Number(order.total))}*
+📊 *Statut :* ${statusLabel}
+💳 *Paiement :* ${paymentStatus}
+
+${order.status === "ready" ? "🎉 Votre commande est *prête* ! Vous pouvez venir la récupérer.\n" : ""}📍 *La Joie Pressing* — Abidjan
+📞 07 59 56 60 87
+
+Merci de votre confiance ! 🙏`;
+}
+
+function sendWhatsApp(order: Order) {
+  const phone = order.customer_phone.replace(/\s/g, "").replace(/^0/, "225");
+  const message = encodeURIComponent(buildWhatsAppMessage(order));
+  window.open(`https://wa.me/${phone}?text=${message}`, "_blank");
 }
 
 export default function OrderCard({ order, onUpdate }: { order: Order; onUpdate: () => void }) {
@@ -83,10 +113,10 @@ export default function OrderCard({ order, onUpdate }: { order: Order; onUpdate:
 
       <div className="flex items-center justify-between text-xs text-muted-foreground mb-3">
         <span>{format(new Date(order.created_at), "dd MMM yyyy HH:mm", { locale: fr })}</span>
-        {order.customer_phone && <span>{order.customer_phone}</span>}
+        {order.notes && <span className="truncate max-w-[120px]">{order.notes}</span>}
       </div>
 
-      <div className="flex gap-2">
+      <div className="flex flex-wrap gap-2">
         <Button
           variant={order.is_paid ? "outline" : "default"}
           size="sm"
@@ -100,6 +130,17 @@ export default function OrderCard({ order, onUpdate }: { order: Order; onUpdate:
           <Button variant="outline" size="sm" className="flex-1" onClick={() => updateStatus(nextStatus)}>
             <ArrowRight className="mr-1 h-3 w-3" />
             {ORDER_STATUS_LABELS[nextStatus].label}
+          </Button>
+        )}
+        {order.customer_phone && (
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => sendWhatsApp(order)}
+            className="text-success border-success/30 hover:bg-success/10"
+          >
+            <MessageCircle className="mr-1 h-3 w-3" />
+            WhatsApp
           </Button>
         )}
       </div>
