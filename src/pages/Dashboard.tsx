@@ -4,7 +4,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Search, Plus, LogOut, Users } from "lucide-react";
+import { Search, Plus, LogOut, Users, Filter } from "lucide-react";
 import { formatPrice } from "@/lib/constants";
 import NewOrderDialog from "@/components/NewOrderDialog";
 import OrderCard from "@/components/OrderCard";
@@ -22,11 +22,19 @@ interface Order {
   created_at: string;
 }
 
+const STATUS_FILTERS = [
+  { value: "all", label: "Tous" },
+  { value: "pending", label: "En cours" },
+  { value: "ready", label: "Prêt" },
+  { value: "collected", label: "Retiré" },
+];
+
 export default function Dashboard() {
   const { user, role, signOut, loading: authLoading } = useAuth();
   const navigate = useNavigate();
   const [orders, setOrders] = useState<Order[]>([]);
   const [search, setSearch] = useState("");
+  const [statusFilter, setStatusFilter] = useState("all");
   const [showNewOrder, setShowNewOrder] = useState(false);
   const [loading, setLoading] = useState(true);
   const [todayTotal, setTodayTotal] = useState(0);
@@ -65,11 +73,13 @@ export default function Dashboard() {
     return () => { supabase.removeChannel(channel); };
   }, []);
 
-  const filtered = orders.filter(
-    (o) =>
+  const filtered = orders.filter((o) => {
+    const matchesSearch =
       o.customer_name.toLowerCase().includes(search.toLowerCase()) ||
-      o.customer_phone.includes(search)
-  );
+      o.customer_phone.includes(search);
+    const matchesStatus = statusFilter === "all" || o.status === statusFilter;
+    return matchesSearch && matchesStatus;
+  });
 
   const pendingCount = orders.filter((o) => o.status === "pending").length;
   const readyCount = orders.filter((o) => o.status === "ready").length;
@@ -123,7 +133,7 @@ export default function Dashboard() {
           </div>
         </div>
 
-        <div className="mb-6 flex gap-3">
+        <div className="mb-4 flex gap-3">
           <div className="relative flex-1">
             <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
             <Input
@@ -133,10 +143,30 @@ export default function Dashboard() {
               className="pl-10"
             />
           </div>
-          <Button onClick={() => setShowNewOrder(true)}>
+          <Button onClick={() => setShowNewOrder(true)} className="hidden sm:flex">
             <Plus className="mr-1 h-4 w-4" />
             Nouvelle entrée
           </Button>
+        </div>
+
+        {/* Status Filter */}
+        <div className="mb-6 flex gap-2 overflow-x-auto pb-1">
+          {STATUS_FILTERS.map((f) => (
+            <Button
+              key={f.value}
+              variant={statusFilter === f.value ? "default" : "outline"}
+              size="sm"
+              onClick={() => setStatusFilter(f.value)}
+              className="shrink-0"
+            >
+              {f.label}
+              {f.value !== "all" && (
+                <span className="ml-1.5 tabular-nums">
+                  ({orders.filter((o) => o.status === f.value).length})
+                </span>
+              )}
+            </Button>
+          ))}
         </div>
 
         {filtered.length === 0 ? (
