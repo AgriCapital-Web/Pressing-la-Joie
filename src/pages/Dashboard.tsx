@@ -4,10 +4,11 @@ import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Search, Plus, LogOut, Users, Filter } from "lucide-react";
+import { Search, Plus, LogOut, Users } from "lucide-react";
 import { formatPrice } from "@/lib/constants";
 import NewOrderDialog from "@/components/NewOrderDialog";
 import OrderCard from "@/components/OrderCard";
+import ThemeToggle from "@/components/ThemeToggle";
 
 interface Order {
   id: number;
@@ -83,6 +84,7 @@ export default function Dashboard() {
 
   const pendingCount = orders.filter((o) => o.status === "pending").length;
   const readyCount = orders.filter((o) => o.status === "ready").length;
+  const todayOrders = orders.filter((o) => new Date(o.created_at).toDateString() === new Date().toDateString()).length;
 
   if (authLoading || loading) {
     return (
@@ -103,6 +105,7 @@ export default function Dashboard() {
             </p>
           </div>
           <div className="flex items-center gap-2">
+            <ThemeToggle />
             {role === "admin" && (
               <Button variant="outline" size="sm" onClick={() => navigate("/admin")}>
                 <Users className="mr-1 h-4 w-4" />
@@ -118,7 +121,7 @@ export default function Dashboard() {
       </header>
 
       <div className="container py-6">
-        <div className="mb-6 grid gap-4 sm:grid-cols-3">
+        <div className="mb-6 grid gap-4 sm:grid-cols-4">
           <div className="rounded-lg bg-card p-4 shadow-card">
             <p className="text-sm text-muted-foreground">En cours</p>
             <p className="text-2xl font-bold tabular-nums text-foreground">{pendingCount}</p>
@@ -126,6 +129,10 @@ export default function Dashboard() {
           <div className="rounded-lg bg-card p-4 shadow-card">
             <p className="text-sm text-muted-foreground">Prêts à retirer</p>
             <p className="text-2xl font-bold tabular-nums text-primary">{readyCount}</p>
+          </div>
+          <div className="rounded-lg bg-card p-4 shadow-card">
+            <p className="text-sm text-muted-foreground">Commandes du jour</p>
+            <p className="text-2xl font-bold tabular-nums text-foreground">{todayOrders}</p>
           </div>
           <div className="rounded-lg bg-card p-4 shadow-card">
             <p className="text-sm text-muted-foreground">Caisse du jour</p>

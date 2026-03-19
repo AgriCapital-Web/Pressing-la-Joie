@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
-import { Shirt, Clock, Truck, Shield, Phone, MapPin, ShoppingBag, Plus, Minus, Star, Sparkles, ChevronRight } from "lucide-react";
+import { Clock, Truck, Shield, Phone, MapPin, ShoppingBag, Plus, Minus, Star, Sparkles, ChevronRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -8,6 +8,7 @@ import { SERVICE_PRESETS, formatPrice } from "@/lib/constants";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import logoImg from "@/assets/logo-lajoie.jpeg";
+import ThemeToggle from "@/components/ThemeToggle";
 
 const features = [
   { icon: Sparkles, title: "Nettoyage Expert", desc: "Soin professionnel pour tous types de vêtements et tissus délicats" },
@@ -71,6 +72,7 @@ export default function Landing() {
     }]);
     setSaving(false);
     if (error) {
+      console.error("Order error:", error);
       toast.error("Erreur, veuillez réessayer");
     } else {
       toast.success("Commande envoyée ! Nous vous contacterons bientôt.");
@@ -98,6 +100,7 @@ export default function Landing() {
             <a href="#contact" className="text-sm text-muted-foreground transition-colors hover:text-foreground">Contact</a>
           </nav>
           <div className="flex items-center gap-2">
+            <ThemeToggle />
             <Link to="/track">
               <Button variant="outline" size="sm">Suivre ma commande</Button>
             </Link>
@@ -116,7 +119,7 @@ export default function Landing() {
           <div className="mx-auto max-w-3xl text-center">
             <div className="mb-6 inline-flex items-center gap-2 rounded-full bg-primary/10 px-4 py-1.5 text-sm font-medium text-primary">
               <Sparkles className="h-4 w-4" />
-              Pressing professionnel à Abidjan
+              Pressing professionnel à Daloa
             </div>
             <h1 className="mb-6 text-4xl font-extrabold tracking-tight text-foreground sm:text-5xl lg:text-6xl">
               Vos vêtements méritent{" "}
@@ -166,11 +169,8 @@ export default function Landing() {
             <p className="text-muted-foreground">Un service complet pensé pour votre confort</p>
           </div>
           <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
-            {features.map((f, i) => (
-              <div
-                key={f.title}
-                className="group rounded-xl bg-background p-6 shadow-card transition-all duration-300 hover:shadow-card-hover hover:-translate-y-1"
-              >
+            {features.map((f) => (
+              <div key={f.title} className="group rounded-xl bg-background p-6 shadow-card transition-all duration-300 hover:shadow-card-hover hover:-translate-y-1">
                 <div className="mb-4 inline-flex rounded-lg bg-primary/10 p-3">
                   <f.icon className="h-6 w-6 text-primary" />
                 </div>
@@ -182,36 +182,29 @@ export default function Landing() {
         </div>
       </section>
 
-      {/* Tarifs */}
+      {/* Tarifs with images */}
       <section id="tarifs" className="py-20">
-        <div className="container max-w-3xl">
+        <div className="container">
           <div className="mb-12 text-center">
             <h2 className="mb-3 text-3xl font-bold text-foreground">Nos Tarifs</h2>
             <p className="text-muted-foreground">Des prix transparents et accessibles</p>
           </div>
-          <div className="rounded-xl bg-card shadow-card overflow-hidden">
-            <div className="divide-y">
-              {SERVICE_PRESETS.map((s, i) => (
-                <div
-                  key={s.name}
-                  className="flex items-center justify-between px-6 py-4 transition-colors hover:bg-muted/50"
-                >
-                  <div className="flex items-center gap-3">
-                    <Shirt className="h-4 w-4 text-primary/60" />
-                    <span className="font-medium text-foreground">{s.name}</span>
-                  </div>
-                  <span className="font-bold tabular-nums text-primary">
-                    {formatPrice(s.price)}
-                  </span>
+          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+            {SERVICE_PRESETS.map((s) => (
+              <div key={s.name} className="group rounded-xl bg-card overflow-hidden shadow-card transition-all hover:shadow-card-hover hover:-translate-y-1">
+                <div className="aspect-square bg-muted/30 p-4 flex items-center justify-center">
+                  <img src={s.image} alt={s.name} className="h-full w-full object-contain transition-transform group-hover:scale-105" loading="lazy" />
                 </div>
-              ))}
-            </div>
-          </div>
-          <div className="mt-6 text-center">
-            <Button size="lg" onClick={() => setShowOrder(true)}>
-              <ShoppingBag className="mr-2 h-5 w-5" />
-              Commander maintenant
-            </Button>
+                <div className="p-4 text-center">
+                  <h3 className="font-semibold text-foreground">{s.name}</h3>
+                  <p className="mt-1 text-lg font-bold tabular-nums text-primary">{formatPrice(s.price)}</p>
+                  <Button size="sm" variant="outline" className="mt-3 w-full" onClick={() => { addItem(s); setShowOrder(true); }}>
+                    <Plus className="mr-1 h-3 w-3" />
+                    Ajouter
+                  </Button>
+                </div>
+              </div>
+            ))}
           </div>
         </div>
       </section>
@@ -245,18 +238,13 @@ export default function Landing() {
           <h2 className="mb-3 text-3xl font-bold text-foreground">Contactez-nous</h2>
           <p className="mb-8 text-muted-foreground">Nous sommes à votre disposition</p>
           <div className="flex flex-col items-center gap-4">
-            <a
-              href="https://wa.me/2250759566087"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="inline-flex items-center gap-2 rounded-lg bg-success/10 px-6 py-3 text-success transition-colors hover:bg-success/20"
-            >
+            <a href="https://wa.me/2250759566087" target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-2 rounded-lg bg-success/10 px-6 py-3 text-success transition-colors hover:bg-success/20">
               <Phone className="h-5 w-5" />
               <span className="font-semibold">07 59 56 60 87</span>
             </a>
             <div className="flex items-center gap-2 text-muted-foreground">
               <MapPin className="h-4 w-4" />
-              <span>Abidjan, Côte d'Ivoire</span>
+              <span>Daloa, Côte d'Ivoire</span>
             </div>
           </div>
         </div>
@@ -270,7 +258,7 @@ export default function Landing() {
             <span className="font-semibold text-foreground">La Joie Pressing</span>
           </div>
           <p className="text-sm text-muted-foreground">
-            © {new Date().getFullYear()} La Joie Pressing. Tous droits réservés.
+            © {new Date().getFullYear()} La Joie Pressing — Daloa. Tous droits réservés.
           </p>
           <Link to="/login" className="text-xs text-muted-foreground transition-colors hover:text-primary">
             Espace gérant
@@ -305,11 +293,19 @@ export default function Landing() {
 
               <div>
                 <Label className="mb-2 block">Sélectionnez vos articles</Label>
-                <div className="flex flex-wrap gap-2">
+                <div className="grid grid-cols-2 gap-2">
                   {SERVICE_PRESETS.map((p) => (
-                    <Button key={p.name} variant="outline" size="sm" onClick={() => addItem(p)} className="text-xs">
-                      {p.name} — {formatPrice(p.price)}
-                    </Button>
+                    <button
+                      key={p.name}
+                      onClick={() => addItem(p)}
+                      className="flex items-center gap-2 rounded-lg border p-2 text-left transition-colors hover:bg-muted/50"
+                    >
+                      <img src={p.image} alt={p.name} className="h-10 w-10 rounded object-contain bg-muted/30" />
+                      <div className="min-w-0">
+                        <p className="text-xs font-medium text-foreground truncate">{p.name}</p>
+                        <p className="text-xs tabular-nums text-primary">{formatPrice(p.price)}</p>
+                      </div>
+                    </button>
                   ))}
                 </div>
               </div>

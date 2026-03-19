@@ -14,6 +14,79 @@ export type Database = {
   }
   public: {
     Tables: {
+      order_comments: {
+        Row: {
+          author_id: string | null
+          author_name: string | null
+          comment: string
+          created_at: string
+          id: string
+          order_id: number
+        }
+        Insert: {
+          author_id?: string | null
+          author_name?: string | null
+          comment: string
+          created_at?: string
+          id?: string
+          order_id: number
+        }
+        Update: {
+          author_id?: string | null
+          author_name?: string | null
+          comment?: string
+          created_at?: string
+          id?: string
+          order_id?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "order_comments_order_id_fkey"
+            columns: ["order_id"]
+            isOneToOne: false
+            referencedRelation: "orders"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      order_history: {
+        Row: {
+          action: string
+          created_at: string
+          details: string | null
+          id: string
+          order_id: number
+          performed_by: string | null
+          performer_name: string | null
+        }
+        Insert: {
+          action: string
+          created_at?: string
+          details?: string | null
+          id?: string
+          order_id: number
+          performed_by?: string | null
+          performer_name?: string | null
+        }
+        Update: {
+          action?: string
+          created_at?: string
+          details?: string | null
+          id?: string
+          order_id?: number
+          performed_by?: string | null
+          performer_name?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "order_history_order_id_fkey"
+            columns: ["order_id"]
+            isOneToOne: false
+            referencedRelation: "orders"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       orders: {
         Row: {
           created_at: string
