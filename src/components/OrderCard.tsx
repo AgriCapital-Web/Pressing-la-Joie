@@ -4,11 +4,12 @@ import { useAuth } from "@/hooks/useAuth";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { ORDER_STATUS_LABELS, formatPrice } from "@/lib/constants";
-import { ArrowRight, CreditCard, MessageCircle, Eye } from "lucide-react";
+import { ArrowRight, CreditCard, MessageCircle, Eye, Printer } from "lucide-react";
 import { toast } from "sonner";
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
 import OrderDetailDialog from "./OrderDetailDialog";
+import { generateOrderReceiptPdf } from "@/lib/receipt";
 
 interface OrderItem {
   name: string;
@@ -109,6 +110,16 @@ export default function OrderCard({ order, onUpdate }: { order: Order; onUpdate:
     }
   };
 
+  const printReceipt = async () => {
+    try {
+      generateOrderReceiptPdf(order);
+      toast.success("Reçu PDF généré");
+      await logHistory("Impression du reçu", `Ticket ${order.ticket_number}`);
+    } catch {
+      toast.error("Impossible de générer le reçu");
+    }
+  };
+
   const nextStatus = order.status === "pending" ? "ready" : order.status === "ready" ? "collected" : null;
 
   return (
@@ -162,6 +173,10 @@ export default function OrderCard({ order, onUpdate }: { order: Order; onUpdate:
           <Button variant="outline" size="sm" onClick={() => setShowDetail(true)}>
             <Eye className="mr-1 h-3 w-3" />
             Détails
+          </Button>
+          <Button variant="outline" size="sm" onClick={printReceipt}>
+            <Printer className="mr-1 h-3 w-3" />
+            Reçu PDF
           </Button>
           {order.customer_phone && (
             <Button
