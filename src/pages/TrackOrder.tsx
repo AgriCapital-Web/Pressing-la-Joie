@@ -5,10 +5,9 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { ORDER_STATUS_LABELS, formatPrice } from "@/lib/constants";
+import { isValidIvoryCoastLocalPhone, toIvoryCoastLocalPhone } from "@/lib/phone";
 import { Search, ArrowLeft } from "lucide-react";
 import logoImg from "@/assets/logo-lajoie.png";
-
-const normalizePhone = (value: string) => value.replace(/\D/g, "");
 
 interface OrderResult {
   customer_name: string;
@@ -29,8 +28,16 @@ export default function TrackOrder() {
   const handleSearch = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!query.trim()) return;
-    const normalizedPhone = normalizePhone(query.trim());
-    const formattedPhone = normalizedPhone.startsWith("225") ? `0${normalizedPhone.slice(3)}` : normalizedPhone;
+
+    const formattedPhone = toIvoryCoastLocalPhone(query.trim());
+    if (!isValidIvoryCoastLocalPhone(formattedPhone)) {
+      setOrders([]);
+      setNotFound(true);
+      return;
+    }
+
+    const phoneVariants = [formattedPhone, formattedPhone.slice(1), `225${formattedPhone.slice(1)}`];
+
     setLoading(true);
     setNotFound(false);
 
@@ -38,7 +45,7 @@ export default function TrackOrder() {
     const { data } = await supabase
       .from("orders")
       .select("customer_name, customer_phone, status, is_paid, total, items, created_at")
-      .eq("customer_phone", formattedPhone)
+      .in("customer_phone", phoneVariants)
       .order("created_at", { ascending: false });
 
     if (data && data.length > 0) {

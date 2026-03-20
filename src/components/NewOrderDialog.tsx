@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { SERVICE_PRESETS, formatPrice } from "@/lib/constants";
+import { isValidIvoryCoastLocalPhone, toIvoryCoastLocalPhone } from "@/lib/phone";
 import { Plus, Minus } from "lucide-react";
 import { toast } from "sonner";
 
@@ -59,6 +60,13 @@ export default function NewOrderDialog({
       toast.error("Téléphone du client requis");
       return;
     }
+
+    const normalizedPhone = toIvoryCoastLocalPhone(customerPhone);
+    if (!isValidIvoryCoastLocalPhone(normalizedPhone)) {
+      toast.error("Numéro ivoirien invalide (ex: 07 59 56 60 87)");
+      return;
+    }
+
     if (cart.length === 0) {
       toast.error("Ajoutez au moins un article");
       return;
@@ -66,7 +74,7 @@ export default function NewOrderDialog({
     setSaving(true);
     const { error } = await supabase.from("orders").insert([{
       customer_name: customerName.trim(),
-      customer_phone: customerPhone.trim(),
+      customer_phone: normalizedPhone,
       items: JSON.parse(JSON.stringify(cart)),
       total,
       manager_id: user!.id,

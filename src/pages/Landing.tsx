@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { SERVICE_PRESETS, formatPrice } from "@/lib/constants";
+import { isValidIvoryCoastLocalPhone, toIvoryCoastLocalPhone } from "@/lib/phone";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import logoImg from "@/assets/logo-lajoie.png";
@@ -31,15 +32,13 @@ interface CartItem {
   price: number;
 }
 
-const normalizePhone = (value: string) => value.replace(/\D/g, "");
-
 const onlineOrderSchema = z.object({
   customerName: z.string().trim().min(2, "Nom requis").max(120, "Nom trop long"),
   customerPhone: z
     .string()
     .trim()
-    .transform(normalizePhone)
-    .refine((phone) => /^(0\d{9}|225\d{10})$/.test(phone), "Numéro ivoirien invalide"),
+    .transform(toIvoryCoastLocalPhone)
+    .refine((phone) => isValidIvoryCoastLocalPhone(phone), "Numéro ivoirien invalide"),
   address: z.string().trim().max(200, "Adresse trop longue").optional(),
   cart: z
     .array(
@@ -87,9 +86,7 @@ export default function Landing() {
       return;
     }
 
-    const normalizedPhone = parsed.data.customerPhone.startsWith("225")
-      ? `0${parsed.data.customerPhone.slice(3)}`
-      : parsed.data.customerPhone;
+    const orderTotal = parsed.data.cart.reduce((sum, item) => sum + item.qty * item.price, 0);
 
     setSaving(true);
     try {
@@ -100,9 +97,9 @@ export default function Landing() {
       const { error } = await supabase.from("orders").insert([
         {
           customer_name: parsed.data.customerName,
-          customer_phone: normalizedPhone,
+          customer_phone: parsed.data.customerPhone,
           items: JSON.parse(JSON.stringify(parsed.data.cart)),
-          total,
+          total: orderTotal,
           manager_id: null,
           notes,
         } as any,
@@ -119,6 +116,8 @@ export default function Landing() {
       setAddress("");
       setCart([]);
       setShowOrder(false);
+    } catch {
+      toast.error("Impossible d'envoyer la commande. Vérifiez la connexion puis réessayez.");
     } finally {
       setSaving(false);
     }
