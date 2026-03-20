@@ -4,6 +4,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { ORDER_STATUS_LABELS, formatPrice } from "@/lib/constants";
+import { isValidIvoryCoastLocalPhone, toIvoryCoastLocalPhone, toIvoryCoastWhatsAppPhone } from "@/lib/phone";
 import { ArrowRight, CreditCard, MessageCircle, Eye, Printer } from "lucide-react";
 import { toast } from "sonner";
 import { format } from "date-fns";
@@ -55,7 +56,13 @@ Merci de votre confiance ! 🙏`;
 }
 
 function sendWhatsApp(order: Order) {
-  const phone = order.customer_phone.replace(/\s/g, "").replace(/^0/, "225");
+  const localPhone = toIvoryCoastLocalPhone(order.customer_phone);
+  if (!isValidIvoryCoastLocalPhone(localPhone)) {
+    toast.error("Numéro client invalide");
+    return;
+  }
+
+  const phone = toIvoryCoastWhatsAppPhone(localPhone);
   const message = encodeURIComponent(buildWhatsAppMessage(order));
   window.open(`https://wa.me/${phone}?text=${message}`, "_blank");
 }
@@ -128,7 +135,7 @@ export default function OrderCard({ order, onUpdate }: { order: Order; onUpdate:
         <div className="mb-3 flex items-start justify-between">
           <div>
             <p className="font-semibold text-foreground">{order.customer_name}</p>
-            <p className="text-xs text-muted-foreground">{order.customer_phone}</p>
+            <p className="text-xs text-muted-foreground">{toIvoryCoastLocalPhone(order.customer_phone)}</p>
           </div>
           <Badge variant="secondary" className={statusInfo.color}>
             {statusInfo.label}
