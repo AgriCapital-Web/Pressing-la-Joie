@@ -95,7 +95,7 @@ export type Database = {
           id: number
           is_paid: boolean
           items: Json
-          manager_id: string
+          manager_id: string | null
           notes: string | null
           status: Database["public"]["Enums"]["order_status"]
           ticket_number: string
@@ -109,7 +109,7 @@ export type Database = {
           id?: number
           is_paid?: boolean
           items?: Json
-          manager_id: string
+          manager_id?: string | null
           notes?: string | null
           status?: Database["public"]["Enums"]["order_status"]
           ticket_number?: string
@@ -123,7 +123,7 @@ export type Database = {
           id?: number
           is_paid?: boolean
           items?: Json
-          manager_id?: string
+          manager_id?: string | null
           notes?: string | null
           status?: Database["public"]["Enums"]["order_status"]
           ticket_number?: string
