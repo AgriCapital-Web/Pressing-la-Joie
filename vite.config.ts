@@ -17,7 +17,7 @@ export default defineConfig(({ mode }) => ({
     mode === "development" && componentTagger(),
     VitePWA({
       registerType: "autoUpdate",
-      includeAssets: ["favicon.ico", "images/logo-lajoie.jpeg"],
+      includeAssets: ["favicon.ico", "images/logo-lajoie.png"],
       manifest: false,
       workbox: {
         globPatterns: ["**/*.{js,css,html,ico,png,svg,jpeg,jpg,woff2}"],

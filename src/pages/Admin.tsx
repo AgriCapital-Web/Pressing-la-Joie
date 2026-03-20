@@ -7,13 +7,14 @@ import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { ArrowLeft, ShieldCheck, ShieldOff, UserPlus, TrendingUp, Package, CreditCard } from "lucide-react";
+import { ArrowLeft, ShieldCheck, ShieldOff, UserPlus, TrendingUp, Package, CreditCard, Download } from "lucide-react";
 import { toast } from "sonner";
 import { formatPrice } from "@/lib/constants";
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid, PieChart, Pie, Cell } from "recharts";
-import { format, subDays, startOfDay } from "date-fns";
+import { format, subDays, startOfDay, subMonths } from "date-fns";
 import { fr } from "date-fns/locale";
 import ThemeToggle from "@/components/ThemeToggle";
+import logoImg from "@/assets/logo-lajoie.png";
 
 interface Manager {
   user_id: string;
@@ -25,11 +26,14 @@ interface Manager {
 
 interface Order {
   id: number;
+  ticket_number: string;
+  customer_phone: string;
   total: number;
   is_paid: boolean;
   status: string;
   created_at: string;
   customer_name: string;
+  notes: string;
 }
 
 const PIE_COLORS = ["hsl(38, 92%, 50%)", "hsl(221, 83%, 53%)", "hsl(142, 71%, 45%)"];
@@ -54,7 +58,7 @@ export default function Admin() {
     const [profilesRes, rolesRes, ordersRes] = await Promise.all([
       supabase.from("profiles").select("*"),
       supabase.from("user_roles").select("*"),
-      supabase.from("orders").select("id, total, is_paid, status, created_at, customer_name"),
+      supabase.from("orders").select("id, ticket_number, customer_name, customer_phone, total, is_paid, status, created_at, notes"),
     ]);
 
     if (profilesRes.data && rolesRes.data) {
@@ -81,7 +85,8 @@ export default function Admin() {
   const totalOrders = orders.length;
   const totalRevenue = orders.filter((o) => o.is_paid).reduce((s, o) => s + Number(o.total), 0);
   const unpaidTotal = orders.filter((o) => !o.is_paid).reduce((s, o) => s + Number(o.total), 0);
-  const avgOrderValue = totalOrders > 0 ? Math.round(totalRevenue / orders.filter(o => o.is_paid).length || 1) : 0;
+  const paidOrdersCount = orders.filter((o) => o.is_paid).length;
+  const avgOrderValue = paidOrdersCount > 0 ? Math.round(totalRevenue / paidOrdersCount) : 0;
 
   const weeklyData = useMemo(() => {
     const days = [];
@@ -107,6 +112,57 @@ export default function Admin() {
     { name: "Prêt", value: orders.filter((o) => o.status === "ready").length },
     { name: "Retiré", value: orders.filter((o) => o.status === "collected").length },
   ], [orders]);
+
+  const monthlyData = useMemo(() => {
+    const months = [];
+    for (let i = 5; i >= 0; i--) {
+      const monthDate = subMonths(new Date(), i);
+      const monthKey = format(monthDate, "yyyy-MM");
+      const monthOrders = orders.filter((o) => format(new Date(o.created_at), "yyyy-MM") === monthKey);
+      const paidRevenue = monthOrders.filter((o) => o.is_paid).reduce((sum, o) => sum + Number(o.total), 0);
+
+      months.push({
+        month: format(monthDate, "MMM yyyy", { locale: fr }),
+        revenue: paidRevenue,
+        orders: monthOrders.length,
+      });
+    }
+    return months;
+  }, [orders]);
+
+  const exportOrdersCsv = () => {
+    const headers = ["Ticket", "Client", "Téléphone", "Date", "Statut", "Payé", "Montant_FCFA", "Notes"];
+
+    const escapeCell = (value: string | number | boolean | null | undefined) =>
+      `"${String(value ?? "").replace(/"/g, '""')}"`;
+
+    const rows = orders.map((order) => [
+      order.ticket_number,
+      order.customer_name,
+      order.customer_phone,
+      format(new Date(order.created_at), "dd/MM/yyyy HH:mm", { locale: fr }),
+      order.status,
+      order.is_paid ? "Oui" : "Non",
+      Number(order.total),
+      order.notes || "",
+    ]);
+
+    const csv = [headers, ...rows]
+      .map((row) => row.map((value) => escapeCell(value)).join(";"))
+      .join("\n");
+
+    const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = `commandes-lajoie-${format(new Date(), "yyyy-MM-dd")}.csv`;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
+
+    toast.success("Export CSV généré");
+  };
 
   const recentOrders = useMemo(() => 
     orders.slice(0, 10).map((o) => ({
@@ -169,6 +225,7 @@ export default function Admin() {
             <Button variant="ghost" size="icon" onClick={() => navigate("/dashboard")}>
               <ArrowLeft className="h-4 w-4" />
             </Button>
+            <img src={logoImg} alt="La Joie Pressing" className="h-10 w-10 rounded-full object-cover ring-2 ring-primary/20" />
             <div>
               <h1 className="text-lg font-bold text-foreground">Administration</h1>
               <p className="text-xs text-muted-foreground">Super Admin</p>
@@ -179,6 +236,13 @@ export default function Admin() {
       </header>
 
       <div className="container py-6">
+        <div className="mb-4 flex justify-end">
+          <Button variant="outline" size="sm" onClick={exportOrdersCsv}>
+            <Download className="mr-2 h-4 w-4" />
+            Export CSV
+          </Button>
+        </div>
+
         {/* KPI Cards */}
         <div className="mb-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
           <div className="rounded-lg bg-card p-5 shadow-card">
@@ -257,6 +321,32 @@ export default function Admin() {
                 </PieChart>
               </ResponsiveContainer>
             </div>
+          </div>
+        </div>
+
+        <div className="mb-8 rounded-lg bg-card p-6 shadow-card">
+          <h2 className="mb-4 text-lg font-semibold text-foreground">Évolution mensuelle (6 mois)</h2>
+          <div className="h-72">
+            <ResponsiveContainer width="100%" height="100%">
+              <BarChart data={monthlyData}>
+                <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
+                <XAxis dataKey="month" tick={{ fontSize: 12 }} stroke="hsl(var(--muted-foreground))" />
+                <YAxis tick={{ fontSize: 12 }} stroke="hsl(var(--muted-foreground))" tickFormatter={(v) => `${(v / 1000).toFixed(0)}k`} />
+                <Tooltip
+                  formatter={(value: number, name: string) =>
+                    name === "revenue" ? [formatPrice(value), "CA payé"] : [value, "Commandes"]
+                  }
+                  contentStyle={{
+                    backgroundColor: "hsl(var(--card))",
+                    border: "1px solid hsl(var(--border))",
+                    borderRadius: "0.5rem",
+                    color: "hsl(var(--foreground))",
+                  }}
+                />
+                <Bar dataKey="revenue" fill="hsl(var(--primary))" radius={[4, 4, 0, 0]} />
+                <Bar dataKey="orders" fill="hsl(var(--warning))" radius={[4, 4, 0, 0]} />
+              </BarChart>
+            </ResponsiveContainer>
           </div>
         </div>
 

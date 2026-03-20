@@ -9,6 +9,7 @@ import { formatPrice } from "@/lib/constants";
 import NewOrderDialog from "@/components/NewOrderDialog";
 import OrderCard from "@/components/OrderCard";
 import ThemeToggle from "@/components/ThemeToggle";
+import logoImg from "@/assets/logo-lajoie.png";
 
 interface Order {
   id: number;
@@ -98,11 +99,14 @@ export default function Dashboard() {
     <div className="min-h-screen bg-background">
       <header className="sticky top-0 z-10 border-b bg-card/80 backdrop-blur-sm">
         <div className="container flex items-center justify-between py-3">
-          <div>
-            <h1 className="text-lg font-bold text-foreground">La Joie Pressing</h1>
-            <p className="text-xs text-muted-foreground">
+          <div className="flex items-center gap-3">
+            <img src={logoImg} alt="La Joie Pressing" className="h-10 w-10 rounded-full object-cover ring-2 ring-primary/20" />
+            <div>
+              <h1 className="text-lg font-bold text-foreground">La Joie Pressing</h1>
+              <p className="text-xs text-muted-foreground">
               {role === "admin" ? "Super Admin" : "Gérant"}
-            </p>
+              </p>
+            </div>
           </div>
           <div className="flex items-center gap-2">
             <ThemeToggle />
