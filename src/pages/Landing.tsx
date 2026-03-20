@@ -1,14 +1,16 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
 import { Clock, Truck, Shield, Phone, MapPin, ShoppingBag, Plus, Minus, Star, Sparkles, ChevronRight } from "lucide-react";
+import { z } from "zod";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { SERVICE_PRESETS, formatPrice } from "@/lib/constants";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
-import logoImg from "@/assets/logo-lajoie.jpeg";
+import logoImg from "@/assets/logo-lajoie.png";
 import ThemeToggle from "@/components/ThemeToggle";
+import PwaInstallPrompt from "@/components/PwaInstallPrompt";
 
 const features = [
   { icon: Sparkles, title: "Nettoyage Expert", desc: "Soin professionnel pour tous types de vêtements et tissus délicats" },
@@ -28,6 +30,27 @@ interface CartItem {
   qty: number;
   price: number;
 }
+
+const normalizePhone = (value: string) => value.replace(/\D/g, "");
+
+const onlineOrderSchema = z.object({
+  customerName: z.string().trim().min(2, "Nom requis").max(120, "Nom trop long"),
+  customerPhone: z
+    .string()
+    .trim()
+    .transform(normalizePhone)
+    .refine((phone) => /^(0\d{9}|225\d{10})$/.test(phone), "Numéro ivoirien invalide"),
+  address: z.string().trim().max(200, "Adresse trop longue").optional(),
+  cart: z
+    .array(
+      z.object({
+        name: z.string().trim().min(1).max(100),
+        qty: z.number().int().min(1).max(50),
+        price: z.number().min(0),
+      }),
+    )
+    .min(1, "Ajoutez au moins un article"),
+});
 
 export default function Landing() {
   const [showOrder, setShowOrder] = useState(false);
@@ -52,35 +75,52 @@ export default function Landing() {
   const total = cart.reduce((sum, i) => sum + i.qty * i.price, 0);
 
   const handleOnlineOrder = async () => {
-    if (!customerName.trim() || !customerPhone.trim()) {
-      toast.error("Nom et téléphone requis");
+    const parsed = onlineOrderSchema.safeParse({
+      customerName,
+      customerPhone,
+      address,
+      cart,
+    });
+
+    if (!parsed.success) {
+      toast.error(parsed.error.issues[0]?.message || "Vérifiez le formulaire");
       return;
     }
-    if (cart.length === 0) {
-      toast.error("Ajoutez au moins un article");
-      return;
-    }
+
+    const normalizedPhone = parsed.data.customerPhone.startsWith("225")
+      ? `0${parsed.data.customerPhone.slice(3)}`
+      : parsed.data.customerPhone;
+
     setSaving(true);
-    const notes = address.trim() ? `Collecte à domicile: ${address.trim()}` : "Commande en ligne";
-    const { error } = await supabase.from("orders").insert([{
-      customer_name: customerName.trim(),
-      customer_phone: customerPhone.trim(),
-      items: JSON.parse(JSON.stringify(cart)),
-      total,
-      manager_id: "00000000-0000-0000-0000-000000000000",
-      notes,
-    }]);
-    setSaving(false);
-    if (error) {
-      console.error("Order error:", error);
-      toast.error("Erreur, veuillez réessayer");
-    } else {
+    try {
+      const notes = parsed.data.address?.trim()
+        ? `Collecte à domicile: ${parsed.data.address.trim()}`
+        : "Commande en ligne";
+
+      const { error } = await supabase.from("orders").insert([
+        {
+          customer_name: parsed.data.customerName,
+          customer_phone: normalizedPhone,
+          items: JSON.parse(JSON.stringify(parsed.data.cart)),
+          total,
+          manager_id: null,
+          notes,
+        } as any,
+      ]);
+
+      if (error) {
+        toast.error(error.message || "Erreur, veuillez réessayer");
+        return;
+      }
+
       toast.success("Commande envoyée ! Nous vous contacterons bientôt.");
       setCustomerName("");
       setCustomerPhone("");
       setAddress("");
       setCart([]);
       setShowOrder(false);
+    } finally {
+      setSaving(false);
     }
   };
 
@@ -345,6 +385,8 @@ export default function Landing() {
           </div>
         </div>
       )}
+
+      <PwaInstallPrompt />
     </div>
   );
 }
