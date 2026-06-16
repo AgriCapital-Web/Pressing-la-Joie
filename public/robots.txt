@@ -1,0 +1,74 @@
+# Robots.txt pour AgriCapital - Optimisé pour SEO
+# Site: https://www.agricapital.ci
+# Dernière mise à jour: 2025
+
+# Permettre tous les robots de recherche principaux
+User-agent: Googlebot
+Allow: /
+Crawl-delay: 1
+
+User-agent: Googlebot-Image
+Allow: /
+
+User-agent: Bingbot
+Allow: /
+Crawl-delay: 2
+
+User-agent: Slurp
+Allow: /
+Crawl-delay: 2
+
+User-agent: DuckDuckBot
+Allow: /
+
+User-agent: Baiduspider
+Allow: /
+
+User-agent: YandexBot
+Allow: /
+
+User-agent: facebookexternalhit
+Allow: /
+
+User-agent: Twitterbot
+Allow: /
+
+User-agent: LinkedInBot
+Allow: /
+
+User-agent: WhatsApp
+Allow: /
+
+User-agent: TelegramBot
+Allow: /
+
+# Règles générales pour tous les autres robots
+User-agent: *
+Allow: /
+
+# Pages à ne pas indexer
+Disallow: /admin
+Disallow: /admin/
+Disallow: /admin-setup
+Disallow: /api/
+Disallow: /*.json$
+Disallow: /*?*
+Disallow: /404
+
+# Fichiers statiques autorisés
+Allow: /sitemap.xml
+Allow: /favicon.png
+Allow: /og-image.png
+Allow: /*.css$
+Allow: /*.js$
+Allow: /*.jpg$
+Allow: /*.jpeg$
+Allow: /*.png$
+Allow: /*.webp$
+Allow: /*.svg$
+
+# Sitemaps multilingues
+Sitemap: https://www.agricapital.ci/sitemap.xml
+
+# Hôte canonique
+Host: https://www.agricapital.ci

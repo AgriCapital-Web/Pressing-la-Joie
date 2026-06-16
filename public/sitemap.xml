@@ -1,0 +1,235 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
+        xmlns:xhtml="http://www.w3.org/1999/xhtml">
+  
+  <!-- Homepage - French (Default) -->
+  <url>
+    <loc>https://agricapital.ci</loc>
+    <xhtml:link rel="alternate" hreflang="fr" href="https://agricapital.ci"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://agricapital.ci/en"/>
+    <xhtml:link rel="alternate" hreflang="ar" href="https://agricapital.ci/ar"/>
+    <xhtml:link rel="alternate" hreflang="es" href="https://agricapital.ci/es"/>
+    <xhtml:link rel="alternate" hreflang="de" href="https://agricapital.ci/de"/>
+    <xhtml:link rel="alternate" hreflang="zh" href="https://agricapital.ci/zh"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://agricapital.ci"/>
+    <lastmod>2025-12-14</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>1.0</priority>
+  </url>
+
+  <!-- French explicit -->
+  <url>
+    <loc>https://agricapital.ci/fr</loc>
+    <xhtml:link rel="alternate" hreflang="fr" href="https://agricapital.ci/fr"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://agricapital.ci/en"/>
+    <xhtml:link rel="alternate" hreflang="ar" href="https://agricapital.ci/ar"/>
+    <xhtml:link rel="alternate" hreflang="es" href="https://agricapital.ci/es"/>
+    <xhtml:link rel="alternate" hreflang="de" href="https://agricapital.ci/de"/>
+    <xhtml:link rel="alternate" hreflang="zh" href="https://agricapital.ci/zh"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://agricapital.ci"/>
+    <lastmod>2025-12-14</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.9</priority>
+  </url>
+
+  <!-- English -->
+  <url>
+    <loc>https://agricapital.ci/en</loc>
+    <xhtml:link rel="alternate" hreflang="fr" href="https://agricapital.ci"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://agricapital.ci/en"/>
+    <xhtml:link rel="alternate" hreflang="ar" href="https://agricapital.ci/ar"/>
+    <xhtml:link rel="alternate" hreflang="es" href="https://agricapital.ci/es"/>
+    <xhtml:link rel="alternate" hreflang="de" href="https://agricapital.ci/de"/>
+    <xhtml:link rel="alternate" hreflang="zh" href="https://agricapital.ci/zh"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://agricapital.ci"/>
+    <lastmod>2025-12-14</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>
+
+  <!-- Arabic -->
+  <url>
+    <loc>https://agricapital.ci/ar</loc>
+    <xhtml:link rel="alternate" hreflang="fr" href="https://agricapital.ci"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://agricapital.ci/en"/>
+    <xhtml:link rel="alternate" hreflang="ar" href="https://agricapital.ci/ar"/>
+    <xhtml:link rel="alternate" hreflang="es" href="https://agricapital.ci/es"/>
+    <xhtml:link rel="alternate" hreflang="de" href="https://agricapital.ci/de"/>
+    <xhtml:link rel="alternate" hreflang="zh" href="https://agricapital.ci/zh"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://agricapital.ci"/>
+    <lastmod>2025-12-14</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>
+
+  <!-- Spanish -->
+  <url>
+    <loc>https://agricapital.ci/es</loc>
+    <xhtml:link rel="alternate" hreflang="fr" href="https://agricapital.ci"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://agricapital.ci/en"/>
+    <xhtml:link rel="alternate" hreflang="ar" href="https://agricapital.ci/ar"/>
+    <xhtml:link rel="alternate" hreflang="es" href="https://agricapital.ci/es"/>
+    <xhtml:link rel="alternate" hreflang="de" href="https://agricapital.ci/de"/>
+    <xhtml:link rel="alternate" hreflang="zh" href="https://agricapital.ci/zh"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://agricapital.ci"/>
+    <lastmod>2025-12-14</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>
+
+  <!-- German -->
+  <url>
+    <loc>https://agricapital.ci/de</loc>
+    <xhtml:link rel="alternate" hreflang="fr" href="https://agricapital.ci"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://agricapital.ci/en"/>
+    <xhtml:link rel="alternate" hreflang="ar" href="https://agricapital.ci/ar"/>
+    <xhtml:link rel="alternate" hreflang="es" href="https://agricapital.ci/es"/>
+    <xhtml:link rel="alternate" hreflang="de" href="https://agricapital.ci/de"/>
+    <xhtml:link rel="alternate" hreflang="zh" href="https://agricapital.ci/zh"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://agricapital.ci"/>
+    <lastmod>2025-12-14</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>
+
+  <!-- Chinese -->
+  <url>
+    <loc>https://agricapital.ci/zh</loc>
+    <xhtml:link rel="alternate" hreflang="fr" href="https://agricapital.ci"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://agricapital.ci/en"/>
+    <xhtml:link rel="alternate" hreflang="ar" href="https://agricapital.ci/ar"/>
+    <xhtml:link rel="alternate" hreflang="es" href="https://agricapital.ci/es"/>
+    <xhtml:link rel="alternate" hreflang="de" href="https://agricapital.ci/de"/>
+    <xhtml:link rel="alternate" hreflang="zh" href="https://agricapital.ci/zh"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://agricapital.ci"/>
+    <lastmod>2025-12-14</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>
+
+  <!-- Sections - French -->
+  <url>
+    <loc>https://agricapital.ci/#apropos</loc>
+    <lastmod>2025-12-14</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+  </url>
+
+  <url>
+    <loc>https://agricapital.ci/#approche</loc>
+    <lastmod>2025-12-14</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+  </url>
+
+  <url>
+    <loc>https://agricapital.ci/#impact</loc>
+    <lastmod>2025-12-14</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+  </url>
+
+  <url>
+    <loc>https://agricapital.ci/#jalons</loc>
+    <lastmod>2025-12-14</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+  </url>
+
+  <url>
+    <loc>https://agricapital.ci/#temoignages</loc>
+    <lastmod>2025-12-14</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+
+  <url>
+    <loc>https://agricapital.ci/#partenariat</loc>
+    <lastmod>2025-12-14</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+  </url>
+
+  <url>
+    <loc>https://agricapital.ci/#contact</loc>
+    <lastmod>2025-12-14</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+  </url>
+
+
+  <!-- Solutions, Services & Partenariats -->
+  <url>
+    <loc>https://agricapital.ci/solutions</loc>
+    <lastmod>2026-06-16</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.9</priority>
+  </url>
+  <url>
+    <loc>https://agricapital.ci/services</loc>
+    <lastmod>2026-06-16</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.9</priority>
+  </url>
+  <url>
+    <loc>https://agricapital.ci/partenariats</loc>
+    <lastmod>2026-06-16</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.9</priority>
+  </url>
+  <url>
+    <loc>https://agricapital.ci/solutions/valorisation-fonciere</loc>
+    <lastmod>2026-06-16</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://agricapital.ci/solutions/plantation-cle-en-main</loc>
+    <lastmod>2026-06-16</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://agricapital.ci/solutions/gestion-de-plantations</loc>
+    <lastmod>2026-06-16</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://agricapital.ci/solutions/accompagnement-projets-agricoles</loc>
+    <lastmod>2026-06-16</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://agricapital.ci/solutions/pepiniere-plants-certifies</loc>
+    <lastmod>2026-06-16</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://agricapital.ci/services/fourniture-intrants</loc>
+    <lastmod>2026-06-16</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://agricapital.ci/services/mise-en-place-suivi-plantations</loc>
+    <lastmod>2026-06-16</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://agricapital.ci/services/garantie-decoulement</loc>
+    <lastmod>2026-06-16</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://agricapital.ci/services/collecte-de-production</loc>
+    <lastmod>2026-06-16</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+
+</urlset>
