@@ -1,0 +1,1 @@
+UPDATE public.news SET is_published = true, published_at = COALESCE(published_at, now()) WHERE is_published = false AND title_fr IS NOT NULL AND content_fr IS NOT NULL;
