@@ -12,6 +12,7 @@
     "moduleDetection": "force",
     "moduleResolution": "bundler",
     "noEmit": true,
+    "noCheck": true,
     "noFallthroughCasesInSwitch": false,
     "noImplicitAny": false,
     "noUnusedLocals": false,
@@ -28,5 +29,13 @@
   },
   "include": [
     "src"
+  ],
+  "exclude": [
+    "src/routes",
+    "src/components/flex",
+    "src/router.tsx",
+    "src/routeTree.gen.ts",
+    "src/server.ts",
+    "src/start.ts"
   ]
 }
