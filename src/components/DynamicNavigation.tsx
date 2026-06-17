@@ -1,10 +1,11 @@
 import { useState, useEffect, useRef } from "react";
-import { Menu, X, Globe, ChevronDown, Phone, MessageCircle, UserCircle2, MapPin } from "lucide-react";
+import { Menu, X, Globe, ChevronDown, Phone, MessageCircle, UserCircle2, MapPin, Eye } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { Language, languageNames } from "@/lib/translations";
 import { useNavigate, useLocation } from "react-router-dom";
 import logo from "@/assets/logo-agricapital-v2.png";
+import { useVisitorCount } from "@/hooks/useVisitorCount";
 
 const CLIENT_PORTAL_URL = "https://pay.agricapital.ci";
 const WHATSAPP_URL = "https://wa.me/2250564551717";
@@ -41,8 +42,7 @@ const menuConfig: MenuItem[] = [
   {
     label: { fr: "Nos Offres", en: "Offers", ar: "عروضنا", es: "Ofertas", de: "Angebote", zh: "方案" },
     children: [
-      { label: { fr: "Solutions", en: "Solutions", ar: "حلول", es: "Soluciones", de: "Lösungen", zh: "解决方案" }, action: "/solutions", isRoute: true },
-      { label: { fr: "Services", en: "Services", ar: "خدمات", es: "Servicios", de: "Dienste", zh: "服务" }, action: "/services", isRoute: true },
+      { label: { fr: "Solutions & Services", en: "Solutions & Services", ar: "الحلول والخدمات", es: "Soluciones y Servicios", de: "Lösungen & Dienste", zh: "解决方案与服务" }, action: "/solutions", isRoute: true },
       { label: { fr: "Comment ça marche", en: "How It Works", ar: "كيف يعمل", es: "Cómo funciona", de: "So funktioniert's", zh: "运作方式" }, action: "approche" },
       { label: { fr: "Partenariats", en: "Partnerships", ar: "شراكات", es: "Asociaciones", de: "Partnerschaften", zh: "合作" }, action: "/partenariats", isRoute: true },
     ],
@@ -64,6 +64,7 @@ const menuConfig: MenuItem[] = [
 const DynamicNavigation = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [showLangMenu, setShowLangMenu] = useState(false);
+  const { totalVisitors, weeklyVisitors } = useVisitorCount();
   
   const [openSubmenu, setOpenSubmenu] = useState<string | null>(null);
   const [openMobileSubmenu, setOpenMobileSubmenu] = useState<string | null>(null);
@@ -203,6 +204,17 @@ const DynamicNavigation = () => {
             >
               <Phone size={18} />
             </a>
+            {/* Visitor counter chip */}
+            <div
+              className="hidden md:flex items-center gap-1.5 h-10 lg:h-11 px-3 rounded-full bg-primary/10 text-primary text-xs font-semibold"
+              title={`${totalVisitors.toLocaleString()} visites totales • ${weeklyVisitors.toLocaleString()} cette semaine`}
+              aria-label="Compteur de visiteurs"
+            >
+              <Eye size={14} />
+              <span className="tabular-nums">{totalVisitors.toLocaleString()}</span>
+              <span className="text-primary/50">·</span>
+              <span className="tabular-nums text-accent">{weeklyVisitors}</span>
+            </div>
             <a
               href={WHATSAPP_URL}
               target="_blank"
