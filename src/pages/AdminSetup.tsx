@@ -5,7 +5,7 @@ import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { toast } from "sonner";
 import { Loader2, Shield, CheckCircle } from "lucide-react";
-import logo from "@/assets/logo.png";
+import logo from "@/assets/logo-agricapital-v2.png";
 
 const AdminSetup = () => {
   const [secret, setSecret] = useState("");
