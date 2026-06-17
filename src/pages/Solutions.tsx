@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { ArrowRight } from "lucide-react";
 import { solutions, services } from "@/data/offerings";
-import pubAsset from "@/assets/pub-agricap.png.asset.json";
+import pubAsset from "@/assets/pub-agricap.jpg.asset.json";
 
 const OfferingGrid = ({ items, basePath }: { items: typeof solutions; basePath: string }) => (
   <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -67,24 +67,24 @@ const Solutions = () => {
 
       <DynamicNavigation />
 
-      <main className="pt-28 pb-20">
+      <main className="pt-24 pb-12">
         {/* Header */}
-        <section className="container mx-auto px-4 md:px-6 mb-16">
-          <div className="grid lg:grid-cols-2 gap-8 lg:gap-12 items-center">
+        <section className="container mx-auto px-4 md:px-6 mb-10 md:mb-12">
+          <div className="grid lg:grid-cols-2 gap-6 lg:gap-10 items-center">
             <div>
               <span className="inline-block px-3 py-1 rounded-full bg-primary/10 text-primary text-xs font-semibold uppercase tracking-wider mb-4">
                 Solutions & Services
               </span>
-              <h1 className="text-3xl md:text-5xl font-bold text-foreground mb-4">
+              <h1 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold text-foreground mb-4 leading-tight">
                 Des solutions adaptées à chaque profil et à chaque projet agricole
               </h1>
-              <p className="text-base md:text-lg text-muted-foreground leading-relaxed">
+              <p className="text-sm md:text-base lg:text-lg text-muted-foreground leading-relaxed">
                 AgriCapital accompagne particuliers, entrepreneurs, investisseurs, propriétaires
                 fonciers, coopératives et institutions dans la création, le développement et la
                 valorisation de plantations agricoles durables.
               </p>
             </div>
-            <div className="relative">
+            <div className="relative order-first lg:order-last">
               <div className="absolute inset-0 bg-gradient-to-br from-primary/10 via-accent/5 to-transparent rounded-3xl blur-2xl" />
               <img
                 src={pubAsset.url}
@@ -94,27 +94,28 @@ const Solutions = () => {
                 loading="eager"
                 decoding="async"
                 fetchPriority="high"
-                className="relative w-full h-auto object-contain max-h-[480px] mx-auto"
+                className="relative w-full h-auto object-contain max-h-[280px] sm:max-h-[360px] lg:max-h-[460px] mx-auto"
+                onError={(e) => { (e.currentTarget as HTMLImageElement).style.display = 'none'; }}
               />
             </div>
           </div>
         </section>
 
         {/* Solutions */}
-        <section className="container mx-auto px-4 md:px-6 mb-20">
+        <section className="container mx-auto px-4 md:px-6 mb-12 md:mb-16">
           <OfferingGrid items={solutions} basePath="/solutions" />
         </section>
 
         {/* Services */}
         <section className="container mx-auto px-4 md:px-6">
-          <div className="mb-10 max-w-3xl">
+          <div className="mb-6 md:mb-8 max-w-3xl">
             <span className="inline-block px-3 py-1 rounded-full bg-accent/10 text-accent text-xs font-semibold uppercase tracking-wider mb-4">
               Services agricoles
             </span>
-            <h2 className="text-2xl md:text-4xl font-bold text-foreground mb-3">
+            <h2 className="text-xl sm:text-2xl md:text-3xl lg:text-4xl font-bold text-foreground mb-3">
               Des services techniques pour accompagner producteurs et exploitations
             </h2>
-            <p className="text-muted-foreground leading-relaxed">
+            <p className="text-sm md:text-base text-muted-foreground leading-relaxed">
               Une offre complète d'intrants, d'interventions terrain et de débouchés commerciaux
               pour sécuriser et valoriser votre production.
             </p>
@@ -123,14 +124,14 @@ const Solutions = () => {
         </section>
 
         {/* CTA Partenariats */}
-        <section className="container mx-auto px-4 md:px-6 mt-20">
+        <section className="container mx-auto px-4 md:px-6 mt-12 md:mt-16">
           <Card className="bg-gradient-to-br from-primary/5 via-primary/10 to-accent/10 border-primary/20">
-            <CardContent className="p-8 md:p-12 flex flex-col md:flex-row md:items-center justify-between gap-6">
+            <CardContent className="p-6 md:p-10 flex flex-col md:flex-row md:items-center justify-between gap-6">
               <div className="max-w-2xl">
-                <h3 className="text-2xl md:text-3xl font-bold text-foreground mb-3">
+                <h3 className="text-xl md:text-2xl lg:text-3xl font-bold text-foreground mb-3">
                   Vous souhaitez construire un partenariat ?
                 </h3>
-                <p className="text-muted-foreground leading-relaxed">
+                <p className="text-sm md:text-base text-muted-foreground leading-relaxed">
                   Financiers, techniques, commerciaux ou institutionnels — découvrez comment
                   collaborer avec AgriCapital pour une agriculture performante et durable.
                 </p>
