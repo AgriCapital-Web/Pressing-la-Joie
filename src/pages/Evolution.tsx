@@ -11,7 +11,7 @@ import SEOHead from "@/components/SEOHead";
 import { supabase } from "@/integrations/supabase/client";
 
 import nurseryPepiniere from "@/assets/nursery-pepiniere-daloa.jpg";
-import nurserySite from "@/assets/nursery-site.webp";
+import nurserySite from "@/assets/nursery-palm.jpg";
 import nurseryInspection from "@/assets/nursery-inspection-2026.jpg";
 import palmFruits from "@/assets/palm-mature-fruits.jpg";
 import palmPlantation from "@/assets/palm-mature-plantation.jpg";
