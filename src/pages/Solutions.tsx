@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { ArrowRight } from "lucide-react";
 import { solutions, services } from "@/data/offerings";
+import pubAsset from "@/assets/pub-agricap.png.asset.json";
 
 const OfferingGrid = ({ items, basePath }: { items: typeof solutions; basePath: string }) => (
   <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -69,17 +70,34 @@ const Solutions = () => {
       <main className="pt-28 pb-20">
         {/* Header */}
         <section className="container mx-auto px-4 md:px-6 mb-16">
-          <span className="inline-block px-3 py-1 rounded-full bg-primary/10 text-primary text-xs font-semibold uppercase tracking-wider mb-4">
-            Nos solutions
-          </span>
-          <h1 className="text-3xl md:text-5xl font-bold text-foreground mb-4 max-w-3xl">
-            Des solutions adaptées à chaque profil et à chaque projet agricole
-          </h1>
-          <p className="text-base md:text-lg text-muted-foreground max-w-3xl leading-relaxed">
-            AgriCapital accompagne particuliers, entrepreneurs, investisseurs, propriétaires
-            fonciers, coopératives et institutions dans la création, le développement et la
-            valorisation de plantations agricoles durables.
-          </p>
+          <div className="grid lg:grid-cols-2 gap-8 lg:gap-12 items-center">
+            <div>
+              <span className="inline-block px-3 py-1 rounded-full bg-primary/10 text-primary text-xs font-semibold uppercase tracking-wider mb-4">
+                Solutions & Services
+              </span>
+              <h1 className="text-3xl md:text-5xl font-bold text-foreground mb-4">
+                Des solutions adaptées à chaque profil et à chaque projet agricole
+              </h1>
+              <p className="text-base md:text-lg text-muted-foreground leading-relaxed">
+                AgriCapital accompagne particuliers, entrepreneurs, investisseurs, propriétaires
+                fonciers, coopératives et institutions dans la création, le développement et la
+                valorisation de plantations agricoles durables.
+              </p>
+            </div>
+            <div className="relative">
+              <div className="absolute inset-0 bg-gradient-to-br from-primary/10 via-accent/5 to-transparent rounded-3xl blur-2xl" />
+              <img
+                src={pubAsset.url}
+                alt="AgriCapital — partenariat et plantation"
+                width={1200}
+                height={1100}
+                loading="eager"
+                decoding="async"
+                fetchPriority="high"
+                className="relative w-full h-auto object-contain max-h-[480px] mx-auto"
+              />
+            </div>
+          </div>
         </section>
 
         {/* Solutions */}
