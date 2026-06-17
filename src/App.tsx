@@ -7,6 +7,7 @@ import { LanguageProvider } from "@/contexts/LanguageContext";
 import { usePageTracking } from "@/hooks/usePageTracking";
 import { lazy, Suspense } from "react";
 import { Loader2 } from "lucide-react";
+import ScrollToTop from "@/components/ScrollToTop";
 
 import HomePage from "./pages/HomePage";
 import NotFound from "./pages/NotFound";
@@ -149,6 +150,7 @@ const App = () => (
         <Toaster />
         <Sonner />
         <BrowserRouter>
+          <ScrollToTop />
           <AppContent />
         </BrowserRouter>
       </TooltipProvider>
