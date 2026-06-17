@@ -46,7 +46,9 @@ serve(async (req) => {
 
   try {
     const url = new URL(req.url);
-    const lang = url.searchParams.get('lang') || 'fr';
+    const VALID_LANGS = ['fr', 'en', 'ar', 'es', 'de', 'zh'];
+    const rawLang = url.searchParams.get('lang') ?? '';
+    const lang = VALID_LANGS.includes(rawLang) ? rawLang : 'fr';
     const meta = metaData[lang] || metaData.fr;
     const baseUrl = 'https://www.agricapital.ci';
     const ogImage = `${baseUrl}/og-image.png`;
