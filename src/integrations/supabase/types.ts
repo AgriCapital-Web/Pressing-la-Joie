@@ -14,6 +14,51 @@ export type Database = {
   }
   public: {
     Tables: {
+      email_campaigns: {
+        Row: {
+          audience_type: string
+          brevo_campaign_id: string | null
+          created_at: string
+          created_by: string | null
+          html_content: string
+          id: string
+          name: string
+          provider: string
+          status: string
+          subject: string
+          updated_at: string
+          updated_by: string | null
+        }
+        Insert: {
+          audience_type?: string
+          brevo_campaign_id?: string | null
+          created_at?: string
+          created_by?: string | null
+          html_content?: string
+          id?: string
+          name: string
+          provider?: string
+          status?: string
+          subject: string
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Update: {
+          audience_type?: string
+          brevo_campaign_id?: string | null
+          created_at?: string
+          created_by?: string | null
+          html_content?: string
+          id?: string
+          name?: string
+          provider?: string
+          status?: string
+          subject?: string
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Relationships: []
+      }
       order_comments: {
         Row: {
           author_id: string | null
@@ -132,6 +177,48 @@ export type Database = {
         }
         Relationships: []
       }
+      page_visits: {
+        Row: {
+          city: string | null
+          country: string | null
+          created_at: string
+          domain: string | null
+          id: string
+          latitude: number | null
+          longitude: number | null
+          page_path: string
+          referrer: string | null
+          user_agent: string | null
+          visitor_id: string
+        }
+        Insert: {
+          city?: string | null
+          country?: string | null
+          created_at?: string
+          domain?: string | null
+          id?: string
+          latitude?: number | null
+          longitude?: number | null
+          page_path: string
+          referrer?: string | null
+          user_agent?: string | null
+          visitor_id: string
+        }
+        Update: {
+          city?: string | null
+          country?: string | null
+          created_at?: string
+          domain?: string | null
+          id?: string
+          latitude?: number | null
+          longitude?: number | null
+          page_path?: string
+          referrer?: string | null
+          user_agent?: string | null
+          visitor_id?: string
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           created_at: string
@@ -180,6 +267,30 @@ export type Database = {
         }
         Relationships: []
       }
+      visitor_counters: {
+        Row: {
+          id: string
+          total_visitors: number
+          updated_at: string
+          week_started_at: string
+          weekly_visitors: number
+        }
+        Insert: {
+          id: string
+          total_visitors?: number
+          updated_at?: string
+          week_started_at?: string
+          weekly_visitors?: number
+        }
+        Update: {
+          id?: string
+          total_visitors?: number
+          updated_at?: string
+          week_started_at?: string
+          weekly_visitors?: number
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
@@ -207,6 +318,14 @@ export type Database = {
           isOneToOne: false
           isSetofReturn: true
         }
+      }
+      get_public_visitor_count: { Args: never; Returns: number }
+      get_public_visitor_stats: {
+        Args: never
+        Returns: {
+          total_visitors: number
+          weekly_visitors: number
+        }[]
       }
       has_role: {
         Args: {
