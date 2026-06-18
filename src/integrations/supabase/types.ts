@@ -267,6 +267,30 @@ export type Database = {
         }
         Relationships: []
       }
+      visitor_counters: {
+        Row: {
+          id: string
+          total_visitors: number
+          updated_at: string
+          week_started_at: string
+          weekly_visitors: number
+        }
+        Insert: {
+          id: string
+          total_visitors?: number
+          updated_at?: string
+          week_started_at?: string
+          weekly_visitors?: number
+        }
+        Update: {
+          id?: string
+          total_visitors?: number
+          updated_at?: string
+          week_started_at?: string
+          weekly_visitors?: number
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
