@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { CheckCircle2, Handshake } from "lucide-react";
 import { partnerTypes, partnershipImpact } from "@/data/offerings";
+import partnershipImg from "@/assets/partnership-photo-cutout.png.asset.json";
 
 const Partenariats = () => {
   return (
@@ -23,19 +24,37 @@ const Partenariats = () => {
 
       <DynamicNavigation />
 
-      <main className="pt-28 pb-20">
+      <main className="pt-24 pb-12">
         {/* Header */}
-        <section className="container mx-auto px-4 md:px-6 mb-16">
-          <span className="inline-block px-3 py-1 rounded-full bg-primary/10 text-primary text-xs font-semibold uppercase tracking-wider mb-4">
-            Partenariats
-          </span>
-          <h1 className="text-3xl md:text-5xl font-bold text-foreground mb-4 max-w-3xl">
-            Construisons ensemble une agriculture performante, inclusive et durable
-          </h1>
-          <p className="text-base md:text-lg text-muted-foreground max-w-3xl leading-relaxed">
-            Nous recherchons des partenaires engagés dans le développement durable de
-            l'agriculture et la création de valeur au sein des territoires.
-          </p>
+        <section className="container mx-auto px-4 md:px-6 mb-10 md:mb-12">
+          <div className="grid lg:grid-cols-2 gap-6 lg:gap-10 items-center">
+            <div>
+              <span className="inline-block px-3 py-1 rounded-full bg-primary/10 text-primary text-xs font-semibold uppercase tracking-wider mb-4">
+                Partenariats
+              </span>
+              <h1 className="text-xl sm:text-2xl md:text-3xl lg:text-4xl font-bold text-foreground mb-4 leading-tight">
+                Construisons ensemble une agriculture performante, inclusive et durable
+              </h1>
+              <p className="text-xs sm:text-sm md:text-base text-muted-foreground leading-relaxed">
+                Nous recherchons des partenaires engagés dans le développement durable de
+                l'agriculture et la création de valeur au sein des territoires.
+              </p>
+            </div>
+            <div className="relative order-first lg:order-last">
+              <div className="absolute inset-x-4 bottom-2 h-6 bg-foreground/10 blur-xl rounded-full" />
+              <img
+                src={partnershipImg.url}
+                alt="AgriCapital — équipe AgriCapital en réunion dans une plantation de palmiers"
+                width={1024}
+                height={1024}
+                loading="eager"
+                decoding="async"
+                fetchPriority="high"
+                className="relative w-full h-auto object-contain max-h-[260px] sm:max-h-[340px] lg:max-h-[460px] mx-auto"
+                onError={(e) => { (e.currentTarget as HTMLImageElement).style.display = 'none'; }}
+              />
+            </div>
+          </div>
         </section>
 
         {/* Partner types */}
@@ -62,9 +81,9 @@ const Partenariats = () => {
         </section>
 
         {/* Impact */}
-        <section className="container mx-auto px-4 md:px-6 mb-16">
-          <div className="max-w-3xl mb-8">
-            <h2 className="text-2xl md:text-3xl font-bold text-foreground mb-3">
+        <section className="container mx-auto px-4 md:px-6 mb-12 md:mb-16">
+          <div className="max-w-3xl mb-6 md:mb-8">
+            <h2 className="text-lg sm:text-xl md:text-2xl lg:text-3xl font-bold text-foreground mb-3">
               Ensemble, nous contribuons à
             </h2>
             <p className="text-muted-foreground leading-relaxed">
@@ -84,9 +103,9 @@ const Partenariats = () => {
         {/* CTA */}
         <section className="container mx-auto px-4 md:px-6">
           <Card className="bg-gradient-to-br from-primary/5 via-primary/10 to-accent/10 border-primary/20">
-            <CardContent className="p-8 md:p-12 text-center">
+            <CardContent className="p-6 md:p-10 text-center">
               <Handshake className="w-12 h-12 text-primary mx-auto mb-4" />
-              <h3 className="text-2xl md:text-3xl font-bold text-foreground mb-3">
+              <h3 className="text-lg sm:text-xl md:text-2xl lg:text-3xl font-bold text-foreground mb-3">
                 Vous souhaitez devenir partenaire ?
               </h3>
               <p className="text-muted-foreground leading-relaxed max-w-2xl mx-auto mb-8">

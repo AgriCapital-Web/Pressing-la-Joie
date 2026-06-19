@@ -39,11 +39,14 @@ export const usePageTracking = () => {
       if (location.pathname.startsWith('/admin')) return;
 
       try {
-        // Don't await geolocation - fire and forget
-        const geoPromise = getGeolocation();
-        
-        // Insert immediately without geo, then update
         const visitorId = getVisitorId();
+
+        // Throttle: 1 visite par page max toutes les 30 minutes / visiteur
+        const throttleKey = `visit_${location.pathname}`;
+        const last = Number(sessionStorage.getItem(throttleKey) || 0);
+        if (Date.now() - last < 30 * 60 * 1000) return;
+        sessionStorage.setItem(throttleKey, String(Date.now()));
+
         const insertData: any = {
           page_path: location.pathname,
           visitor_id: visitorId,
@@ -52,20 +55,31 @@ export const usePageTracking = () => {
           domain: TRACKING_DOMAIN,
         };
 
-        // Try to get geo data quickly
-        const geoData = await Promise.race([
-          geoPromise,
-          new Promise<null>((resolve) => setTimeout(() => resolve(null), 1000))
-        ]);
-
-        if (geoData) {
-          insertData.country = geoData.country;
-          insertData.city = geoData.city;
-          insertData.latitude = geoData.latitude;
-          insertData.longitude = geoData.longitude;
+        const { error } = await (supabase as any).from('page_visits').insert(insertData);
+        if (error) {
+          // surfaced for debugging si RLS/grants posent problème
+          console.warn('page_visits insert error:', error.message);
+          return;
         }
 
-        await supabase.from('page_visits').insert(insertData);
+        // Géolocalisation en best-effort, mise à jour de la ligne ensuite (non bloquant)
+        const geo = await getGeolocation();
+        if (geo) {
+          try {
+            await (supabase as any)
+              .from('page_visits')
+              .update({
+                country: geo.country,
+                city: geo.city,
+                latitude: geo.latitude,
+                longitude: geo.longitude,
+              })
+              .eq('visitor_id', visitorId)
+              .eq('page_path', location.pathname)
+              .order('created_at', { ascending: false })
+              .limit(1);
+          } catch {/* ignore */}
+        }
       } catch {
         // Silently fail
       }

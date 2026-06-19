@@ -1,8 +1,8 @@
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 
-const BASE_TOTAL = 3234;
-const BASE_WEEKLY = 107;
+const BASE_TOTAL = 3262; // 3234 + 28 visites de la semaine confirmées par l'admin
+const BASE_WEEKLY = 135; // 107 + 28 visites de la semaine confirmées par l'admin
 
 export const useVisitorCount = () => {
   const [totalVisitors, setTotalVisitors] = useState<number>(() => {
@@ -22,13 +22,18 @@ export const useVisitorCount = () => {
 
     const fetchVisitorCount = async () => {
       try {
-        const { data, error } = await supabase.rpc('get_public_visitor_count');
-        if (!error && typeof data === 'number' && isMounted) {
-          const adjusted = Math.max(BASE_TOTAL, data + BASE_TOTAL);
-          setTotalVisitors(adjusted);
-          localStorage.setItem('cached_visitor_count', String(adjusted));
-          const weekly = Math.max(BASE_WEEKLY, BASE_WEEKLY + Math.floor((data || 0) * 0.18));
+        // Lit le compteur agrégé public (table visitor_counters, lecture anon autorisée)
+        const { data, error } = await (supabase as any)
+          .from('visitor_counters')
+          .select('total_visitors, weekly_visitors')
+          .eq('id', 'public')
+          .maybeSingle();
+        if (!error && data && isMounted) {
+          const total = Math.max(BASE_TOTAL, Number(data.total_visitors) || 0);
+          const weekly = Math.max(BASE_WEEKLY, Number(data.weekly_visitors) || 0);
+          setTotalVisitors(total);
           setWeeklyVisitors(weekly);
+          localStorage.setItem('cached_visitor_count', String(total));
           localStorage.setItem('cached_weekly_count', String(weekly));
         }
       } catch (error) {
@@ -44,23 +49,14 @@ export const useVisitorCount = () => {
       .channel('visitor-count')
       .on(
         'postgres_changes',
-        { event: 'INSERT', schema: 'public', table: 'page_visits' },
+        { event: 'UPDATE', schema: 'public', table: 'visitor_counters' },
         () => {
-          setTotalVisitors(prev => {
-            const newVal = prev + 1;
-            localStorage.setItem('cached_visitor_count', String(newVal));
-            return newVal;
-          });
-          setWeeklyVisitors(prev => {
-            const newVal = prev + 1;
-            localStorage.setItem('cached_weekly_count', String(newVal));
-            return newVal;
-          });
+          fetchVisitorCount();
         }
       )
       .subscribe();
 
-    const interval = window.setInterval(fetchVisitorCount, 30000);
+    const interval = window.setInterval(fetchVisitorCount, 20000);
 
     return () => {
       isMounted = false;
