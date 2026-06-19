@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { ArrowRight } from "lucide-react";
 import { solutions, services } from "@/data/offerings";
-import pubAsset from "@/assets/pub-agricap.jpg.asset.json";
+import pubAsset from "@/assets/solution-service-photo-cutout.png.asset.json";
 
 const OfferingGrid = ({ items, basePath }: { items: typeof solutions; basePath: string }) => (
   <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -75,26 +75,26 @@ const Solutions = () => {
               <span className="inline-block px-3 py-1 rounded-full bg-primary/10 text-primary text-xs font-semibold uppercase tracking-wider mb-4">
                 Solutions & Services
               </span>
-              <h1 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold text-foreground mb-4 leading-tight">
+              <h1 className="text-xl sm:text-2xl md:text-3xl lg:text-4xl font-bold text-foreground mb-4 leading-tight">
                 Des solutions adaptées à chaque profil et à chaque projet agricole
               </h1>
-              <p className="text-sm md:text-base lg:text-lg text-muted-foreground leading-relaxed">
+              <p className="text-xs sm:text-sm md:text-base text-muted-foreground leading-relaxed">
                 AgriCapital accompagne particuliers, entrepreneurs, investisseurs, propriétaires
                 fonciers, coopératives et institutions dans la création, le développement et la
                 valorisation de plantations agricoles durables.
               </p>
             </div>
             <div className="relative order-first lg:order-last">
-              <div className="absolute inset-0 bg-gradient-to-br from-primary/10 via-accent/5 to-transparent rounded-3xl blur-2xl" />
+              <div className="absolute inset-x-4 bottom-2 h-6 bg-foreground/10 blur-xl rounded-full" />
               <img
                 src={pubAsset.url}
-                alt="AgriCapital — partenariat et plantation"
-                width={1200}
-                height={1100}
+                alt="AgriCapital — remise d'un plateau de jeunes palmiers (plantation clé en main)"
+                width={1024}
+                height={1024}
                 loading="eager"
                 decoding="async"
                 fetchPriority="high"
-                className="relative w-full h-auto object-contain max-h-[280px] sm:max-h-[360px] lg:max-h-[460px] mx-auto"
+                className="relative w-full h-auto object-contain max-h-[260px] sm:max-h-[340px] lg:max-h-[460px] mx-auto"
                 onError={(e) => { (e.currentTarget as HTMLImageElement).style.display = 'none'; }}
               />
             </div>
