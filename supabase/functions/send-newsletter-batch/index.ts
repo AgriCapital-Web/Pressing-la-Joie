@@ -150,7 +150,7 @@ const handler = async (req: Request): Promise<Response> => {
       });
     }
 
-    const { subject, html, includeTestimonials, retryEmails }: NewsletterRequest = await req.json();
+    const { subject, html, audienceType = "all", includeTestimonials, retryEmails }: NewsletterRequest = await req.json();
 
     if (!subject || typeof subject !== 'string' || subject.length > 500) {
       return new Response(JSON.stringify({ error: "Sujet invalide" }), {
@@ -168,38 +168,50 @@ const handler = async (req: Request): Promise<Response> => {
 
     const sanitizedHtml = sanitizeHtml(html);
 
-    let allEmails: string[];
+    let recipients: Recipient[];
 
     if (retryEmails && Array.isArray(retryEmails) && retryEmails.length > 0) {
       // Retry mode: only send to specified emails
-      allEmails = retryEmails.filter(e => typeof e === 'string' && e.includes('@'));
+      recipients = retryEmails.filter(e => typeof e === 'string' && e.includes('@')).map((email) => ({ email }));
     } else {
-      // Normal mode: gather all recipients
-      const { data: subscribers, error: subError } = await supabase
-        .from('newsletter_subscribers')
-        .select('email')
-        .eq('is_active', true);
+      const map = new Map<string, Recipient>();
+      const add = (items?: Recipient[] | null) => (items || []).forEach((item) => {
+        if (item.email && item.email.includes("@")) map.set(item.email.toLowerCase(), item);
+      });
 
-      if (subError) throw subError;
-
-      let testimonialEmails: string[] = [];
-      if (includeTestimonials) {
-        const { data: testimonials } = await supabase
-          .from('testimonials')
-          .select('email')
-          .not('email', 'is', null);
-        if (testimonials) {
-          testimonialEmails = testimonials.map(t => t.email).filter(Boolean) as string[];
-        }
+      if (["all", "subscribers"].includes(audienceType)) {
+        const { data, error } = await supabase.from('newsletter_subscribers').select('email').eq('is_active', true);
+        if (error) throw error;
+        add(data as Recipient[]);
       }
-
-      allEmails = [...new Set([
-        ...(subscribers?.map(s => s.email) || []),
-        ...testimonialEmails,
-      ])];
+      if (["all", "testimonials", "clients"].includes(audienceType) || includeTestimonials) {
+        const { data } = await supabase.from('testimonials').select('email, first_name, last_name').not('email', 'is', null);
+        add(data as Recipient[]);
+      }
+      if (["all", "investors", "partners", "prospects", "clients"].includes(audienceType)) {
+        const { data } = await supabase.from('partnership_requests').select('email, first_name, last_name, partner_type, request_type').not('email', 'is', null);
+        const filtered = (data || []).filter((p: any) => {
+          if (audienceType === "all") return true;
+          if (audienceType === "investors") return p.request_type === "investor" || p.partner_type === "investor" || p.request_type === "investment";
+          if (audienceType === "partners") return ["technical", "institution", "industrial"].includes(p.request_type) || ["company", "ngo", "institution"].includes(p.partner_type);
+          if (audienceType === "clients") return ["landowner", "producer"].includes(p.request_type);
+          if (audienceType === "prospects") return true;
+          return false;
+        });
+        add(filtered as Recipient[]);
+      }
+      if (["all", "prospects", "clients", "members"].includes(audienceType)) {
+        const { data } = await supabase.from('visitor_contacts').select('email, first_name, last_name').not('email', 'is', null);
+        add(data as Recipient[]);
+      }
+      if (["all", "prospects", "clients", "members"].includes(audienceType)) {
+        const { data } = await supabase.from('waitlist_submissions').select('email, full_name').not('email', 'is', null);
+        add((data || []).map((w: any) => ({ email: w.email, first_name: String(w.full_name || "").split(" ")[0], last_name: String(w.full_name || "").split(" ").slice(1).join(" ") })));
+      }
+      recipients = [...map.values()];
     }
 
-    if (allEmails.length === 0) {
+    if (recipients.length === 0) {
       return new Response(JSON.stringify({ error: "Aucun destinataire trouvé" }), {
         status: 400,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
@@ -246,14 +258,14 @@ const handler = async (req: Request): Promise<Response> => {
     let failCount = 0;
     const failedRecipients: { email: string; error: string }[] = [];
 
-    console.log(`Newsletter send initiated by admin ${user.email} to ${allEmails.length} recipients`);
+    console.log(`Newsletter send initiated by admin ${user.email} to ${recipients.length} recipients`);
 
     // Send emails in batches of 5 concurrently
     const BATCH_SIZE = 5;
-    for (let i = 0; i < allEmails.length; i += BATCH_SIZE) {
-      const batch = allEmails.slice(i, i + BATCH_SIZE);
+    for (let i = 0; i < recipients.length; i += BATCH_SIZE) {
+      const batch = recipients.slice(i, i + BATCH_SIZE);
       const results = await Promise.all(
-        batch.map(email => sendEmailWithRetry(BREVO_API_KEY, LOVABLE_API_KEY, email, subject, formattedHtml))
+        batch.map(recipient => sendEmailWithRetry(BREVO_API_KEY, LOVABLE_API_KEY, recipient, subject, formattedHtml))
       );
 
       results.forEach((result, idx) => {
@@ -261,12 +273,12 @@ const handler = async (req: Request): Promise<Response> => {
           successCount++;
         } else {
           failCount++;
-          failedRecipients.push({ email: batch[idx], error: result.error || "Unknown" });
+          failedRecipients.push({ email: batch[idx].email, error: result.error || "Unknown" });
         }
       });
 
       // Pause between batches to respect rate limits
-      if (i + BATCH_SIZE < allEmails.length) {
+      if (i + BATCH_SIZE < recipients.length) {
         await new Promise(resolve => setTimeout(resolve, 500));
       }
     }
@@ -280,7 +292,7 @@ const handler = async (req: Request): Promise<Response> => {
       success: true, 
       totalSent: successCount,
       totalFailed: failCount,
-      totalRecipients: allEmails.length,
+      totalRecipients: recipients.length,
       failedRecipients: failedRecipients.length > 0 ? failedRecipients : undefined,
     }), {
       status: 200,
