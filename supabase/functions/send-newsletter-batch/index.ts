@@ -31,47 +31,28 @@ const MAX_RETRIES = 3;
 const RETRY_DELAY_MS = 2000;
 
 const sendEmailWithRetry = async (
-  apiKey: string,
-  lovableApiKey: string | undefined,
+  brevoKey: string,
+  lovableApiKey: string,
   to: string,
   subject: string,
   html: string
 ): Promise<{ success: boolean; error?: string }> => {
   for (let attempt = 1; attempt <= MAX_RETRIES; attempt++) {
     try {
-      let response: Response;
-
-      // Use Resend connector gateway if LOVABLE_API_KEY available, else direct
-      if (lovableApiKey) {
-        response = await fetch("https://connector-gateway.lovable.dev/resend/emails", {
-          method: "POST",
-          headers: {
-            "Authorization": `Bearer ${lovableApiKey}`,
-            "X-Connection-Api-Key": apiKey,
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            from: "AgriCapital <newsletter@agricapital.ci>",
-            to: [to],
-            subject,
-            html,
-          }),
-        });
-      } else {
-        response = await fetch("https://api.resend.com/emails", {
-          method: "POST",
-          headers: {
-            "Authorization": `Bearer ${apiKey}`,
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            from: "AgriCapital <newsletter@agricapital.ci>",
-            to: [to],
-            subject,
-            html,
-          }),
-        });
-      }
+      const response = await fetch("https://connector-gateway.lovable.dev/brevo/smtp/email", {
+        method: "POST",
+        headers: {
+          "Authorization": `Bearer ${lovableApiKey}`,
+          "X-Connection-Api-Key": brevoKey,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          sender: { name: "AgriCapital", email: "contact@agricapital.ci" },
+          to: [{ email: to }],
+          subject,
+          htmlContent: html,
+        }),
+      });
 
       if (response.ok) {
         return { success: true };
@@ -112,12 +93,11 @@ const handler = async (req: Request): Promise<Response> => {
   }
 
   try {
-    const RESEND_API_KEY = Deno.env.get("RESEND_API_KEY");
-    if (!RESEND_API_KEY) {
-      throw new Error("RESEND_API_KEY not configured");
-    }
-
+    const BREVO_API_KEY = Deno.env.get("BREVO_API_KEY");
     const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
+    if (!BREVO_API_KEY || !LOVABLE_API_KEY) {
+      throw new Error("Brevo is not configured");
+    }
 
     const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
     const supabaseKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
@@ -260,7 +240,7 @@ const handler = async (req: Request): Promise<Response> => {
     for (let i = 0; i < allEmails.length; i += BATCH_SIZE) {
       const batch = allEmails.slice(i, i + BATCH_SIZE);
       const results = await Promise.all(
-        batch.map(email => sendEmailWithRetry(RESEND_API_KEY, LOVABLE_API_KEY, email, subject, formattedHtml))
+        batch.map(email => sendEmailWithRetry(BREVO_API_KEY, LOVABLE_API_KEY, email, subject, formattedHtml))
       );
 
       results.forEach((result, idx) => {
