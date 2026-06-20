@@ -1,6 +1,12 @@
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.39.3";
 
+const normalizeSecret = (value: string | undefined) =>
+  value?.trim().replace(/^['"]|['"]$/g, "");
+
+const isValidEmail = (email: string) =>
+  /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type, x-admin-secret",
@@ -17,8 +23,8 @@ serve(async (req) => {
 
   try {
     // Verify admin secret from environment variable
-    const expectedSecret = Deno.env.get("ADMIN_INIT_SECRET");
-    const authHeader = req.headers.get("x-admin-secret");
+    const expectedSecret = normalizeSecret(Deno.env.get("ADMIN_INIT_SECRET"));
+    const authHeader = normalizeSecret(req.headers.get("x-admin-secret") ?? undefined);
     
     console.log("Auth header received:", authHeader ? "present" : "missing");
     console.log("Expected secret configured:", expectedSecret ? "yes" : "no");
@@ -63,8 +69,8 @@ serve(async (req) => {
     });
 
     // Get admin credentials from environment variables
-    const adminEmail = Deno.env.get("ADMIN_EMAIL");
-    const adminPassword = Deno.env.get("ADMIN_PASSWORD");
+    const adminEmail = normalizeSecret(Deno.env.get("ADMIN_EMAIL"))?.toLowerCase();
+    const adminPassword = normalizeSecret(Deno.env.get("ADMIN_PASSWORD"));
     
     if (!adminEmail || !adminPassword) {
       console.log("Admin credentials not configured");
@@ -73,6 +79,17 @@ serve(async (req) => {
         { 
           status: 503, 
           headers: { ...corsHeaders, "Content-Type": "application/json" } 
+        }
+      );
+    }
+
+    if (!isValidEmail(adminEmail)) {
+      console.error("Invalid ADMIN_EMAIL format");
+      return new Response(
+        JSON.stringify({ error: "ADMIN_EMAIL has an invalid format", success: false }),
+        {
+          status: 500,
+          headers: { ...corsHeaders, "Content-Type": "application/json" }
         }
       );
     }
