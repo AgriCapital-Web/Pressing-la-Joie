@@ -3,6 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { ArrowRight } from "lucide-react";
 import { solutions, services } from "@/data/offerings";
+import WaitlistDialog from "@/components/WaitlistDialog";
 
 const SolutionsSummary = () => {
   // Show 3 flagship solutions + 2 services to keep it concise
@@ -60,9 +61,9 @@ const SolutionsSummary = () => {
         </div>
 
         <div className="flex flex-col sm:flex-row gap-3">
-          <Button asChild size="lg">
-            <Link to="/solutions">Voir toutes les solutions</Link>
-          </Button>
+          <WaitlistDialog sourcePage="solutions-summary">
+            <Button size="lg">Rejoindre la liste d'attente</Button>
+          </WaitlistDialog>
           <Button asChild size="lg" variant="outline">
             <Link to="/partenariats">Découvrir les partenariats</Link>
           </Button>
