@@ -9,9 +9,12 @@ const corsHeaders = {
 interface NewsletterRequest {
   subject: string;
   html: string;
+  audienceType?: string;
   includeTestimonials?: boolean;
   retryEmails?: string[];
 }
+
+type Recipient = { email: string; first_name?: string | null; last_name?: string | null };
 
 // Basic HTML sanitization
 const sanitizeHtml = (html: string): string => {
@@ -30,10 +33,20 @@ const sanitizeHtml = (html: string): string => {
 const MAX_RETRIES = 3;
 const RETRY_DELAY_MS = 2000;
 
+const personalizeHtml = (html: string, recipient: Recipient): string => {
+  const firstName = recipient.first_name?.trim() || "";
+  const lastName = recipient.last_name?.trim() || "";
+  const greeting = firstName ? `Bonjour ${[firstName, lastName].filter(Boolean).join(" ")},` : "Bonjour très cher,";
+  return html
+    .replace(/Bonjour\s*\{\{prenom\}\}\s*\{\{nom\}\}\s*,?/gi, greeting)
+    .replace(/\{\{prenom\}\}/g, firstName || "")
+    .replace(/\{\{nom\}\}/g, lastName || "");
+};
+
 const sendEmailWithRetry = async (
   brevoKey: string,
   lovableApiKey: string,
-  to: string,
+  recipient: Recipient,
   subject: string,
   html: string
 ): Promise<{ success: boolean; error?: string }> => {
@@ -48,9 +61,9 @@ const sendEmailWithRetry = async (
         },
         body: JSON.stringify({
           sender: { name: "AgriCapital", email: "contact@agricapital.ci" },
-          to: [{ email: to }],
+          to: [{ email: recipient.email }],
           subject,
-          htmlContent: html,
+          htmlContent: personalizeHtml(html, recipient),
         }),
       });
 
@@ -68,7 +81,7 @@ const sendEmailWithRetry = async (
       // Retry on 429 or 5xx
       if (attempt < MAX_RETRIES) {
         const delay = RETRY_DELAY_MS * attempt;
-        console.log(`Retry ${attempt}/${MAX_RETRIES} for ${to} after ${delay}ms (status: ${response.status})`);
+        console.log(`Retry ${attempt}/${MAX_RETRIES} for ${recipient.email} after ${delay}ms (status: ${response.status})`);
         await new Promise(resolve => setTimeout(resolve, delay));
         continue;
       }
@@ -77,7 +90,7 @@ const sendEmailWithRetry = async (
     } catch (err) {
       if (attempt < MAX_RETRIES) {
         const delay = RETRY_DELAY_MS * attempt;
-        console.log(`Retry ${attempt}/${MAX_RETRIES} for ${to} after network error: ${err}`);
+        console.log(`Retry ${attempt}/${MAX_RETRIES} for ${recipient.email} after network error: ${err}`);
         await new Promise(resolve => setTimeout(resolve, delay));
         continue;
       }
