@@ -22,12 +22,19 @@ export type Database = {
           created_by: string | null
           html_content: string
           id: string
+          image_url: string | null
+          include_image: boolean
+          include_video: boolean
           name: string
+          plain_text: string
+          preheader: string
           provider: string
+          source_prompt: string
           status: string
           subject: string
           updated_at: string
           updated_by: string | null
+          video_url: string | null
         }
         Insert: {
           audience_type?: string
@@ -36,12 +43,19 @@ export type Database = {
           created_by?: string | null
           html_content?: string
           id?: string
+          image_url?: string | null
+          include_image?: boolean
+          include_video?: boolean
           name: string
+          plain_text?: string
+          preheader?: string
           provider?: string
+          source_prompt?: string
           status?: string
           subject: string
           updated_at?: string
           updated_by?: string | null
+          video_url?: string | null
         }
         Update: {
           audience_type?: string
@@ -50,12 +64,19 @@ export type Database = {
           created_by?: string | null
           html_content?: string
           id?: string
+          image_url?: string | null
+          include_image?: boolean
+          include_video?: boolean
           name?: string
+          plain_text?: string
+          preheader?: string
           provider?: string
+          source_prompt?: string
           status?: string
           subject?: string
           updated_at?: string
           updated_by?: string | null
+          video_url?: string | null
         }
         Relationships: []
       }
@@ -288,6 +309,60 @@ export type Database = {
           updated_at?: string
           week_started_at?: string
           weekly_visitors?: number
+        }
+        Relationships: []
+      }
+      waitlist_submissions: {
+        Row: {
+          admin_notes: string | null
+          created_at: string
+          desired_area_hectares: number | null
+          email: string
+          full_name: string
+          id: string
+          land_area_hectares: number | null
+          land_status: string
+          message: string | null
+          phone: string | null
+          residence: string | null
+          source_page: string | null
+          status: string
+          updated_at: string
+          whatsapp: string | null
+        }
+        Insert: {
+          admin_notes?: string | null
+          created_at?: string
+          desired_area_hectares?: number | null
+          email: string
+          full_name: string
+          id?: string
+          land_area_hectares?: number | null
+          land_status?: string
+          message?: string | null
+          phone?: string | null
+          residence?: string | null
+          source_page?: string | null
+          status?: string
+          updated_at?: string
+          whatsapp?: string | null
+        }
+        Update: {
+          admin_notes?: string | null
+          created_at?: string
+          desired_area_hectares?: number | null
+          email?: string
+          full_name?: string
+          id?: string
+          land_area_hectares?: number | null
+          land_status?: string
+          message?: string | null
+          phone?: string | null
+          residence?: string | null
+          source_page?: string | null
+          status?: string
+          updated_at?: string
+          whatsapp?: string | null
         }
         Relationships: []
       }
