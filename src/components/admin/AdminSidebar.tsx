@@ -27,6 +27,7 @@ const menuItems: MenuItem[] = [
 
   { divider: true, label: "Communication" },
   { icon: Mail, label: "Messages contact", path: "/admin/contact-messages" },
+  { icon: Users, label: "Liste d'attente", path: "/admin/waitlist" },
   { icon: Users, label: "Newsletter", path: "/admin/newsletter" },
   { icon: History, label: "Historique envois", path: "/admin/newsletter-history" },
   { icon: Send, label: "Campagnes Brevo", path: "/admin/email-campaigns" },

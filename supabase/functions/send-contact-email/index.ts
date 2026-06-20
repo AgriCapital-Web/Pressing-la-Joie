@@ -1,9 +1,6 @@
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
-import { Resend } from "https://esm.sh/resend@3.2.0";
 import { z } from "https://deno.land/x/zod@v3.22.4/mod.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
-
-const resend = new Resend(Deno.env.get("RESEND_API_KEY"));
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -114,15 +111,30 @@ const handler = async (req: Request): Promise<Response> => {
       <p><em>— Email reçu depuis le site vitrine AgriCapital (https://agricapital.ci)</em></p>
     `;
 
-    const emailResponse = await resend.emails.send({
-      from: "AgriCapital Contact <onboarding@resend.dev>",
-      to: ["contact@agricapital.ci", "inocent.koffi@agricapital.ci"],
+    const BREVO_API_KEY = Deno.env.get("BREVO_API_KEY");
+    const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
+    if (!BREVO_API_KEY || !LOVABLE_API_KEY) throw new Error("Brevo is not configured");
+
+    const emailResponse = await fetch("https://connector-gateway.lovable.dev/brevo/smtp/email", {
+      method: "POST",
+      headers: {
+        "Authorization": `Bearer ${LOVABLE_API_KEY}`,
+        "X-Connection-Api-Key": BREVO_API_KEY,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+      sender: { name: "AgriCapital Contact", email: "contact@agricapital.ci" },
+      to: [{ email: "contact@agricapital.ci" }, { email: "inocent.koffi@agricapital.ci" }, { email: "innocentkoffi1@gmail.com" }],
       subject: "Nouveau message – Formulaire site vitrine AgriCapital",
-      html: emailHtml,
-      reply_to: email,
+      htmlContent: emailHtml,
+      replyTo: { email },
+      }),
     });
 
-    console.log("Email sent successfully:", emailResponse);
+    const emailResult = await emailResponse.json();
+    if (!emailResponse.ok) throw new Error(emailResult?.message || "Erreur d'envoi Brevo");
+
+    console.log("Email sent successfully:", emailResult);
 
     // Create admin notification
     await createAdminNotification(name, email, subject);
@@ -130,7 +142,7 @@ const handler = async (req: Request): Promise<Response> => {
     return new Response(JSON.stringify({ 
       success: true,
       message: "Email envoyé avec succès",
-      data: emailResponse 
+      data: emailResult 
     }), {
       status: 200,
       headers: {

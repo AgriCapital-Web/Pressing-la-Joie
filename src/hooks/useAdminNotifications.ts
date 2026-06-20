@@ -27,7 +27,10 @@ export const useAdminNotifications = () => {
         .order("created_at", { ascending: false })
         .limit(50);
       
-      if (error) throw error;
+      if (error) {
+        console.warn("Notifications indisponibles:", error.message);
+        return [];
+      }
       return data as AdminNotification[];
     },
   });
@@ -70,7 +73,7 @@ export const useAdminNotifications = () => {
   // Écouter les nouvelles notifications en temps réel
   useEffect(() => {
     const channel = supabase
-      .channel("admin-notifications-realtime")
+      .channel(`admin-notifications-realtime-${Math.random().toString(36).slice(2)}`)
       .on(
         "postgres_changes",
         {

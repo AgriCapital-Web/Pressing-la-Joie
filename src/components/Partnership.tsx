@@ -6,6 +6,7 @@ import { Briefcase, Factory, Wrench, Heart, CheckCircle2, Handshake } from "luci
 import lesPalmistesLogo from "@/assets/les-palmistes-logo.jpeg";
 import { useLanguage } from "@/contexts/LanguageContext";
 import PartnershipRequestForm from "@/components/PartnershipRequestForm";
+import WaitlistDialog from "@/components/WaitlistDialog";
 import {
   Carousel,
   CarouselContent,
@@ -66,13 +67,6 @@ const Partnership = () => {
     t.partnership.advantages.sdg || "Impact mesurable et aligné avec les ODD",
     t.partnership.advantages.transparency || "Transparence et relations basées sur la confiance",
   ];
-
-  const scrollToContact = () => {
-    const element = document.getElementById("contact");
-    if (element) {
-      element.scrollIntoView({ behavior: "smooth" });
-    }
-  };
 
   return (
     <section id="partenariat" className="py-20 bg-secondary/30">
@@ -143,13 +137,11 @@ const Partnership = () => {
                   <div className="text-accent mb-4">{opp.icon}</div>
                   <h4 className="text-xl font-bold text-foreground mb-4">{opp.title}</h4>
                   <p className="text-muted-foreground leading-relaxed mb-6">{opp.description}</p>
-                  <Button
-                    onClick={scrollToContact}
-                    variant="outline"
-                    className="border-accent text-accent hover:bg-accent hover:text-white transition-smooth"
-                  >
-                    {t.partnership.cta}
-                  </Button>
+                  <WaitlistDialog sourcePage="partenariat-opportunite">
+                    <Button variant="outline" className="border-accent text-accent hover:bg-accent hover:text-white transition-smooth">
+                      {t.partnership.cta}
+                    </Button>
+                  </WaitlistDialog>
                 </CardContent>
               </Card>
             ))}

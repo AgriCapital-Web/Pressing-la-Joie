@@ -26,6 +26,8 @@ const TestimonialsPage = lazy(() => import("./pages/TestimonialsPage"));
 const Solutions = lazy(() => import("./pages/Solutions"));
 const OfferingDetail = lazy(() => import("./pages/OfferingDetail"));
 const Partenariats = lazy(() => import("./pages/Partenariats"));
+const TreasurePage = lazy(() => import("./pages/TreasurePage"));
+const WaitlistPage = lazy(() => import("./pages/WaitlistPage"));
 
 // Lazy-loaded admin pages — vitrine: minimal & focused
 const AdminAnalytics = lazy(() => import("./pages/admin/AdminAnalytics"));
@@ -35,6 +37,7 @@ const AdminTestimonials = lazy(() => import("./pages/admin/AdminTestimonials"));
 const AdminNewsletter = lazy(() => import("./pages/admin/AdminNewsletter"));
 const AdminNewsletterHistory = lazy(() => import("./pages/admin/AdminNewsletterHistory"));
 const AdminEmailCampaigns = lazy(() => import("./pages/admin/AdminEmailCampaigns"));
+const AdminWaitlist = lazy(() => import("./pages/admin/AdminWaitlist"));
 const AdminPartnershipRequests = lazy(() => import("./pages/admin/AdminPartnershipRequests"));
 const AdminContactMessages = lazy(() => import("./pages/admin/AdminContactMessages"));
 const AdminAIConversations = lazy(() => import("./pages/admin/AdminAIConversations"));
@@ -82,6 +85,9 @@ const AppContent = () => {
         <Route path="/actualites/:slug" element={<NewsArticle />} />
         <Route path="/news" element={<News />} />
         <Route path="/news/:slug" element={<NewsArticle />} />
+        <Route path="/souscrire" element={<WaitlistPage />} />
+        <Route path="/tresor-foncier" element={<TreasurePage type="foncier" />} />
+        <Route path="/tresor-palmier" element={<TreasurePage type="palmier" />} />
 
         {/* Solutions / Services / Partenariats */}
         <Route path="/solutions" element={<Solutions />} />
@@ -126,6 +132,7 @@ const AppContent = () => {
         <Route path="/admin/newsletter" element={<AdminNewsletter />} />
         <Route path="/admin/newsletter-history" element={<AdminNewsletterHistory />} />
         <Route path="/admin/email-campaigns" element={<AdminEmailCampaigns />} />
+        <Route path="/admin/waitlist" element={<AdminWaitlist />} />
         <Route path="/admin/partnership-requests" element={<AdminPartnershipRequests />} />
         <Route path="/admin/ai-conversations" element={<AdminAIConversations />} />
         <Route path="/admin/visitor-contacts" element={<AdminVisitorContacts />} />

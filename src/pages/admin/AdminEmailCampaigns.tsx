@@ -1,101 +1,164 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import AdminLayout from "@/components/admin/AdminLayout";
+import WYSIWYGEditor from "@/components/admin/WYSIWYGEditor";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
+import { Checkbox } from "@/components/ui/checkbox";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Loader2, Mail, Plus, Save, Eye, Trash2, Send, AlertCircle } from "lucide-react";
+import { Loader2, Mail, Plus, Save, Eye, Trash2, Send, Sparkles, Image as ImageIcon, Video, FileText } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
+
+type Audience = "all" | "testimonials" | "subscribers" | "investors" | "prospects" | "partners" | "clients" | "members" | "custom";
+type Status = "draft" | "ready" | "sent" | "archived";
 
 type Campaign = {
   id: string;
   name: string;
   subject: string;
+  preheader: string;
   html_content: string;
-  audience_type: "all" | "investors" | "partners" | "clients" | "subscribers";
-  status: "draft" | "ready" | "sent" | "archived";
+  plain_text: string;
+  source_prompt: string;
+  audience_type: Audience;
+  status: Status;
   provider: string;
   brevo_campaign_id: string | null;
+  include_image: boolean;
+  include_video: boolean;
+  image_url: string | null;
+  video_url: string | null;
   created_at: string;
   updated_at: string;
 };
 
-const emptyForm: Omit<Campaign, "id" | "created_at" | "updated_at" | "brevo_campaign_id" | "provider"> = {
+const emptyForm = {
   name: "",
   subject: "",
+  preheader: "",
   html_content: "",
-  audience_type: "all",
-  status: "draft",
+  plain_text: "",
+  source_prompt: "",
+  audience_type: "all" as Audience,
+  status: "draft" as Status,
+  include_image: false,
+  include_video: false,
+  image_url: "",
+  video_url: "",
 };
+
+const audienceOptions: { value: Audience; label: string; help: string }[] = [
+  { value: "all", label: "Tous les contacts", help: "Ton global, clair et fédérateur" },
+  { value: "testimonials", label: "Témoignants", help: "Ton chaleureux et relationnel" },
+  { value: "subscribers", label: "Abonnés newsletter", help: "Ton informatif et fidélisation" },
+  { value: "investors", label: "Investisseurs", help: "Ton financier et stratégique" },
+  { value: "prospects", label: "Prospects", help: "Ton commercial et conversion" },
+  { value: "partners", label: "Partenaires", help: "Ton institutionnel et collaboratif" },
+  { value: "clients", label: "Clients", help: "Ton rassurant et orienté service" },
+  { value: "members", label: "Membres", help: "Ton communautaire" },
+  { value: "custom", label: "Personnalisé", help: "Ton adapté au prompt" },
+];
+
+const stripHtml = (html: string) => html.replace(/<style[\s\S]*?<\/style>/gi, " ").replace(/<[^>]+>/g, " ").replace(/\s+/g, " ").trim();
 
 const AdminEmailCampaigns = () => {
   const [campaigns, setCampaigns] = useState<Campaign[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
-  const [brevoConfigured, setBrevoConfigured] = useState<boolean>(false);
+  const [isGenerating, setIsGenerating] = useState(false);
+  const [isSending, setIsSending] = useState(false);
   const [form, setForm] = useState(emptyForm);
   const [editingId, setEditingId] = useState<string | null>(null);
-  const [showPreview, setShowPreview] = useState(false);
+  const [showPreview, setShowPreview] = useState(true);
+  const imageInputRef = useRef<HTMLInputElement>(null);
+  const videoInputRef = useRef<HTMLInputElement>(null);
 
   const fetchCampaigns = async () => {
     setIsLoading(true);
-    const { data, error } = await (supabase as any)
-      .from("email_campaigns")
-      .select("*")
-      .order("updated_at", { ascending: false });
-    if (error) {
-      toast.error("Erreur de chargement des campagnes");
-    } else {
-      setCampaigns((data || []) as Campaign[]);
-    }
+    const { data, error } = await supabase.from("email_campaigns").select("*").order("updated_at", { ascending: false });
+    if (error) toast.error("Erreur de chargement des campagnes");
+    else setCampaigns((data || []) as Campaign[]);
     setIsLoading(false);
   };
 
-  useEffect(() => {
-    fetchCampaigns();
-    // L'API Brevo sera connectée plus tard via la fonction edge — on signale juste l'état
-    setBrevoConfigured(false);
-  }, []);
+  useEffect(() => { fetchCampaigns(); }, []);
 
   const resetForm = () => {
     setForm(emptyForm);
     setEditingId(null);
-    setShowPreview(false);
+    setShowPreview(true);
+  };
+
+  const handleGenerate = async () => {
+    if (!form.source_prompt.trim()) {
+      toast.error("Écrivez une idée, des mots-clés ou un brouillon");
+      return;
+    }
+    setIsGenerating(true);
+    try {
+      const { data, error } = await supabase.functions.invoke("generate-newsletter", {
+        body: {
+          prompt: form.source_prompt,
+          targetAudience: form.audience_type,
+          includeImage: form.include_image,
+          includeVideo: form.include_video,
+        },
+      });
+      if (error) throw error;
+      setForm((f) => ({
+        ...f,
+        name: data.name || f.source_prompt.slice(0, 60),
+        subject: data.subject || "",
+        preheader: data.preheader || "",
+        html_content: data.html || "",
+        plain_text: data.plainText || stripHtml(data.html || ""),
+        status: "ready",
+      }));
+      setShowPreview(true);
+      toast.success("Campagne IA générée");
+    } catch (err: any) {
+      toast.error(err?.message || "Erreur de génération IA");
+    } finally {
+      setIsGenerating(false);
+    }
   };
 
   const handleSave = async () => {
-    if (!form.name.trim() || !form.subject.trim()) {
-      toast.error("Nom et objet requis");
+    if (!form.name.trim() || !form.subject.trim() || !form.html_content.trim()) {
+      toast.error("Nom, objet et contenu requis");
       return;
     }
     setIsSaving(true);
     try {
       const { data: { user } } = await supabase.auth.getUser();
-      const payload: any = {
+      const payload = {
         name: form.name.trim(),
         subject: form.subject.trim(),
+        preheader: form.preheader.trim(),
         html_content: form.html_content,
+        plain_text: form.plain_text || stripHtml(form.html_content),
+        source_prompt: form.source_prompt,
         audience_type: form.audience_type,
         status: form.status,
         provider: "brevo",
+        include_image: form.include_image,
+        include_video: form.include_video,
+        image_url: form.image_url || null,
+        video_url: form.video_url || null,
         updated_by: user?.id ?? null,
       };
       if (editingId) {
-        const { error } = await (supabase as any)
-          .from("email_campaigns")
-          .update(payload)
-          .eq("id", editingId);
+        const { error } = await supabase.from("email_campaigns").update(payload).eq("id", editingId);
         if (error) throw error;
         toast.success("Campagne mise à jour");
       } else {
-        payload.created_by = user?.id ?? null;
-        const { error } = await (supabase as any).from("email_campaigns").insert(payload);
+        const { error } = await supabase.from("email_campaigns").insert({ ...payload, created_by: user?.id ?? null });
         if (error) throw error;
-        toast.success("Brouillon enregistré");
+        toast.success("Campagne enregistrée");
       }
       resetForm();
       fetchCampaigns();
@@ -106,179 +169,126 @@ const AdminEmailCampaigns = () => {
     }
   };
 
-  const handleEdit = (c: Campaign) => {
-    setEditingId(c.id);
+  const handleSend = async () => {
+    if (!form.subject || !form.html_content) return toast.error("Campagne vide");
+    if (!confirm(`Envoyer cette campagne via Brevo au segment : ${audienceOptions.find((a) => a.value === form.audience_type)?.label} ?`)) return;
+    setIsSending(true);
+    try {
+      const { data, error } = await supabase.functions.invoke("send-newsletter-batch", {
+        body: { subject: form.subject, html: form.html_content, audienceType: form.audience_type },
+      });
+      if (error) throw error;
+      toast.success(`Envoi Brevo terminé : ${data?.totalSent || 0} envoyés, ${data?.totalFailed || 0} échecs`);
+      setForm((f) => ({ ...f, status: "sent" }));
+    } catch (err: any) {
+      toast.error(err?.message || "Erreur d'envoi Brevo");
+    } finally {
+      setIsSending(false);
+    }
+  };
+
+  const handleEdit = (campaign: Campaign) => {
+    setEditingId(campaign.id);
     setForm({
-      name: c.name,
-      subject: c.subject,
-      html_content: c.html_content || "",
-      audience_type: c.audience_type,
-      status: c.status,
+      name: campaign.name,
+      subject: campaign.subject,
+      preheader: campaign.preheader || "",
+      html_content: campaign.html_content || "",
+      plain_text: campaign.plain_text || stripHtml(campaign.html_content || ""),
+      source_prompt: campaign.source_prompt || "",
+      audience_type: campaign.audience_type,
+      status: campaign.status,
+      include_image: campaign.include_image,
+      include_video: campaign.include_video,
+      image_url: campaign.image_url || "",
+      video_url: campaign.video_url || "",
     });
     window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
   const handleDelete = async (id: string) => {
     if (!confirm("Supprimer cette campagne ?")) return;
-    const { error } = await (supabase as any).from("email_campaigns").delete().eq("id", id);
+    const { error } = await supabase.from("email_campaigns").delete().eq("id", id);
     if (error) toast.error("Suppression impossible");
-    else {
-      toast.success("Campagne supprimée");
-      fetchCampaigns();
-    }
+    else { toast.success("Campagne supprimée"); fetchCampaigns(); }
+  };
+
+  const handleMedia = (kind: "image" | "video", file?: File) => {
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = () => setForm((f) => ({ ...f, [kind === "image" ? "image_url" : "video_url"]: String(reader.result) }));
+    reader.readAsDataURL(file);
   };
 
   return (
-    <AdminLayout title="Campagnes Email (Brevo)">
+    <AdminLayout title="Générateur Premium Emailing IA">
       <div className="space-y-6">
-        {/* Brevo banner */}
-        <Card className="border-amber-300/40 bg-amber-50/40 dark:bg-amber-900/10">
-          <CardContent className="p-4 flex items-start gap-3">
-            <AlertCircle className="w-5 h-5 text-amber-600 mt-0.5" />
-            <div className="text-sm">
-              <p className="font-semibold text-foreground">
-                Environnement Brevo prêt — clé API à connecter plus tard
-              </p>
-              <p className="text-muted-foreground">
-                Vous pouvez dès maintenant composer, enregistrer et organiser vos campagnes. La
-                connexion à Brevo (envoi réel) sera activée lorsque la clé API Brevo
-                (<code className="text-xs">BREVO_API_KEY</code>) sera renseignée côté backend.
-              </p>
-              {brevoConfigured && <Badge className="mt-2 bg-emerald-600">Brevo connecté</Badge>}
+        <Card className="border-primary/20 bg-primary/5">
+          <CardContent className="p-5 flex flex-col gap-2 md:flex-row md:items-center md:justify-between">
+            <div>
+              <p className="font-bold text-foreground">Brevo connecté au backend</p>
+              <p className="text-sm text-muted-foreground">Génération IA, édition visuelle, HTML arrière-plan, texte brut et envoi segmenté sont centralisés ici.</p>
             </div>
+            <Badge className="w-fit bg-primary text-primary-foreground">Module Premium</Badge>
           </CardContent>
         </Card>
 
-        {/* Composer */}
         <Card>
-          <CardHeader>
-            <CardTitle className="text-lg flex items-center gap-2">
-              <Mail className="w-5 h-5" />
-              {editingId ? "Modifier la campagne" : "Nouvelle campagne"}
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <div className="grid md:grid-cols-2 gap-4">
-              <div>
-                <Label>Nom interne</Label>
-                <Input
-                  value={form.name}
-                  onChange={(e) => setForm((f) => ({ ...f, name: e.target.value }))}
-                  placeholder="Ex: Lancement pépinière — juin"
-                />
+          <CardHeader><CardTitle className="flex items-center gap-2"><Sparkles className="w-5 h-5" /> Assistant expert de campagne</CardTitle></CardHeader>
+          <CardContent className="space-y-5">
+            <div className="grid lg:grid-cols-[1.4fr_.8fr] gap-4">
+              <div className="space-y-2">
+                <Label>Zone de saisie libre</Label>
+                <Textarea value={form.source_prompt} onChange={(e) => setForm((f) => ({ ...f, source_prompt: e.target.value }))} className="min-h-[170px]" placeholder="Ex: Je veux présenter AgriCapital à des investisseurs agricoles et leur proposer un rendez-vous." />
               </div>
-              <div>
-                <Label>Audience</Label>
-                <Select
-                  value={form.audience_type}
-                  onValueChange={(v) => setForm((f) => ({ ...f, audience_type: v as Campaign["audience_type"] }))}
-                >
-                  <SelectTrigger><SelectValue /></SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="all">Tous les contacts</SelectItem>
-                    <SelectItem value="investors">Investisseurs</SelectItem>
-                    <SelectItem value="partners">Partenaires</SelectItem>
-                    <SelectItem value="clients">Clients & planteurs</SelectItem>
-                    <SelectItem value="subscribers">Abonnés newsletter</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-            </div>
-            <div>
-              <Label>Objet de l'email</Label>
-              <Input
-                value={form.subject}
-                onChange={(e) => setForm((f) => ({ ...f, subject: e.target.value }))}
-                placeholder="Ex: AgriCapital — Lancement officiel de notre nouvelle pépinière"
-              />
-            </div>
-            <div>
-              <Label>Contenu HTML</Label>
-              <Textarea
-                value={form.html_content}
-                onChange={(e) => setForm((f) => ({ ...f, html_content: e.target.value }))}
-                placeholder="<h1>Bonjour</h1><p>Votre message...</p>"
-                className="min-h-[220px] font-mono text-xs"
-              />
-            </div>
-            <div className="flex flex-wrap items-center gap-2">
-              <Select value={form.status} onValueChange={(v) => setForm((f) => ({ ...f, status: v as Campaign["status"] }))}>
-                <SelectTrigger className="w-40"><SelectValue /></SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="draft">Brouillon</SelectItem>
-                  <SelectItem value="ready">Prête à envoyer</SelectItem>
-                  <SelectItem value="archived">Archivée</SelectItem>
-                </SelectContent>
-              </Select>
-              <Button onClick={handleSave} disabled={isSaving} className="gap-2">
-                {isSaving ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
-                {editingId ? "Mettre à jour" : "Enregistrer"}
-              </Button>
-              <Button variant="outline" onClick={() => setShowPreview((v) => !v)} className="gap-2">
-                <Eye className="w-4 h-4" />
-                {showPreview ? "Masquer" : "Aperçu"}
-              </Button>
-              {editingId && (
-                <Button variant="ghost" onClick={resetForm} className="gap-2">
-                  <Plus className="w-4 h-4" /> Nouvelle
+              <div className="space-y-4">
+                <div className="space-y-2">
+                  <Label>Destinataires</Label>
+                  <Select value={form.audience_type} onValueChange={(v) => setForm((f) => ({ ...f, audience_type: v as Audience }))}>
+                    <SelectTrigger><SelectValue /></SelectTrigger>
+                    <SelectContent>{audienceOptions.map((a) => <SelectItem key={a.value} value={a.value}>{a.label}</SelectItem>)}</SelectContent>
+                  </Select>
+                  <p className="text-xs text-muted-foreground">{audienceOptions.find((a) => a.value === form.audience_type)?.help}</p>
+                </div>
+                <div className="grid gap-3 rounded-md border p-3">
+                  <label className="flex items-center gap-3 text-sm"><Checkbox checked={form.include_image} onCheckedChange={(v) => setForm((f) => ({ ...f, include_image: Boolean(v) }))} /> Générer avec image</label>
+                  <label className="flex items-center gap-3 text-sm"><Checkbox checked={form.include_video} onCheckedChange={(v) => setForm((f) => ({ ...f, include_video: Boolean(v) }))} /> Générer avec vidéo</label>
+                </div>
+                <Button onClick={handleGenerate} disabled={isGenerating} className="w-full gap-2">
+                  {isGenerating ? <Loader2 className="w-4 h-4 animate-spin" /> : <Sparkles className="w-4 h-4" />} Générer
                 </Button>
-              )}
-              <Button
-                variant="secondary"
-                className="gap-2 ml-auto"
-                disabled={!brevoConfigured}
-                title={brevoConfigured ? "Envoyer via Brevo" : "Brevo non connecté"}
-              >
-                <Send className="w-4 h-4" /> Envoyer (Brevo)
-              </Button>
+              </div>
             </div>
 
-            {showPreview && (
-              <div className="border rounded-lg p-4 bg-card">
-                <p className="text-xs text-muted-foreground mb-2">Aperçu HTML</p>
-                <div className="prose prose-sm max-w-none dark:prose-invert"
-                  dangerouslySetInnerHTML={{ __html: form.html_content || "<p>Aucun contenu</p>" }}
-                />
-              </div>
-            )}
+            <div className="grid md:grid-cols-2 gap-4">
+              <div className="space-y-2"><Label>Nom interne</Label><Input value={form.name} onChange={(e) => setForm((f) => ({ ...f, name: e.target.value }))} /></div>
+              <div className="space-y-2"><Label>Objet optimisé</Label><Input value={form.subject} onChange={(e) => setForm((f) => ({ ...f, subject: e.target.value }))} /></div>
+            </div>
+            <div className="space-y-2"><Label>Pré-header</Label><Input value={form.preheader} onChange={(e) => setForm((f) => ({ ...f, preheader: e.target.value }))} /></div>
+
+            <div className="space-y-2">
+              <Label>Éditeur visuel professionnel</Label>
+              <WYSIWYGEditor value={form.html_content} onChange={(value) => setForm((f) => ({ ...f, html_content: value, plain_text: stripHtml(value) }))} rows={16} />
+            </div>
+
+            <div className="grid md:grid-cols-2 gap-3">
+              {form.include_image && <div className="rounded-md border p-3 space-y-2"><div className="flex items-center justify-between"><Label className="flex items-center gap-2"><ImageIcon className="w-4 h-4" /> Image</Label><Button size="sm" variant="outline" onClick={() => imageInputRef.current?.click()}>Remplacer l'image</Button></div>{form.image_url && <img src={form.image_url} alt="Visuel email" className="max-h-44 rounded-md object-cover" />}<input ref={imageInputRef} type="file" accept="image/*" className="hidden" onChange={(e) => handleMedia("image", e.target.files?.[0])} /></div>}
+              {form.include_video && <div className="rounded-md border p-3 space-y-2"><div className="flex items-center justify-between"><Label className="flex items-center gap-2"><Video className="w-4 h-4" /> Vidéo</Label><Button size="sm" variant="outline" onClick={() => videoInputRef.current?.click()}>Remplacer la vidéo</Button></div>{form.video_url && <p className="text-sm text-muted-foreground truncate">Vidéo importée</p>}<input ref={videoInputRef} type="file" accept="video/*" className="hidden" onChange={(e) => handleMedia("video", e.target.files?.[0])} /></div>}
+            </div>
+
+            <div className="flex flex-wrap items-center gap-2">
+              <Select value={form.status} onValueChange={(v) => setForm((f) => ({ ...f, status: v as Status }))}><SelectTrigger className="w-44"><SelectValue /></SelectTrigger><SelectContent><SelectItem value="draft">Brouillon</SelectItem><SelectItem value="ready">Prête</SelectItem><SelectItem value="sent">Envoyée</SelectItem><SelectItem value="archived">Archivée</SelectItem></SelectContent></Select>
+              <Button onClick={handleSave} disabled={isSaving} className="gap-2">{isSaving ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />} {editingId ? "Mettre à jour" : "Enregistrer"}</Button>
+              <Button variant="outline" onClick={() => setShowPreview((v) => !v)} className="gap-2"><Eye className="w-4 h-4" /> Aperçu</Button>
+              <Button variant="secondary" onClick={handleSend} disabled={isSending || !form.html_content} className="gap-2 ml-auto">{isSending ? <Loader2 className="w-4 h-4 animate-spin" /> : <Send className="w-4 h-4" />} Envoyer Brevo</Button>
+              {editingId && <Button variant="ghost" onClick={resetForm} className="gap-2"><Plus className="w-4 h-4" /> Nouvelle</Button>}
+            </div>
+
+            {showPreview && <div className="grid lg:grid-cols-[1fr_.55fr] gap-4"><div className="border rounded-md bg-background p-4"><p className="text-xs text-muted-foreground mb-3">Aperçu visuel complet</p><div className="prose prose-sm dark:prose-invert max-w-none" dangerouslySetInnerHTML={{ __html: form.html_content || "<p>Aucun contenu généré</p>" }} /></div><div className="border rounded-md bg-muted/20 p-4"><p className="text-xs font-semibold text-muted-foreground mb-2 flex items-center gap-2"><FileText className="w-4 h-4" /> Version texte brut</p><pre className="whitespace-pre-wrap text-xs text-muted-foreground font-sans">{form.plain_text || stripHtml(form.html_content) || "Texte brut généré automatiquement"}</pre></div></div>}
           </CardContent>
         </Card>
 
-        {/* List */}
-        <Card>
-          <CardHeader>
-            <CardTitle className="text-lg">Campagnes enregistrées</CardTitle>
-          </CardHeader>
-          <CardContent>
-            {isLoading ? (
-              <div className="flex justify-center py-8"><Loader2 className="w-6 h-6 animate-spin" /></div>
-            ) : campaigns.length === 0 ? (
-              <p className="text-center text-muted-foreground py-6">Aucune campagne enregistrée</p>
-            ) : (
-              <ul className="divide-y divide-border">
-                {campaigns.map((c) => (
-                  <li key={c.id} className="py-3 flex flex-wrap items-center gap-3">
-                    <div className="flex-1 min-w-[200px]">
-                      <p className="font-medium text-foreground truncate">{c.name}</p>
-                      <p className="text-xs text-muted-foreground truncate">{c.subject}</p>
-                    </div>
-                    <Badge variant="outline" className="text-xs">{c.audience_type}</Badge>
-                    <Badge className={
-                      c.status === "sent" ? "bg-emerald-600" :
-                      c.status === "ready" ? "bg-amber-600" :
-                      c.status === "archived" ? "bg-muted text-foreground" :
-                      "bg-secondary text-foreground"
-                    }>{c.status}</Badge>
-                    <Button size="sm" variant="outline" onClick={() => handleEdit(c)}>Modifier</Button>
-                    <Button size="sm" variant="ghost" className="text-destructive" onClick={() => handleDelete(c.id)}>
-                      <Trash2 className="w-4 h-4" />
-                    </Button>
-                  </li>
-                ))}
-              </ul>
-            )}
-          </CardContent>
-        </Card>
+        <Card><CardHeader><CardTitle className="text-lg flex items-center gap-2"><Mail className="w-5 h-5" /> Campagnes enregistrées</CardTitle></CardHeader><CardContent>{isLoading ? <div className="flex justify-center py-8"><Loader2 className="w-6 h-6 animate-spin" /></div> : campaigns.length === 0 ? <p className="text-center text-muted-foreground py-6">Aucune campagne enregistrée</p> : <ul className="divide-y divide-border">{campaigns.map((c) => <li key={c.id} className="py-3 flex flex-wrap items-center gap-3"><div className="flex-1 min-w-[220px]"><p className="font-medium text-foreground truncate">{c.name}</p><p className="text-xs text-muted-foreground truncate">{c.subject}</p></div><Badge variant="outline" className="text-xs">{audienceOptions.find((a) => a.value === c.audience_type)?.label || c.audience_type}</Badge><Badge>{c.status}</Badge><Button size="sm" variant="outline" onClick={() => handleEdit(c)}>Modifier</Button><Button size="sm" variant="ghost" className="text-destructive" onClick={() => handleDelete(c.id)}><Trash2 className="w-4 h-4" /></Button></li>)}</ul>}</CardContent></Card>
       </div>
     </AdminLayout>
   );

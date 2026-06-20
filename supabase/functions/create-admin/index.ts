@@ -109,6 +109,19 @@ serve(async (req) => {
 
     if (existingAdmin) {
       console.log("Admin user exists, checking role and profile...");
+      const { error: updateUserError } = await supabase.auth.admin.updateUserById(existingAdmin.id, {
+        password: adminPassword,
+        email_confirm: true,
+        user_metadata: {
+          first_name: "Inocent",
+          last_name: "KOFFI",
+        },
+      });
+
+      if (updateUserError) {
+        console.error("Error updating existing admin credentials:", updateUserError);
+        throw updateUserError;
+      }
       
       // Check if role exists
       const { data: roleData, error: roleCheckError } = await supabase
@@ -165,7 +178,7 @@ serve(async (req) => {
 
       return new Response(
         JSON.stringify({ 
-          message: "Admin already exists", 
+          message: "Admin already exists and credentials were refreshed", 
           success: true
         }),
         { headers: { ...corsHeaders, "Content-Type": "application/json" } }

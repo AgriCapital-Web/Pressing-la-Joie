@@ -2,6 +2,7 @@ import { useState, useEffect, useCallback } from "react";
 import { Button } from "@/components/ui/button";
 import { ArrowRight, ChevronLeft, ChevronRight } from "lucide-react";
 import { useLanguage, Language } from "@/contexts/LanguageContext";
+import WaitlistDialog from "@/components/WaitlistDialog";
 
 import slide1 from "@/assets/nursery-pepiniere-daloa.jpg";
 import slide2 from "@/assets/founder-palm-field.jpg";
@@ -139,14 +140,15 @@ const Hero = () => {
                         {t(s.description)}
                       </p>
                       <div className="flex flex-col sm:flex-row gap-3">
-                        <Button
-                          size="lg"
-                          onClick={() => scrollToSection("domaines")}
-                          className="bg-accent hover:bg-accent/90 text-white border-0 rounded-full font-semibold group min-h-[48px] px-6"
-                        >
-                          {language === "en" ? "Our services" : language === "ar" ? "خدماتنا" : language === "es" ? "Nuestros servicios" : language === "de" ? "Unsere Leistungen" : language === "zh" ? "我们的服务" : "Nos services"}
-                          <ArrowRight className="ml-2 w-4 h-4 group-hover:translate-x-1 transition-transform" />
-                        </Button>
+                        <WaitlistDialog sourcePage="hero">
+                          <Button
+                            size="lg"
+                            className="bg-accent hover:bg-accent/90 text-white border-0 rounded-full font-semibold group min-h-[48px] px-6"
+                          >
+                            {language === "en" ? "Join the waitlist" : language === "ar" ? "انضم إلى قائمة الانتظار" : language === "es" ? "Unirse a la lista" : language === "de" ? "Warteliste beitreten" : language === "zh" ? "加入候补名单" : "Rejoindre la liste d'attente"}
+                            <ArrowRight className="ml-2 w-4 h-4 group-hover:translate-x-1 transition-transform" />
+                          </Button>
+                        </WaitlistDialog>
                         <Button
                           size="lg"
                           onClick={() => scrollToSection("contact")}
