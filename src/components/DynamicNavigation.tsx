@@ -206,14 +206,14 @@ const DynamicNavigation = () => {
             </a>
             {/* Visitor counter chip */}
             <div
-              className="hidden md:flex items-center gap-1.5 h-10 lg:h-11 px-3 rounded-full bg-primary/10 text-primary text-xs font-semibold"
+              className="flex items-center gap-1.5 h-10 lg:h-11 px-2 sm:px-3 rounded-full bg-primary/10 text-primary text-[11px] sm:text-xs font-semibold"
               title={`${totalVisitors.toLocaleString()} visites totales • ${weeklyVisitors.toLocaleString()} cette semaine`}
               aria-label="Compteur de visiteurs"
             >
               <Eye size={14} />
               <span className="tabular-nums">{totalVisitors.toLocaleString()}</span>
-              <span className="text-primary/50">·</span>
-              <span className="tabular-nums text-accent">{weeklyVisitors}</span>
+              <span className="hidden sm:inline text-primary/50">·</span>
+              <span className="hidden sm:inline tabular-nums text-accent">{weeklyVisitors}</span>
             </div>
             <a
               href={WHATSAPP_URL}
