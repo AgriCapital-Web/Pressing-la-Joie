@@ -17,18 +17,25 @@ export type Database = {
       email_campaigns: {
         Row: {
           audience_type: string
+          batches_total: number
           brevo_campaign_id: string | null
+          click_count: number
           created_at: string
           created_by: string | null
+          error_summary: string | null
           html_content: string
           id: string
           image_url: string | null
           include_image: boolean
           include_video: boolean
+          last_sent_at: string | null
+          media_preview: Json
           name: string
+          open_count: number
           plain_text: string
           preheader: string
           provider: string
+          scheduled_at: string | null
           source_prompt: string
           status: string
           subject: string
@@ -38,18 +45,25 @@ export type Database = {
         }
         Insert: {
           audience_type?: string
+          batches_total?: number
           brevo_campaign_id?: string | null
+          click_count?: number
           created_at?: string
           created_by?: string | null
+          error_summary?: string | null
           html_content?: string
           id?: string
           image_url?: string | null
           include_image?: boolean
           include_video?: boolean
+          last_sent_at?: string | null
+          media_preview?: Json
           name: string
+          open_count?: number
           plain_text?: string
           preheader?: string
           provider?: string
+          scheduled_at?: string | null
           source_prompt?: string
           status?: string
           subject: string
@@ -59,24 +73,147 @@ export type Database = {
         }
         Update: {
           audience_type?: string
+          batches_total?: number
           brevo_campaign_id?: string | null
+          click_count?: number
           created_at?: string
           created_by?: string | null
+          error_summary?: string | null
           html_content?: string
           id?: string
           image_url?: string | null
           include_image?: boolean
           include_video?: boolean
+          last_sent_at?: string | null
+          media_preview?: Json
           name?: string
+          open_count?: number
           plain_text?: string
           preheader?: string
           provider?: string
+          scheduled_at?: string | null
           source_prompt?: string
           status?: string
           subject?: string
           updated_at?: string
           updated_by?: string | null
           video_url?: string | null
+        }
+        Relationships: []
+      }
+      newsletter_sends: {
+        Row: {
+          audience_type: string | null
+          batches_completed: number
+          batches_total: number
+          campaign_id: string | null
+          click_count: number
+          completed_at: string | null
+          created_at: string
+          error_summary: string | null
+          failed_recipients: Json | null
+          html_content: string | null
+          html_preview: string | null
+          id: string
+          media_preview: Json
+          open_count: number
+          preheader: string
+          provider: string
+          scheduled_at: string | null
+          sent_by: string | null
+          started_at: string | null
+          status: string
+          subject: string
+          total_failed: number
+          total_recipients: number
+          total_sent: number
+        }
+        Insert: {
+          audience_type?: string | null
+          batches_completed?: number
+          batches_total?: number
+          campaign_id?: string | null
+          click_count?: number
+          completed_at?: string | null
+          created_at?: string
+          error_summary?: string | null
+          failed_recipients?: Json | null
+          html_content?: string | null
+          html_preview?: string | null
+          id?: string
+          media_preview?: Json
+          open_count?: number
+          preheader?: string
+          provider?: string
+          scheduled_at?: string | null
+          sent_by?: string | null
+          started_at?: string | null
+          status?: string
+          subject: string
+          total_failed?: number
+          total_recipients?: number
+          total_sent?: number
+        }
+        Update: {
+          audience_type?: string | null
+          batches_completed?: number
+          batches_total?: number
+          campaign_id?: string | null
+          click_count?: number
+          completed_at?: string | null
+          created_at?: string
+          error_summary?: string | null
+          failed_recipients?: Json | null
+          html_content?: string | null
+          html_preview?: string | null
+          id?: string
+          media_preview?: Json
+          open_count?: number
+          preheader?: string
+          provider?: string
+          scheduled_at?: string | null
+          sent_by?: string | null
+          started_at?: string | null
+          status?: string
+          subject?: string
+          total_failed?: number
+          total_recipients?: number
+          total_sent?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "newsletter_sends_campaign_id_fkey"
+            columns: ["campaign_id"]
+            isOneToOne: false
+            referencedRelation: "email_campaigns"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      newsletter_subscribers: {
+        Row: {
+          email: string
+          first_name: string
+          id: string
+          is_active: boolean
+          last_name: string
+          subscribed_at: string
+        }
+        Insert: {
+          email: string
+          first_name?: string
+          id?: string
+          is_active?: boolean
+          last_name?: string
+          subscribed_at?: string
+        }
+        Update: {
+          email?: string
+          first_name?: string
+          id?: string
+          is_active?: boolean
+          last_name?: string
+          subscribed_at?: string
         }
         Relationships: []
       }
