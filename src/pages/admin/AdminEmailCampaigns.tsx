@@ -9,12 +9,12 @@ import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Loader2, Mail, Plus, Save, Eye, Trash2, Send, Sparkles, Image as ImageIcon, Video, FileText } from "lucide-react";
+import { AlertTriangle, CalendarClock, Loader2, Mail, Plus, Save, Eye, Trash2, Send, Sparkles, Image as ImageIcon, Video, FileText, MousePointer } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 
 type Audience = "all" | "testimonials" | "subscribers" | "investors" | "prospects" | "partners" | "clients" | "members" | "custom";
-type Status = "draft" | "ready" | "sent" | "archived";
+type Status = "draft" | "ready" | "scheduled" | "sending" | "sent" | "failed" | "archived";
 
 type Campaign = {
   id: string;
@@ -32,9 +32,17 @@ type Campaign = {
   include_video: boolean;
   image_url: string | null;
   video_url: string | null;
+  scheduled_at: string | null;
+  last_sent_at: string | null;
+  batches_total: number;
+  open_count: number;
+  click_count: number;
+  error_summary: string | null;
   created_at: string;
   updated_at: string;
 };
+
+type SendHistory = { id: string; campaign_id: string | null; subject: string; status: string; total_recipients: number; total_sent: number; total_failed: number; batches_total: number; batches_completed: number; open_count: number; click_count: number; error_summary: string | null; scheduled_at: string | null; created_at: string };
 
 const emptyForm = {
   name: "",
@@ -49,6 +57,7 @@ const emptyForm = {
   include_video: false,
   image_url: "",
   video_url: "",
+  scheduled_at: "",
 };
 
 const audienceOptions: { value: Audience; label: string; help: string }[] = [
@@ -72,6 +81,7 @@ const AdminEmailCampaigns = () => {
   const [isGenerating, setIsGenerating] = useState(false);
   const [isSending, setIsSending] = useState(false);
   const [form, setForm] = useState(emptyForm);
+  const [sendHistory, setSendHistory] = useState<SendHistory[]>([]);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [showPreview, setShowPreview] = useState(true);
   const imageInputRef = useRef<HTMLInputElement>(null);
@@ -82,6 +92,8 @@ const AdminEmailCampaigns = () => {
     const { data, error } = await supabase.from("email_campaigns").select("*").order("updated_at", { ascending: false });
     if (error) toast.error("Erreur de chargement des campagnes");
     else setCampaigns((data || []) as Campaign[]);
+    const { data: history } = await (supabase as any).from("newsletter_sends").select("id,campaign_id,subject,status,total_recipients,total_sent,total_failed,batches_total,batches_completed,open_count,click_count,error_summary,scheduled_at,created_at").order("created_at", { ascending: false }).limit(25);
+    setSendHistory((history || []) as SendHistory[]);
     setIsLoading(false);
   };
 
