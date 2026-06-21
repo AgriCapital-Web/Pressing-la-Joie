@@ -73,6 +73,16 @@ const audienceOptions: { value: Audience; label: string; help: string }[] = [
 ];
 
 const stripHtml = (html: string) => html.replace(/<style[\s\S]*?<\/style>/gi, " ").replace(/<[^>]+>/g, " ").replace(/\s+/g, " ").trim();
+const validateCampaign = (form: typeof emptyForm) => {
+  const errors: string[] = [];
+  if (!form.name.trim()) errors.push("Nom interne requis");
+  if (form.subject.trim().length < 6) errors.push("Objet trop court");
+  if (form.preheader.trim().length < 12) errors.push("Pré-header requis");
+  if (stripHtml(form.html_content).length < 80) errors.push("Corps du message trop court");
+  if (form.include_image && !form.image_url) errors.push("Image demandée mais absente");
+  if (form.include_video && !form.video_url) errors.push("Vidéo demandée mais absente");
+  return errors;
+};
 
 const AdminEmailCampaigns = () => {
   const [campaigns, setCampaigns] = useState<Campaign[]>([]);
@@ -140,8 +150,9 @@ const AdminEmailCampaigns = () => {
   };
 
   const handleSave = async () => {
-    if (!form.name.trim() || !form.subject.trim() || !form.html_content.trim()) {
-      toast.error("Nom, objet et contenu requis");
+    const validationErrors = validateCampaign(form);
+    if (validationErrors.length) {
+      toast.error(validationErrors[0]);
       return;
     }
     setIsSaving(true);
@@ -161,6 +172,9 @@ const AdminEmailCampaigns = () => {
         include_video: form.include_video,
         image_url: form.image_url || null,
         video_url: form.video_url || null,
+        scheduled_at: form.scheduled_at || null,
+        batches_total: Math.max(1, Math.ceil(estimateRecipients(form.audience_type) / 5)),
+        media_preview: buildMediaPreview(),
         updated_by: user?.id ?? null,
       };
       if (editingId) {
@@ -181,17 +195,27 @@ const AdminEmailCampaigns = () => {
     }
   };
 
-  const handleSend = async () => {
-    if (!form.subject || !form.html_content) return toast.error("Campagne vide");
-    if (!confirm(`Envoyer cette campagne via Brevo au segment : ${audienceOptions.find((a) => a.value === form.audience_type)?.label} ?`)) return;
+  const buildMediaPreview = () => [
+    ...(form.image_url ? [{ type: "image", url: form.image_url, alt: form.name || "Visuel AgriCapital" }] : []),
+    ...(form.video_url ? [{ type: "video", url: form.video_url, alt: form.name || "Vidéo AgriCapital" }] : []),
+  ];
+
+  const estimateRecipients = (_audience: Audience) => 25;
+
+  const handleSend = async (schedule = false) => {
+    const validationErrors = validateCampaign(form);
+    if (validationErrors.length) return toast.error(`Envoi bloqué : ${validationErrors[0]}`);
+    if (schedule && !form.scheduled_at) return toast.error("Choisissez une date et une heure");
+    if (!schedule && !confirm(`Envoyer cette campagne via Brevo au segment : ${audienceOptions.find((a) => a.value === form.audience_type)?.label} ?`)) return;
     setIsSending(true);
     try {
       const { data, error } = await supabase.functions.invoke("send-newsletter-batch", {
-        body: { subject: form.subject, html: form.html_content, audienceType: form.audience_type },
+        body: { campaignId: editingId, subject: form.subject, preheader: form.preheader, html: form.html_content, audienceType: form.audience_type, scheduledAt: schedule ? form.scheduled_at : null, mediaPreview: buildMediaPreview() },
       });
       if (error) throw error;
-      toast.success(`Envoi Brevo terminé : ${data?.totalSent || 0} envoyés, ${data?.totalFailed || 0} échecs`);
-      setForm((f) => ({ ...f, status: "sent" }));
+      toast.success(schedule ? `Campagne programmée : ${data?.totalRecipients || 0} destinataires, ${data?.batchesTotal || 1} batch(es)` : `Envoi Brevo terminé : ${data?.totalSent || 0} envoyés, ${data?.totalFailed || 0} échecs`);
+      setForm((f) => ({ ...f, status: schedule ? "scheduled" : "sent" }));
+      fetchCampaigns();
     } catch (err: any) {
       toast.error(err?.message || "Erreur d'envoi Brevo");
     } finally {
@@ -214,6 +238,7 @@ const AdminEmailCampaigns = () => {
       include_video: campaign.include_video,
       image_url: campaign.image_url || "",
       video_url: campaign.video_url || "",
+      scheduled_at: campaign.scheduled_at ? campaign.scheduled_at.slice(0, 16) : "",
     });
     window.scrollTo({ top: 0, behavior: "smooth" });
   };
