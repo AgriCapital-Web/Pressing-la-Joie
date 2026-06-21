@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { ArrowRight } from "lucide-react";
 import { solutions, services } from "@/data/offerings";
-import pubAsset from "@/assets/solution-service-photo-cutout.png.asset.json";
+import pubAsset from "@/assets/solution-plantation-cle-main.webp.asset.json";
 
 const OfferingGrid = ({ items, basePath }: { items: typeof solutions; basePath: string }) => (
   <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -95,7 +95,7 @@ const Solutions = () => {
                 decoding="async"
                 fetchPriority="high"
                 className="relative w-full h-auto object-contain max-h-[260px] sm:max-h-[340px] lg:max-h-[460px] mx-auto"
-                onError={(e) => { (e.currentTarget as HTMLImageElement).style.display = 'none'; }}
+                onError={(e) => { (e.currentTarget as HTMLImageElement).src = "/placeholder.jpeg"; }}
               />
             </div>
           </div>
