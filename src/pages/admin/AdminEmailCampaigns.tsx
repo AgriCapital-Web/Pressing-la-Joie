@@ -257,6 +257,9 @@ const AdminEmailCampaigns = () => {
     reader.readAsDataURL(file);
   };
 
+  const validationErrors = validateCampaign(form);
+  const canSend = validationErrors.length === 0;
+
   return (
     <AdminLayout title="Générateur Premium Emailing IA">
       <div className="space-y-6">
@@ -302,6 +305,10 @@ const AdminEmailCampaigns = () => {
               <div className="space-y-2"><Label>Objet optimisé</Label><Input value={form.subject} onChange={(e) => setForm((f) => ({ ...f, subject: e.target.value }))} /></div>
             </div>
             <div className="space-y-2"><Label>Pré-header</Label><Input value={form.preheader} onChange={(e) => setForm((f) => ({ ...f, preheader: e.target.value }))} /></div>
+            <div className="grid md:grid-cols-2 gap-4">
+              <div className="space-y-2"><Label>Programmer l'envoi</Label><Input type="datetime-local" value={form.scheduled_at} onChange={(e) => setForm((f) => ({ ...f, scheduled_at: e.target.value }))} /></div>
+              <div className="rounded-md border bg-muted/20 p-3 text-sm text-muted-foreground"><p className="font-semibold text-foreground">Lots estimés</p><p>{Math.max(1, Math.ceil(estimateRecipients(form.audience_type) / 5))} batch(es) de 5 emails maximum pour protéger la délivrabilité.</p></div>
+            </div>
 
             <div className="space-y-2">
               <Label>Éditeur visuel professionnel</Label>
@@ -314,14 +321,16 @@ const AdminEmailCampaigns = () => {
             </div>
 
             <div className="flex flex-wrap items-center gap-2">
-              <Select value={form.status} onValueChange={(v) => setForm((f) => ({ ...f, status: v as Status }))}><SelectTrigger className="w-44"><SelectValue /></SelectTrigger><SelectContent><SelectItem value="draft">Brouillon</SelectItem><SelectItem value="ready">Prête</SelectItem><SelectItem value="sent">Envoyée</SelectItem><SelectItem value="archived">Archivée</SelectItem></SelectContent></Select>
+              <Select value={form.status} onValueChange={(v) => setForm((f) => ({ ...f, status: v as Status }))}><SelectTrigger className="w-44"><SelectValue /></SelectTrigger><SelectContent><SelectItem value="draft">Brouillon</SelectItem><SelectItem value="ready">Prête</SelectItem><SelectItem value="scheduled">Programmée</SelectItem><SelectItem value="sending">En cours</SelectItem><SelectItem value="sent">Envoyée</SelectItem><SelectItem value="failed">Erreur</SelectItem><SelectItem value="archived">Archivée</SelectItem></SelectContent></Select>
               <Button onClick={handleSave} disabled={isSaving} className="gap-2">{isSaving ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />} {editingId ? "Mettre à jour" : "Enregistrer"}</Button>
               <Button variant="outline" onClick={() => setShowPreview((v) => !v)} className="gap-2"><Eye className="w-4 h-4" /> Aperçu</Button>
-              <Button variant="secondary" onClick={handleSend} disabled={isSending || !form.html_content} className="gap-2 ml-auto">{isSending ? <Loader2 className="w-4 h-4 animate-spin" /> : <Send className="w-4 h-4" />} Envoyer Brevo</Button>
+              <Button variant="outline" onClick={() => handleSend(true)} disabled={isSending || !canSend} className="gap-2 ml-auto"><CalendarClock className="w-4 h-4" /> Programmer</Button>
+              <Button variant="secondary" onClick={() => handleSend(false)} disabled={isSending || !canSend} className="gap-2">{isSending ? <Loader2 className="w-4 h-4 animate-spin" /> : <Send className="w-4 h-4" />} Envoyer Brevo</Button>
               {editingId && <Button variant="ghost" onClick={resetForm} className="gap-2"><Plus className="w-4 h-4" /> Nouvelle</Button>}
             </div>
+            {!canSend && <div className="rounded-md border border-destructive/20 bg-destructive/5 p-3 text-sm text-destructive flex items-start gap-2"><AlertTriangle className="w-4 h-4 mt-0.5" /><span>Envoi bloqué : {validationErrors.join(" · ")}</span></div>}
 
-            {showPreview && <div className="grid lg:grid-cols-[1fr_.55fr] gap-4"><div className="border rounded-md bg-background p-4"><p className="text-xs text-muted-foreground mb-3">Aperçu visuel complet</p><div className="prose prose-sm dark:prose-invert max-w-none" dangerouslySetInnerHTML={{ __html: form.html_content || "<p>Aucun contenu généré</p>" }} /></div><div className="border rounded-md bg-muted/20 p-4"><p className="text-xs font-semibold text-muted-foreground mb-2 flex items-center gap-2"><FileText className="w-4 h-4" /> Version texte brut</p><pre className="whitespace-pre-wrap text-xs text-muted-foreground font-sans">{form.plain_text || stripHtml(form.html_content) || "Texte brut généré automatiquement"}</pre></div></div>}
+            {showPreview && <div className="grid lg:grid-cols-[1fr_.55fr] gap-4"><div className="border rounded-md bg-background p-4"><p className="text-xs text-muted-foreground mb-3">Aperçu complet</p><div className="mb-4 rounded-md bg-muted/30 p-3 text-sm"><p><strong>Objet :</strong> {form.subject || "—"}</p><p><strong>Pré-header :</strong> {form.preheader || "—"}</p></div>{form.image_url && <img src={form.image_url} alt="Aperçu image" className="mb-4 max-h-72 w-full rounded-md object-cover" />}{form.video_url && <video src={form.video_url} className="mb-4 max-h-72 w-full rounded-md object-cover" controls muted loop playsInline />}<div className="prose prose-sm dark:prose-invert max-w-none" dangerouslySetInnerHTML={{ __html: form.html_content || "<p>Aucun contenu généré</p>" }} /></div><div className="border rounded-md bg-muted/20 p-4"><p className="text-xs font-semibold text-muted-foreground mb-2 flex items-center gap-2"><FileText className="w-4 h-4" /> Version texte brut</p><pre className="whitespace-pre-wrap text-xs text-muted-foreground font-sans">{form.plain_text || stripHtml(form.html_content) || "Texte brut généré automatiquement"}</pre></div></div>}
           </CardContent>
         </Card>
 
