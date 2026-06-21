@@ -1,6 +1,6 @@
 import { useLanguage } from "@/contexts/LanguageContext";
 import { Card, CardContent } from "@/components/ui/card";
-import founderAsset from "@/assets/inocent-koffi-official.jpeg.asset.json";
+import founderAsset from "@/assets/founder-inocent-koffi.webp.asset.json";
 
 const renderBoldName = (text: string) => {
   const parts = text.split('Inocent KOFFI');
@@ -56,7 +56,7 @@ const Founder = () => {
                       loading="lazy"
                       decoding="async"
                       sizes="(max-width: 768px) 80vw, 320px"
-                      onError={(e) => { (e.currentTarget as HTMLImageElement).src = "/placeholder.svg"; }}
+                      onError={(e) => { (e.currentTarget as HTMLImageElement).src = "/placeholder.jpeg"; }}
                     />
                   </div>
                 </div>

@@ -1,7 +1,7 @@
 import { useLanguage } from "@/contexts/LanguageContext";
 import { Card, CardContent } from "@/components/ui/card";
 import { User } from "lucide-react";
-import founderAsset from "@/assets/inocent-koffi-official.jpeg.asset.json";
+import founderAsset from "@/assets/founder-inocent-koffi.webp.asset.json";
 import pierreImage from "@/assets/team-pierre-kouame.jpg";
 import ericImage from "@/assets/team-eric-dido.jpg";
 import marcelImage from "@/assets/team-marcel-konan.jpg";
@@ -142,7 +142,7 @@ const MemberCard = ({ member }: { member: MemberType }) => (
             loading="lazy"
             decoding="async"
             sizes="112px"
-            onError={(e) => { (e.currentTarget as HTMLImageElement).src = "/placeholder.svg"; }}
+            onError={(e) => { (e.currentTarget as HTMLImageElement).src = "/placeholder.jpeg"; }}
           />
         ) : (
           <User className="w-12 h-12 text-muted-foreground" />
