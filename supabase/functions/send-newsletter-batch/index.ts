@@ -9,12 +9,18 @@ const corsHeaders = {
 interface NewsletterRequest {
   subject: string;
   html: string;
+  preheader?: string;
   audienceType?: string;
   includeTestimonials?: boolean;
   retryEmails?: string[];
+  campaignId?: string | null;
+  scheduledAt?: string | null;
+  mediaPreview?: { type: "image" | "video"; url: string; alt?: string }[];
+  processDue?: boolean;
 }
 
 type Recipient = { email: string; first_name?: string | null; last_name?: string | null };
+type AdminUser = { id: string; email?: string };
 
 // Basic HTML sanitization
 const sanitizeHtml = (html: string): string => {
@@ -30,6 +36,13 @@ const sanitizeHtml = (html: string): string => {
   return sanitized;
 };
 
+const escapeHtml = (value: unknown) => String(value ?? "")
+  .replace(/&/g, "&amp;")
+  .replace(/</g, "&lt;")
+  .replace(/>/g, "&gt;")
+  .replace(/"/g, "&quot;")
+  .replace(/'/g, "&#039;");
+
 const MAX_RETRIES = 3;
 const RETRY_DELAY_MS = 2000;
 
@@ -41,6 +54,92 @@ const personalizeHtml = (html: string, recipient: Recipient): string => {
     .replace(/Bonjour\s*\{\{prenom\}\}\s*\{\{nom\}\}\s*,?/gi, greeting)
     .replace(/\{\{prenom\}\}/g, firstName || "")
     .replace(/\{\{nom\}\}/g, lastName || "");
+};
+
+const getRecipients = async (supabase: any, request: NewsletterRequest): Promise<Recipient[]> => {
+  if (request.retryEmails && Array.isArray(request.retryEmails) && request.retryEmails.length > 0) {
+    return request.retryEmails.filter(e => typeof e === 'string' && e.includes('@')).map((email) => ({ email }));
+  }
+
+  const audienceType = request.audienceType || "all";
+  const map = new Map<string, Recipient>();
+  const add = (items?: Recipient[] | null) => (items || []).forEach((item) => {
+    if (item.email && item.email.includes("@")) map.set(item.email.toLowerCase(), item);
+  });
+
+  if (["all", "subscribers"].includes(audienceType)) {
+    const { data, error } = await supabase.from('newsletter_subscribers').select('email, first_name, last_name').eq('is_active', true);
+    if (error) throw error;
+    add(data as Recipient[]);
+  }
+  if (["all", "testimonials", "clients"].includes(audienceType) || request.includeTestimonials) {
+    const { data } = await supabase.from('testimonials').select('email, first_name, last_name').not('email', 'is', null);
+    add(data as Recipient[]);
+  }
+  if (["all", "investors", "partners", "prospects", "clients"].includes(audienceType)) {
+    const { data } = await supabase.from('partnership_requests').select('email, first_name, last_name, partner_type, request_type').not('email', 'is', null);
+    const filtered = (data || []).filter((p: any) => {
+      if (audienceType === "all") return true;
+      if (audienceType === "investors") return p.request_type === "investor" || p.partner_type === "investor" || p.request_type === "investment";
+      if (audienceType === "partners") return ["technical", "institution", "industrial"].includes(p.request_type) || ["company", "ngo", "institution"].includes(p.partner_type);
+      if (audienceType === "clients") return ["landowner", "producer"].includes(p.request_type);
+      if (audienceType === "prospects") return true;
+      return false;
+    });
+    add(filtered as Recipient[]);
+  }
+  if (["all", "prospects", "clients", "members"].includes(audienceType)) {
+    const { data } = await supabase.from('visitor_contacts').select('email, first_name, last_name').not('email', 'is', null);
+    add(data as Recipient[]);
+  }
+  if (["all", "prospects", "clients", "members"].includes(audienceType)) {
+    const { data } = await supabase.from('waitlist_submissions').select('email, full_name').not('email', 'is', null);
+    add((data || []).map((w: any) => ({ email: w.email, first_name: String(w.full_name || "").split(" ")[0], last_name: String(w.full_name || "").split(" ").slice(1).join(" ") })));
+  }
+  return [...map.values()];
+};
+
+const buildFormattedHtml = (html: string, preheader = "", mediaPreview: NewsletterRequest["mediaPreview"] = []) => {
+  const logoUrl = "https://www.agricapital.ci/favicon.png";
+  const mediaHtml = (mediaPreview || []).filter((m) => m?.url).map((m) => {
+    if (m.type === "video") {
+      return `<div style="margin:22px 0;text-align:center;"><video src="${escapeHtml(m.url)}" controls muted loop playsinline style="max-width:100%;border-radius:12px;border:1px solid #d8c9a4;display:block;margin:0 auto;">Votre messagerie ne permet pas l'aperçu vidéo intégré.</video></div>`;
+    }
+    return `<div style="margin:22px 0;text-align:center;"><img src="${escapeHtml(m.url)}" alt="${escapeHtml(m.alt || "Visuel AgriCapital")}" style="max-width:100%;height:auto;border-radius:12px;border:0;display:block;margin:0 auto;" /></div>`;
+  }).join("");
+
+  return `<!DOCTYPE html>
+<html lang="fr">
+<head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+<!--[if mso]><style>table,td,div,p,a{font-family:Arial,sans-serif!important;}</style><![endif]-->
+</head>
+<body style="margin:0;padding:0;background-color:#f4f4f4;font-family:'Segoe UI',Arial,Helvetica,sans-serif;">
+<div style="display:none;max-height:0;overflow:hidden;color:transparent;opacity:0;">${escapeHtml(preheader)}</div>
+<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background-color:#f4f4f4;">
+<tr><td align="center" style="padding:20px 0;">
+<table role="presentation" width="600" cellpadding="0" cellspacing="0" style="max-width:600px;width:100%;background:#ffffff;border-radius:12px;overflow:hidden;box-shadow:0 4px 24px rgba(0,0,0,0.08);">
+  <tr><td style="background:linear-gradient(135deg,#166534 0%,#14532d 50%,#0f4c25 100%);padding:30px;text-align:center;">
+    <img src="${logoUrl}" alt="AgriCapital" width="92" style="display:block;margin:0 auto 12px;max-width:92px;height:auto;border:0;outline:none;text-decoration:none;">
+    <p style="color:rgba(255,255,255,0.9);font-size:13px;margin:8px 0 0;font-weight:700;line-height:1.4;">Investir la terre. Cultiver l'avenir.</p>
+  </td></tr>
+  <tr><td style="padding:30px;font-size:15px;line-height:1.6;color:#333333;">
+    ${mediaHtml}
+    ${html}
+  </td></tr>
+  <tr><td style="background:#f9fafb;padding:20px 30px;text-align:center;border-top:1px solid #e5e7eb;">
+    <p style="color:#4b5563;font-size:12px;margin:0 0 8px;line-height:1.6;font-weight:700;">AgriCapital SARL</p>
+    <p style="color:#9ca3af;font-size:11px;margin:0;line-height:1.5;">
+      C&ocirc;te d'Ivoire<br/>
+      <a href="https://www.agricapital.ci" style="color:#166534;text-decoration:none;">www.agricapital.ci</a> |
+      <a href="mailto:contact@agricapital.ci" style="color:#166534;text-decoration:none;">contact@agricapital.ci</a> |
+      <a href="tel:+2250564551717" style="color:#166534;text-decoration:none;">05 64 55 17 17</a>
+    </p>
+  </td></tr>
+</table>
+</td></tr>
+</table>
+</body>
+</html>`;
 };
 
 const sendEmailWithRetry = async (
