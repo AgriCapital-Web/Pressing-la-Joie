@@ -128,23 +128,9 @@ const AdminNewsletter = () => {
     setIsSending(true);
     try {
       const { data, error } = await supabase.functions.invoke('send-newsletter-batch', {
-        body: { subject, html: htmlContent, includeTestimonials: targetAudience === 'all' || targetAudience === 'clients' }
+        body: { subject, html: htmlContent, audienceType: targetAudience, includeTestimonials: targetAudience === 'all' || targetAudience === 'clients' }
       });
       if (error) throw error;
-      
-      // Save send record
-      const { data: { user } } = await supabase.auth.getUser();
-      await supabase.from('newsletter_sends').insert({
-        subject,
-        html_preview: htmlContent.substring(0, 500),
-        html_content: htmlContent,
-        total_recipients: data?.totalRecipients || recipients.length,
-        total_sent: data?.totalSent || 0,
-        total_failed: data?.totalFailed || 0,
-        failed_recipients: data?.failedRecipients || [],
-        audience_type: targetAudience,
-        sent_by: user?.id,
-      } as any);
 
       const failedList = data?.failedRecipients as { email: string; error: string }[] | undefined;
       if (failedList && failedList.length > 0) {

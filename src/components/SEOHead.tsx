@@ -19,16 +19,16 @@ interface SEOHeadProps {
 
 const seoTranslations: Record<Language, SEOData> = {
   fr: {
-    title: "AgriCapital - Le partenaire idéal des producteurs agricoles en Côte d'Ivoire",
+    title: "AgriCapital - Investir la terre. Cultiver l'avenir.",
     description: "AgriCapital propose un modèle innovant d'accompagnement agricole permettant aux petits producteurs et propriétaires terriens d'accéder à la filière palmier à huile sans barrière financière. Basé à Daloa, Haut-Sassandra.",
     keywords: "AgriCapital, Côte d'Ivoire, Daloa, Haut-Sassandra, SARL, modèle innovant, innovation agricole, accompagnement agricole, services intégrés, débouché commercial, garantie rachat, petits producteurs agricoles, propriétaires terriens, palmier à huile, filière palmier à huile, création de plantations, gestion de terres, valorisation de terres agricoles, encadrement technique agricole, développement rural, agriculture durable, pépinière palmier à huile, suivi technique plantations, Inocent KOFFI",
-    slogan: "Cultivons ensemble l'avenir de l'agriculture ivoirienne",
+    slogan: "Investir la terre. Cultiver l'avenir.",
   },
   en: {
-    title: "AgriCapital - The ideal partner for agricultural producers in Côte d'Ivoire",
+    title: "AgriCapital - Invest in land. Cultivate the future.",
     description: "AgriCapital offers an innovative agricultural support model enabling small producers and landowners to access the oil palm industry without financial barriers. Based in Daloa, Haut-Sassandra.",
     keywords: "AgriCapital, Côte d'Ivoire, Daloa, Haut-Sassandra, innovative model, agricultural innovation, agricultural support, integrated services, commercial outlet, buyback guarantee, small agricultural producers, landowners, oil palm, oil palm industry, plantation creation, land management, agricultural land development, technical agricultural supervision, rural development, sustainable agriculture, oil palm nursery, plantation technical monitoring, Inocent KOFFI",
-    slogan: "Transforming Ivorian agriculture together",
+    slogan: "Investir la terre. Cultiver l'avenir.",
   },
   ar: {
     title: "أجري كابيتال - الشريك المثالي للمنتجين الزراعيين في كوت ديفوار",

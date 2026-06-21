@@ -1,7 +1,7 @@
 import { useLanguage } from "@/contexts/LanguageContext";
 import { Card, CardContent } from "@/components/ui/card";
 import { User } from "lucide-react";
-import founderAsset from "@/assets/inocent-koffi-official.jpeg.asset.json";
+import founderImage from "@/assets/founder-inocent-koffi.webp";
 import pierreImage from "@/assets/team-pierre-kouame.jpg";
 import ericImage from "@/assets/team-eric-dido.jpg";
 import marcelImage from "@/assets/team-marcel-konan.jpg";
@@ -56,32 +56,32 @@ const teamTranslations = {
 
 const directionMembers = {
   fr: [
-    { name: "Inocent KOFFI", role: "Gérant", bio: "Informaticien, commercial et stratège, Inocent KOFFI assure la vision globale d'AgriCapital, la conception du modèle économique et la coordination de l'ensemble du déploiement.", image: founderAsset.url, email: "direction@agricapital.ci" },
+    { name: "Inocent KOFFI", role: "Gérant", bio: "Informaticien, commercial et stratège, Inocent KOFFI assure la vision globale d'AgriCapital, la conception du modèle économique et la coordination de l'ensemble du déploiement.", image: founderImage, email: "direction@agricapital.ci" },
     { name: "Éric Stéphane DIDO", role: "Chargé du Développement Commercial", bio: "Contribution à la préparation du dispositif commercial, au déploiement des activités et au développement du portefeuille de clients.", image: ericImage },
     { name: "Koffi Pierre KOUAMÉ", role: "Conseiller Stratégique", bio: "Plus de 10 ans d'expérience en gouvernance organisationnelle. Accompagne AgriCapital sur les questions institutionnelles, la gouvernance et la sécurisation foncière.", image: pierreImage },
   ],
   en: [
-    { name: "Inocent KOFFI", role: "Manager", bio: "IT specialist, commercial strategist and entrepreneur, Inocent KOFFI oversees AgriCapital's global vision, business model design and overall deployment coordination.", image: founderAsset.url, email: "direction@agricapital.ci" },
+    { name: "Inocent KOFFI", role: "Manager", bio: "IT specialist, commercial strategist and entrepreneur, Inocent KOFFI oversees AgriCapital's global vision, business model design and overall deployment coordination.", image: founderImage, email: "direction@agricapital.ci" },
     { name: "Éric Stéphane DIDO", role: "Business Development Manager", bio: "Contributes to commercial strategy preparation, business deployment and client portfolio development.", image: ericImage },
     { name: "Koffi Pierre KOUAMÉ", role: "Strategic Advisor", bio: "Over 10 years of experience in organizational governance. Supports AgriCapital on institutional matters, governance and land security.", image: pierreImage },
   ],
   ar: [
-    { name: "Inocent KOFFI", role: "المدير", bio: "يشرف Inocent KOFFI على الرؤية الشاملة لأغريكابيتال وتصميم النموذج الاقتصادي وتنسيق التنفيذ.", image: founderAsset.url, email: "direction@agricapital.ci" },
+    { name: "Inocent KOFFI", role: "المدير", bio: "يشرف Inocent KOFFI على الرؤية الشاملة لأغريكابيتال وتصميم النموذج الاقتصادي وتنسيق التنفيذ.", image: founderImage, email: "direction@agricapital.ci" },
     { name: "إريك ستيفان ديدو", role: "مسؤول التطوير التجاري", bio: "المساهمة في إعداد الجهاز التجاري وتطوير محفظة العملاء.", image: ericImage },
     { name: "كوفي بيير كوامي", role: "مستشار استراتيجي", bio: "أكثر من 10 سنوات من الخبرة في الحوكمة المؤسسية.", image: pierreImage },
   ],
   es: [
-    { name: "Inocent KOFFI", role: "Gerente", bio: "Informático, comercial y estratega, Inocent KOFFI lidera la visión global de AgriCapital y la coordinación del despliegue.", image: founderAsset.url, email: "direction@agricapital.ci" },
+    { name: "Inocent KOFFI", role: "Gerente", bio: "Informático, comercial y estratega, Inocent KOFFI lidera la visión global de AgriCapital y la coordinación del despliegue.", image: founderImage, email: "direction@agricapital.ci" },
     { name: "Éric Stéphane DIDO", role: "Encargado de Desarrollo Comercial", bio: "Contribución a la estrategia comercial y desarrollo de cartera de clientes.", image: ericImage },
     { name: "Koffi Pierre KOUAMÉ", role: "Asesor Estratégico", bio: "Más de 10 años de experiencia en gobernanza organizacional.", image: pierreImage },
   ],
   de: [
-    { name: "Inocent KOFFI", role: "Geschäftsführer", bio: "Als IT-Fachmann, Kaufmann und Stratege leitet Inocent KOFFI die Gesamtvision von AgriCapital und die Umsetzung des Modells.", image: founderAsset.url, email: "direction@agricapital.ci" },
+    { name: "Inocent KOFFI", role: "Geschäftsführer", bio: "Als IT-Fachmann, Kaufmann und Stratege leitet Inocent KOFFI die Gesamtvision von AgriCapital und die Umsetzung des Modells.", image: founderImage, email: "direction@agricapital.ci" },
     { name: "Éric Stéphane DIDO", role: "Leiter Geschäftsentwicklung", bio: "Beitrag zur Geschäftsstrategie und Kundenportfolio-Entwicklung.", image: ericImage },
     { name: "Koffi Pierre KOUAMÉ", role: "Strategischer Berater", bio: "Über 10 Jahre Erfahrung in organisatorischer Governance.", image: pierreImage },
   ],
   zh: [
-    { name: "Inocent KOFFI", role: "经理", bio: "Inocent KOFFI 负责 AgriCapital 的整体愿景、商业模式设计和部署协调。", image: founderAsset.url, email: "direction@agricapital.ci" },
+    { name: "Inocent KOFFI", role: "经理", bio: "Inocent KOFFI 负责 AgriCapital 的整体愿景、商业模式设计和部署协调。", image: founderImage, email: "direction@agricapital.ci" },
     { name: "Éric Stéphane DIDO", role: "商业发展负责人", bio: "参与商业战略准备和客户组合开发。", image: ericImage },
     { name: "Koffi Pierre KOUAMÉ", role: "战略顾问", bio: "超过10年的组织治理经验。", image: pierreImage },
   ],
@@ -142,7 +142,7 @@ const MemberCard = ({ member }: { member: MemberType }) => (
             loading="lazy"
             decoding="async"
             sizes="112px"
-            onError={(e) => { (e.currentTarget as HTMLImageElement).src = "/placeholder.svg"; }}
+            onError={(e) => { (e.currentTarget as HTMLImageElement).src = "/placeholder.jpeg"; }}
           />
         ) : (
           <User className="w-12 h-12 text-muted-foreground" />

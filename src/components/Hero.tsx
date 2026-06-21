@@ -3,6 +3,7 @@ import { Button } from "@/components/ui/button";
 import { ArrowRight, ChevronLeft, ChevronRight } from "lucide-react";
 import { useLanguage, Language } from "@/contexts/LanguageContext";
 import WaitlistDialog from "@/components/WaitlistDialog";
+import { Link } from "react-router-dom";
 
 import slide1 from "@/assets/nursery-pepiniere-daloa.jpg";
 import slide2 from "@/assets/founder-palm-field.jpg";
@@ -192,6 +193,20 @@ const Hero = () => {
               ))}
             </div>
           </div>
+        </div>
+
+        <div className="mt-8 grid gap-4 lg:grid-cols-2">
+          {[
+            { title: "Le trésor caché du foncier agricole", text: "Un bref essentiel pour comprendre pourquoi les terres africaines inexploitées peuvent devenir un patrimoine productif et transmissible.", href: "/tresor-foncier" },
+            { title: "Le trésor caché du palmier à huile", text: "Un bref clair sur un arbre stratégique, présent dans le quotidien, productif pendant des décennies et adapté au potentiel ivoirien.", href: "/tresor-palmier" },
+          ].map((item) => (
+            <Link key={item.href} to={item.href} className="group rounded-xl border border-primary/15 bg-card p-5 shadow-soft transition-all hover:-translate-y-1 hover:border-primary/35 hover:shadow-medium">
+              <p className="belife-eyebrow mb-2">Bref investisseur</p>
+              <h2 className="text-xl font-extrabold text-foreground md:text-2xl">{item.title}</h2>
+              <p className="mt-2 text-sm leading-relaxed text-muted-foreground">{item.text}</p>
+              <span className="mt-4 inline-flex items-center gap-2 text-sm font-bold text-primary">Lire le bref <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" /></span>
+            </Link>
+          ))}
         </div>
       </div>
     </section>

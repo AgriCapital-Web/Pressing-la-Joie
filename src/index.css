@@ -190,6 +190,12 @@
     border-radius: 2px;
   }
 
+  .treasure-eyebrow {
+    @apply mb-4 text-sm font-black uppercase text-primary-foreground;
+    letter-spacing: 0.25em;
+    text-shadow: 0 2px 12px hsl(var(--foreground) / 0.55);
+  }
+
   /* Nav link hover — sober underline reveal */
   .belife-nav-link {
     @apply relative text-foreground/80 hover:text-foreground transition-colors text-sm font-semibold px-3 py-2;

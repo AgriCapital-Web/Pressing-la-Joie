@@ -9,12 +9,12 @@ import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Loader2, Mail, Plus, Save, Eye, Trash2, Send, Sparkles, Image as ImageIcon, Video, FileText } from "lucide-react";
+import { AlertTriangle, CalendarClock, Loader2, Mail, Plus, Save, Eye, Trash2, Send, Sparkles, Image as ImageIcon, Video, FileText, MousePointer } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 
 type Audience = "all" | "testimonials" | "subscribers" | "investors" | "prospects" | "partners" | "clients" | "members" | "custom";
-type Status = "draft" | "ready" | "sent" | "archived";
+type Status = "draft" | "ready" | "scheduled" | "sending" | "sent" | "failed" | "archived";
 
 type Campaign = {
   id: string;
@@ -32,9 +32,17 @@ type Campaign = {
   include_video: boolean;
   image_url: string | null;
   video_url: string | null;
+  scheduled_at: string | null;
+  last_sent_at: string | null;
+  batches_total: number;
+  open_count: number;
+  click_count: number;
+  error_summary: string | null;
   created_at: string;
   updated_at: string;
 };
+
+type SendHistory = { id: string; campaign_id: string | null; subject: string; status: string; total_recipients: number; total_sent: number; total_failed: number; batches_total: number; batches_completed: number; open_count: number; click_count: number; error_summary: string | null; scheduled_at: string | null; created_at: string };
 
 const emptyForm = {
   name: "",
@@ -49,6 +57,7 @@ const emptyForm = {
   include_video: false,
   image_url: "",
   video_url: "",
+  scheduled_at: "",
 };
 
 const audienceOptions: { value: Audience; label: string; help: string }[] = [
@@ -64,6 +73,16 @@ const audienceOptions: { value: Audience; label: string; help: string }[] = [
 ];
 
 const stripHtml = (html: string) => html.replace(/<style[\s\S]*?<\/style>/gi, " ").replace(/<[^>]+>/g, " ").replace(/\s+/g, " ").trim();
+const validateCampaign = (form: typeof emptyForm) => {
+  const errors: string[] = [];
+  if (!form.name.trim()) errors.push("Nom interne requis");
+  if (form.subject.trim().length < 6) errors.push("Objet trop court");
+  if (form.preheader.trim().length < 12) errors.push("Pré-header requis");
+  if (stripHtml(form.html_content).length < 80) errors.push("Corps du message trop court");
+  if (form.include_image && !form.image_url) errors.push("Image demandée mais absente");
+  if (form.include_video && !form.video_url) errors.push("Vidéo demandée mais absente");
+  return errors;
+};
 
 const AdminEmailCampaigns = () => {
   const [campaigns, setCampaigns] = useState<Campaign[]>([]);
@@ -72,6 +91,7 @@ const AdminEmailCampaigns = () => {
   const [isGenerating, setIsGenerating] = useState(false);
   const [isSending, setIsSending] = useState(false);
   const [form, setForm] = useState(emptyForm);
+  const [sendHistory, setSendHistory] = useState<SendHistory[]>([]);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [showPreview, setShowPreview] = useState(true);
   const imageInputRef = useRef<HTMLInputElement>(null);
@@ -82,6 +102,8 @@ const AdminEmailCampaigns = () => {
     const { data, error } = await supabase.from("email_campaigns").select("*").order("updated_at", { ascending: false });
     if (error) toast.error("Erreur de chargement des campagnes");
     else setCampaigns((data || []) as Campaign[]);
+    const { data: history } = await (supabase as any).from("newsletter_sends").select("id,campaign_id,subject,status,total_recipients,total_sent,total_failed,batches_total,batches_completed,open_count,click_count,error_summary,scheduled_at,created_at").order("created_at", { ascending: false }).limit(25);
+    setSendHistory((history || []) as SendHistory[]);
     setIsLoading(false);
   };
 
@@ -128,8 +150,9 @@ const AdminEmailCampaigns = () => {
   };
 
   const handleSave = async () => {
-    if (!form.name.trim() || !form.subject.trim() || !form.html_content.trim()) {
-      toast.error("Nom, objet et contenu requis");
+    const validationErrors = validateCampaign(form);
+    if (validationErrors.length) {
+      toast.error(validationErrors[0]);
       return;
     }
     setIsSaving(true);
@@ -149,6 +172,9 @@ const AdminEmailCampaigns = () => {
         include_video: form.include_video,
         image_url: form.image_url || null,
         video_url: form.video_url || null,
+        scheduled_at: form.scheduled_at || null,
+        batches_total: Math.max(1, Math.ceil(estimateRecipients(form.audience_type) / 5)),
+        media_preview: buildMediaPreview(),
         updated_by: user?.id ?? null,
       };
       if (editingId) {
@@ -169,17 +195,27 @@ const AdminEmailCampaigns = () => {
     }
   };
 
-  const handleSend = async () => {
-    if (!form.subject || !form.html_content) return toast.error("Campagne vide");
-    if (!confirm(`Envoyer cette campagne via Brevo au segment : ${audienceOptions.find((a) => a.value === form.audience_type)?.label} ?`)) return;
+  const buildMediaPreview = () => [
+    ...(form.image_url ? [{ type: "image", url: form.image_url, alt: form.name || "Visuel AgriCapital" }] : []),
+    ...(form.video_url ? [{ type: "video", url: form.video_url, alt: form.name || "Vidéo AgriCapital" }] : []),
+  ];
+
+  const estimateRecipients = (_audience: Audience) => 25;
+
+  const handleSend = async (schedule = false) => {
+    const validationErrors = validateCampaign(form);
+    if (validationErrors.length) return toast.error(`Envoi bloqué : ${validationErrors[0]}`);
+    if (schedule && !form.scheduled_at) return toast.error("Choisissez une date et une heure");
+    if (!schedule && !confirm(`Envoyer cette campagne via Brevo au segment : ${audienceOptions.find((a) => a.value === form.audience_type)?.label} ?`)) return;
     setIsSending(true);
     try {
       const { data, error } = await supabase.functions.invoke("send-newsletter-batch", {
-        body: { subject: form.subject, html: form.html_content, audienceType: form.audience_type },
+        body: { campaignId: editingId, subject: form.subject, preheader: form.preheader, html: form.html_content, audienceType: form.audience_type, scheduledAt: schedule ? form.scheduled_at : null, mediaPreview: buildMediaPreview() },
       });
       if (error) throw error;
-      toast.success(`Envoi Brevo terminé : ${data?.totalSent || 0} envoyés, ${data?.totalFailed || 0} échecs`);
-      setForm((f) => ({ ...f, status: "sent" }));
+      toast.success(schedule ? `Campagne programmée : ${data?.totalRecipients || 0} destinataires, ${data?.batchesTotal || 1} batch(es)` : `Envoi Brevo terminé : ${data?.totalSent || 0} envoyés, ${data?.totalFailed || 0} échecs`);
+      setForm((f) => ({ ...f, status: schedule ? "scheduled" : "sent" }));
+      fetchCampaigns();
     } catch (err: any) {
       toast.error(err?.message || "Erreur d'envoi Brevo");
     } finally {
@@ -202,6 +238,7 @@ const AdminEmailCampaigns = () => {
       include_video: campaign.include_video,
       image_url: campaign.image_url || "",
       video_url: campaign.video_url || "",
+      scheduled_at: campaign.scheduled_at ? campaign.scheduled_at.slice(0, 16) : "",
     });
     window.scrollTo({ top: 0, behavior: "smooth" });
   };
@@ -219,6 +256,9 @@ const AdminEmailCampaigns = () => {
     reader.onload = () => setForm((f) => ({ ...f, [kind === "image" ? "image_url" : "video_url"]: String(reader.result) }));
     reader.readAsDataURL(file);
   };
+
+  const validationErrors = validateCampaign(form);
+  const canSend = validationErrors.length === 0;
 
   return (
     <AdminLayout title="Générateur Premium Emailing IA">
@@ -265,6 +305,10 @@ const AdminEmailCampaigns = () => {
               <div className="space-y-2"><Label>Objet optimisé</Label><Input value={form.subject} onChange={(e) => setForm((f) => ({ ...f, subject: e.target.value }))} /></div>
             </div>
             <div className="space-y-2"><Label>Pré-header</Label><Input value={form.preheader} onChange={(e) => setForm((f) => ({ ...f, preheader: e.target.value }))} /></div>
+            <div className="grid md:grid-cols-2 gap-4">
+              <div className="space-y-2"><Label>Programmer l'envoi</Label><Input type="datetime-local" value={form.scheduled_at} onChange={(e) => setForm((f) => ({ ...f, scheduled_at: e.target.value }))} /></div>
+              <div className="rounded-md border bg-muted/20 p-3 text-sm text-muted-foreground"><p className="font-semibold text-foreground">Lots estimés</p><p>{Math.max(1, Math.ceil(estimateRecipients(form.audience_type) / 5))} batch(es) de 5 emails maximum pour protéger la délivrabilité.</p></div>
+            </div>
 
             <div className="space-y-2">
               <Label>Éditeur visuel professionnel</Label>
@@ -277,18 +321,22 @@ const AdminEmailCampaigns = () => {
             </div>
 
             <div className="flex flex-wrap items-center gap-2">
-              <Select value={form.status} onValueChange={(v) => setForm((f) => ({ ...f, status: v as Status }))}><SelectTrigger className="w-44"><SelectValue /></SelectTrigger><SelectContent><SelectItem value="draft">Brouillon</SelectItem><SelectItem value="ready">Prête</SelectItem><SelectItem value="sent">Envoyée</SelectItem><SelectItem value="archived">Archivée</SelectItem></SelectContent></Select>
+              <Select value={form.status} onValueChange={(v) => setForm((f) => ({ ...f, status: v as Status }))}><SelectTrigger className="w-44"><SelectValue /></SelectTrigger><SelectContent><SelectItem value="draft">Brouillon</SelectItem><SelectItem value="ready">Prête</SelectItem><SelectItem value="scheduled">Programmée</SelectItem><SelectItem value="sending">En cours</SelectItem><SelectItem value="sent">Envoyée</SelectItem><SelectItem value="failed">Erreur</SelectItem><SelectItem value="archived">Archivée</SelectItem></SelectContent></Select>
               <Button onClick={handleSave} disabled={isSaving} className="gap-2">{isSaving ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />} {editingId ? "Mettre à jour" : "Enregistrer"}</Button>
               <Button variant="outline" onClick={() => setShowPreview((v) => !v)} className="gap-2"><Eye className="w-4 h-4" /> Aperçu</Button>
-              <Button variant="secondary" onClick={handleSend} disabled={isSending || !form.html_content} className="gap-2 ml-auto">{isSending ? <Loader2 className="w-4 h-4 animate-spin" /> : <Send className="w-4 h-4" />} Envoyer Brevo</Button>
+              <Button variant="outline" onClick={() => handleSend(true)} disabled={isSending || !canSend} className="gap-2 ml-auto"><CalendarClock className="w-4 h-4" /> Programmer</Button>
+              <Button variant="secondary" onClick={() => handleSend(false)} disabled={isSending || !canSend} className="gap-2">{isSending ? <Loader2 className="w-4 h-4 animate-spin" /> : <Send className="w-4 h-4" />} Envoyer Brevo</Button>
               {editingId && <Button variant="ghost" onClick={resetForm} className="gap-2"><Plus className="w-4 h-4" /> Nouvelle</Button>}
             </div>
+            {!canSend && <div className="rounded-md border border-destructive/20 bg-destructive/5 p-3 text-sm text-destructive flex items-start gap-2"><AlertTriangle className="w-4 h-4 mt-0.5" /><span>Envoi bloqué : {validationErrors.join(" · ")}</span></div>}
 
-            {showPreview && <div className="grid lg:grid-cols-[1fr_.55fr] gap-4"><div className="border rounded-md bg-background p-4"><p className="text-xs text-muted-foreground mb-3">Aperçu visuel complet</p><div className="prose prose-sm dark:prose-invert max-w-none" dangerouslySetInnerHTML={{ __html: form.html_content || "<p>Aucun contenu généré</p>" }} /></div><div className="border rounded-md bg-muted/20 p-4"><p className="text-xs font-semibold text-muted-foreground mb-2 flex items-center gap-2"><FileText className="w-4 h-4" /> Version texte brut</p><pre className="whitespace-pre-wrap text-xs text-muted-foreground font-sans">{form.plain_text || stripHtml(form.html_content) || "Texte brut généré automatiquement"}</pre></div></div>}
+            {showPreview && <div className="grid lg:grid-cols-[1fr_.55fr] gap-4"><div className="border rounded-md bg-background p-4"><p className="text-xs text-muted-foreground mb-3">Aperçu complet</p><div className="mb-4 rounded-md bg-muted/30 p-3 text-sm"><p><strong>Objet :</strong> {form.subject || "—"}</p><p><strong>Pré-header :</strong> {form.preheader || "—"}</p></div>{form.image_url && <img src={form.image_url} alt="Aperçu image" className="mb-4 max-h-72 w-full rounded-md object-cover" />}{form.video_url && <video src={form.video_url} className="mb-4 max-h-72 w-full rounded-md object-cover" controls muted loop playsInline />}<div className="prose prose-sm dark:prose-invert max-w-none" dangerouslySetInnerHTML={{ __html: form.html_content || "<p>Aucun contenu généré</p>" }} /></div><div className="border rounded-md bg-muted/20 p-4"><p className="text-xs font-semibold text-muted-foreground mb-2 flex items-center gap-2"><FileText className="w-4 h-4" /> Version texte brut</p><pre className="whitespace-pre-wrap text-xs text-muted-foreground font-sans">{form.plain_text || stripHtml(form.html_content) || "Texte brut généré automatiquement"}</pre></div></div>}
           </CardContent>
         </Card>
 
-        <Card><CardHeader><CardTitle className="text-lg flex items-center gap-2"><Mail className="w-5 h-5" /> Campagnes enregistrées</CardTitle></CardHeader><CardContent>{isLoading ? <div className="flex justify-center py-8"><Loader2 className="w-6 h-6 animate-spin" /></div> : campaigns.length === 0 ? <p className="text-center text-muted-foreground py-6">Aucune campagne enregistrée</p> : <ul className="divide-y divide-border">{campaigns.map((c) => <li key={c.id} className="py-3 flex flex-wrap items-center gap-3"><div className="flex-1 min-w-[220px]"><p className="font-medium text-foreground truncate">{c.name}</p><p className="text-xs text-muted-foreground truncate">{c.subject}</p></div><Badge variant="outline" className="text-xs">{audienceOptions.find((a) => a.value === c.audience_type)?.label || c.audience_type}</Badge><Badge>{c.status}</Badge><Button size="sm" variant="outline" onClick={() => handleEdit(c)}>Modifier</Button><Button size="sm" variant="ghost" className="text-destructive" onClick={() => handleDelete(c.id)}><Trash2 className="w-4 h-4" /></Button></li>)}</ul>}</CardContent></Card>
+        <Card><CardHeader><CardTitle className="text-lg flex items-center gap-2"><Mail className="w-5 h-5" /> Campagnes enregistrées</CardTitle></CardHeader><CardContent>{isLoading ? <div className="flex justify-center py-8"><Loader2 className="w-6 h-6 animate-spin" /></div> : campaigns.length === 0 ? <p className="text-center text-muted-foreground py-6">Aucune campagne enregistrée</p> : <ul className="divide-y divide-border">{campaigns.map((c) => <li key={c.id} className="py-3 flex flex-wrap items-center gap-3"><div className="flex-1 min-w-[220px]"><p className="font-medium text-foreground truncate">{c.name}</p><p className="text-xs text-muted-foreground truncate">{c.subject}</p>{c.scheduled_at && <p className="text-xs text-primary">Programmée : {new Date(c.scheduled_at).toLocaleString("fr-FR")}</p>}</div><Badge variant="outline" className="text-xs">{audienceOptions.find((a) => a.value === c.audience_type)?.label || c.audience_type}</Badge><Badge>{c.status}</Badge><span className="text-xs text-muted-foreground">Lots {c.batches_total || 1}</span><span className="inline-flex items-center gap-1 text-xs text-muted-foreground"><Eye className="w-3 h-3" /> {c.open_count || 0}</span><span className="inline-flex items-center gap-1 text-xs text-muted-foreground"><MousePointer className="w-3 h-3" /> {c.click_count || 0}</span>{c.error_summary && <Badge variant="destructive" className="text-xs">{c.error_summary}</Badge>}<Button size="sm" variant="outline" onClick={() => handleEdit(c)}>Modifier</Button><Button size="sm" variant="ghost" className="text-destructive" onClick={() => handleDelete(c.id)}><Trash2 className="w-4 h-4" /></Button></li>)}</ul>}</CardContent></Card>
+
+        <Card><CardHeader><CardTitle className="text-lg flex items-center gap-2"><CalendarClock className="w-5 h-5" /> Historique & état d'envoi</CardTitle></CardHeader><CardContent>{sendHistory.length === 0 ? <p className="text-center text-muted-foreground py-6">Aucun historique d'envoi</p> : <ul className="divide-y divide-border">{sendHistory.map((s) => <li key={s.id} className="py-3 flex flex-wrap items-center gap-3"><div className="flex-1 min-w-[240px]"><p className="font-medium text-foreground truncate">{s.subject}</p><p className="text-xs text-muted-foreground">{s.scheduled_at ? `Programmée : ${new Date(s.scheduled_at).toLocaleString("fr-FR")}` : new Date(s.created_at).toLocaleString("fr-FR")}</p></div><Badge>{s.status}</Badge><span className="text-xs text-muted-foreground">{s.total_sent}/{s.total_recipients} envoyés</span><span className="text-xs text-muted-foreground">Lots {s.batches_completed}/{s.batches_total}</span><span className="inline-flex items-center gap-1 text-xs text-muted-foreground"><Eye className="w-3 h-3" /> {s.open_count || 0}</span><span className="inline-flex items-center gap-1 text-xs text-muted-foreground"><MousePointer className="w-3 h-3" /> {s.click_count || 0}</span>{s.total_failed > 0 && <Badge variant="destructive">{s.total_failed} erreur(s)</Badge>}</li>)}</ul>}</CardContent></Card>
       </div>
     </AdminLayout>
   );

@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { CheckCircle2, Handshake } from "lucide-react";
 import { partnerTypes, partnershipImpact } from "@/data/offerings";
-import partnershipImg from "@/assets/partnership-photo-cutout.png.asset.json";
+import partnershipImg from "@/assets/partenariat-agricapital.webp";
 
 const Partenariats = () => {
   return (
@@ -43,15 +43,15 @@ const Partenariats = () => {
             <div className="relative order-first lg:order-last">
               <div className="absolute inset-x-4 bottom-2 h-6 bg-foreground/10 blur-xl rounded-full" />
               <img
-                src={partnershipImg.url}
+                src={partnershipImg}
                 alt="AgriCapital — équipe AgriCapital en réunion dans une plantation de palmiers"
                 width={1024}
                 height={1024}
                 loading="eager"
                 decoding="async"
                 fetchPriority="high"
-                className="relative w-full h-auto object-contain max-h-[260px] sm:max-h-[340px] lg:max-h-[460px] mx-auto"
-                onError={(e) => { (e.currentTarget as HTMLImageElement).style.display = 'none'; }}
+                className="relative w-full rounded-xl object-cover aspect-[4/3] max-h-[260px] sm:max-h-[340px] lg:max-h-[460px] mx-auto shadow-medium"
+                onError={(e) => { (e.currentTarget as HTMLImageElement).src = "/placeholder.jpeg"; }}
               />
             </div>
           </div>
