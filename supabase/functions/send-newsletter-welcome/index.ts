@@ -113,6 +113,7 @@ const handler = async (req: Request): Promise<Response> => {
     const safeLastName = escapeHtml(lastName);
     const currentYear = new Date().getFullYear();
 
+    const logoUrl = "https://www.agricapital.ci/favicon.png";
     const htmlContent = `
           <!DOCTYPE html>
           <html lang="fr">
@@ -128,21 +129,21 @@ const handler = async (req: Request): Promise<Response> => {
                   <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="600" style="margin: 0 auto; background-color: #ffffff; border-radius: 16px; overflow: hidden; box-shadow: 0 4px 24px rgba(0,0,0,0.1);">
                     <tr>
                       <td style="background: linear-gradient(135deg, #1a5d3a 0%, #2d8f5e 50%, #3ab06a 100%); padding: 40px 40px 30px; text-align: center;">
-                        <img src="https://agricapital.ci/favicon.png" alt="AgriCapital" width="80" style="margin-bottom: 16px;">
+                        <img src="${logoUrl}" alt="AgriCapital" width="92" style="margin-bottom: 16px;display:inline-block;height:auto;">
                         <h1 style="color: #ffffff; font-size: 28px; margin: 0; font-weight: 700; letter-spacing: -0.5px;">AgriCapital</h1>
                         <p style="color: rgba(255,255,255,0.9); font-size: 14px; margin: 8px 0 0; font-weight: 400;">Investir la terre. Cultiver l'avenir.</p>
                       </td>
                     </tr>
                     <tr>
                       <td style="padding: 40px;">
-                        <h2 style="color: #1a5d3a; font-size: 24px; margin: 0 0 20px; font-weight: 600;">Bienvenue ${safeFirstName} ${safeLastName} ! 🎉</h2>
-                        <p style="color: #333; font-size: 16px; line-height: 1.7; margin: 0 0 20px;">Nous sommes ravis de vous compter parmi notre communauté <strong style="color: #c9a227;">AgriCapital</strong>. Votre inscription à notre newsletter est confirmée !</p>
+                        <h2 style="color: #1a5d3a; font-size: 24px; margin: 0 0 20px; font-weight: 600;">Cher(e) ${safeFirstName} ${safeLastName},</h2>
+                        <p style="color: #333; font-size: 16px; line-height: 1.7; margin: 0 0 20px;">Merci de rejoindre la communauté <strong style="color: #c9a227;">AgriCapital</strong>. Votre inscription à notre newsletter est confirmée : vous recevrez nos actualités, nos opportunités et nos analyses sur le foncier agricole et le palmier à huile.</p>
                         <div style="background: linear-gradient(135deg, #f0f9f4 0%, #e8f5e9 100%); border-radius: 12px; padding: 24px; margin: 24px 0; border-left: 4px solid #1a5d3a;">
                           <h3 style="color: #1a5d3a; font-size: 16px; margin: 0 0 16px; font-weight: 600;">📬 Ce que vous recevrez :</h3>
                           <ul style="color: #333; font-size: 15px; line-height: 1.8; margin: 0; padding-left: 20px;"><li>Les dernières actualités de notre projet</li><li>Des informations exclusives sur la filière palmier à huile</li><li>Des conseils pratiques pour bâtir votre patrimoine agricole</li><li>Les opportunités de partenariat en avant-première</li></ul>
                         </div>
                         <div style="text-align: center; margin: 32px 0;"><a href="https://www.agricapital.ci" style="display: inline-block; background: linear-gradient(135deg, #c9a227 0%, #d4af37 100%); color: #ffffff; text-decoration: none; padding: 16px 40px; border-radius: 50px; font-weight: 600; font-size: 16px;">🌐 Visiter notre site web</a></div>
-                        <p style="color: #666; font-size: 15px; line-height: 1.7; margin: 20px 0 0;">Merci de votre confiance !<br><strong style="color: #1a5d3a;">L'équipe AgriCapital</strong></p>
+                        <p style="color: #666; font-size: 15px; line-height: 1.7; margin: 20px 0 0;">Merci de votre confiance.<br><strong style="color: #1a5d3a;">L'équipe AgriCapital</strong><br><span style="color:#c9a227;font-weight:700;">Investir la terre. Cultiver l'avenir.</span></p>
                       </td>
                     </tr>
                     <tr><td style="background-color: #f8f9fa; padding: 30px 40px; border-top: 1px solid #e9ecef; font-size: 14px; color: #666; line-height: 1.8;"><strong style="color: #1a5d3a;">📍 Nos coordonnées</strong><br>Daloa, Haut-Sassandra, Côte d'Ivoire<br>📧 contact@agricapital.ci<br>📞 +225 05 64 55 17 17<br>🌐 www.agricapital.ci</td></tr>

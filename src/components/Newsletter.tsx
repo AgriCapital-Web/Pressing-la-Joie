@@ -22,11 +22,12 @@ const Newsletter = () => {
     try {
       const { error } = await supabase
         .from("newsletter_subscribers" as any)
-        .insert({ email } as any);
+        .insert({ email: email.trim().toLowerCase(), first_name: firstName.trim(), last_name: lastName.trim() } as any);
 
       if (error) {
         if (error.code === "23505") {
           toast.info(t.newsletter.alreadySubscribed);
+          setIsSubscribed(true);
         } else {
           throw error;
         }
