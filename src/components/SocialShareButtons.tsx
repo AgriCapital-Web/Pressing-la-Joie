@@ -16,8 +16,8 @@ const SocialShareButtons = ({ variant = "inline", className = "" }: SocialShareB
     const url = language === "fr" ? baseUrl : `${baseUrl}/${language}`;
     
     const titles: Record<string, string> = {
-      fr: "AgriCapital - Le partenaire idéal des producteurs agricoles",
-      en: "AgriCapital - The ideal partner for agricultural producers",
+      fr: "AgriCapital - Investir la terre. Cultiver l'avenir.",
+      en: "AgriCapital - Invest in land. Cultivate the future.",
       ar: "أجري كابيتال - الشريك المثالي للمنتجين الزراعيين",
       es: "AgriCapital - El socio ideal de los productores agrícolas",
       de: "AgriCapital - Der ideale Partner für landwirtschaftliche Produzenten",
