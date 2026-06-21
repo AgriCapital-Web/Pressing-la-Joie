@@ -71,17 +71,17 @@ const directionMembers = {
     { name: "كوفي بيير كوامي", role: "مستشار استراتيجي", bio: "أكثر من 10 سنوات من الخبرة في الحوكمة المؤسسية.", image: pierreImage },
   ],
   es: [
-    { name: "Inocent KOFFI", role: "Gerente", bio: "Informático, comercial y estratega, Inocent KOFFI lidera la visión global de AgriCapital y la coordinación del despliegue.", image: founderAsset.url, email: "direction@agricapital.ci" },
+    { name: "Inocent KOFFI", role: "Gerente", bio: "Informático, comercial y estratega, Inocent KOFFI lidera la visión global de AgriCapital y la coordinación del despliegue.", image: founderImage, email: "direction@agricapital.ci" },
     { name: "Éric Stéphane DIDO", role: "Encargado de Desarrollo Comercial", bio: "Contribución a la estrategia comercial y desarrollo de cartera de clientes.", image: ericImage },
     { name: "Koffi Pierre KOUAMÉ", role: "Asesor Estratégico", bio: "Más de 10 años de experiencia en gobernanza organizacional.", image: pierreImage },
   ],
   de: [
-    { name: "Inocent KOFFI", role: "Geschäftsführer", bio: "Als IT-Fachmann, Kaufmann und Stratege leitet Inocent KOFFI die Gesamtvision von AgriCapital und die Umsetzung des Modells.", image: founderAsset.url, email: "direction@agricapital.ci" },
+    { name: "Inocent KOFFI", role: "Geschäftsführer", bio: "Als IT-Fachmann, Kaufmann und Stratege leitet Inocent KOFFI die Gesamtvision von AgriCapital und die Umsetzung des Modells.", image: founderImage, email: "direction@agricapital.ci" },
     { name: "Éric Stéphane DIDO", role: "Leiter Geschäftsentwicklung", bio: "Beitrag zur Geschäftsstrategie und Kundenportfolio-Entwicklung.", image: ericImage },
     { name: "Koffi Pierre KOUAMÉ", role: "Strategischer Berater", bio: "Über 10 Jahre Erfahrung in organisatorischer Governance.", image: pierreImage },
   ],
   zh: [
-    { name: "Inocent KOFFI", role: "经理", bio: "Inocent KOFFI 负责 AgriCapital 的整体愿景、商业模式设计和部署协调。", image: founderAsset.url, email: "direction@agricapital.ci" },
+    { name: "Inocent KOFFI", role: "经理", bio: "Inocent KOFFI 负责 AgriCapital 的整体愿景、商业模式设计和部署协调。", image: founderImage, email: "direction@agricapital.ci" },
     { name: "Éric Stéphane DIDO", role: "商业发展负责人", bio: "参与商业战略准备和客户组合开发。", image: ericImage },
     { name: "Koffi Pierre KOUAMÉ", role: "战略顾问", bio: "超过10年的组织治理经验。", image: pierreImage },
   ],

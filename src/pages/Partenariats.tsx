@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { CheckCircle2, Handshake } from "lucide-react";
 import { partnerTypes, partnershipImpact } from "@/data/offerings";
-import partnershipImg from "@/assets/partenariat-agricapital.webp.asset.json";
+import partnershipImg from "@/assets/partenariat-agricapital.webp";
 
 const Partenariats = () => {
   return (
@@ -43,7 +43,7 @@ const Partenariats = () => {
             <div className="relative order-first lg:order-last">
               <div className="absolute inset-x-4 bottom-2 h-6 bg-foreground/10 blur-xl rounded-full" />
               <img
-                src={partnershipImg.url}
+                src={partnershipImg}
                 alt="AgriCapital — équipe AgriCapital en réunion dans une plantation de palmiers"
                 width={1024}
                 height={1024}

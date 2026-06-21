@@ -12,8 +12,8 @@ import founderField from "@/assets/founder-palm-field.jpg";
 import nursery from "@/assets/nursery-pepiniere-daloa.jpg";
 import prospectMeeting from "@/assets/prospect-meeting-10.jpg";
 import production from "@/assets/palm-oil-production.jpg";
-import leveTopoVideo from "@/assets/leve-topo.mp4.asset.json";
-import leveTopoPoster from "@/assets/leve-topo-poster.webp.asset.json";
+import leveTopoVideo from "@/assets/leve-topo.mp4";
+import leveTopoPoster from "@/assets/leve-topo-poster.webp";
 
 type PageKind = "foncier" | "palmier";
 
@@ -85,7 +85,7 @@ const PalmierContent = () => (
 );
 
 const TrustBridge = () => (
-  <section className="py-20"><div className="container mx-auto grid gap-10 px-4 lg:grid-cols-2 lg:items-center"><div><p className="belife-eyebrow">AgriCapital</p><h2 className="mb-6 text-3xl font-bold md:text-5xl">L'acteur de confiance qui fait le lien</h2><p className="text-lg leading-8 text-muted-foreground">AgriCapital identifie le foncier, sécurise contractuellement, développe les plantations, suit la production et accompagne la commercialisation. Vous investissez dans quelque chose de réel ; nous structurons le terrain.</p><div className="mt-6 space-y-3">{["Prospection terrain et validation agronomique", "Conventions sécurisées et cartographie GPS", "Plants certifiés, suivi technique et intrants", "Remise de plantation clé en main"].map((item) => <p key={item} className="flex items-center gap-3"><CheckCircle2 className="h-5 w-5 text-primary" /> {item}</p>)}</div><WaitlistDialog sourcePage="cta-tresor"><Button size="lg" className="mt-8 gap-2 bg-accent text-accent-foreground hover:bg-accent/90">Découvrir nos offres <ArrowRight className="h-4 w-4" /></Button></WaitlistDialog></div><video src={leveTopoVideo.url} poster={leveTopoPoster.url} className="h-[500px] w-full rounded-xl object-cover shadow-strong" autoPlay muted loop playsInline controls preload="metadata" aria-label="Levée topographique AgriCapital sur le terrain" /></div></section>
+  <section className="py-20"><div className="container mx-auto grid gap-10 px-4 lg:grid-cols-2 lg:items-center"><div><p className="belife-eyebrow">AgriCapital</p><h2 className="mb-6 text-3xl font-bold md:text-5xl">L'acteur de confiance qui fait le lien</h2><p className="text-lg leading-8 text-muted-foreground">AgriCapital identifie le foncier, sécurise contractuellement, développe les plantations, suit la production et accompagne la commercialisation. Vous investissez dans quelque chose de réel ; nous structurons le terrain.</p><div className="mt-6 space-y-3">{["Prospection terrain et validation agronomique", "Conventions sécurisées et cartographie GPS", "Plants certifiés, suivi technique et intrants", "Remise de plantation clé en main"].map((item) => <p key={item} className="flex items-center gap-3"><CheckCircle2 className="h-5 w-5 text-primary" /> {item}</p>)}</div><WaitlistDialog sourcePage="cta-tresor"><Button size="lg" className="mt-8 gap-2 bg-accent text-accent-foreground hover:bg-accent/90">Découvrir nos offres <ArrowRight className="h-4 w-4" /></Button></WaitlistDialog></div><video src={leveTopoVideo} poster={leveTopoPoster} className="h-[500px] w-full rounded-xl object-cover shadow-strong" autoPlay muted loop playsInline controls preload="metadata" aria-label="Levée topographique AgriCapital sur le terrain" /></div></section>
 );
 
 export default TreasurePage;
