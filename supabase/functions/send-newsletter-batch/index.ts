@@ -336,11 +336,39 @@ const handler = async (req: Request): Promise<Response> => {
       console.log(`Failed recipients: ${JSON.stringify(failedRecipients)}`);
     }
 
+    const status = failCount === 0 ? "sent" : successCount > 0 ? "partial" : "failed";
+    const sendPayload = {
+      campaign_id: campaignId || null,
+      subject,
+      preheader,
+      html_preview: sanitizedHtml.substring(0, 500),
+      html_content: sanitizedHtml,
+      total_recipients: recipients.length,
+      total_sent: successCount,
+      total_failed: failCount,
+      failed_recipients: failedRecipients,
+      audience_type: request.audienceType || "all",
+      status,
+      started_at: new Date().toISOString(),
+      completed_at: new Date().toISOString(),
+      batches_total: batchesTotal,
+      batches_completed: batchesTotal,
+      error_summary: failedRecipients.length ? `${failedRecipients.length} échec(s)` : null,
+      media_preview: mediaPreview,
+      sent_by: user.id,
+    };
+    await supabase.from("newsletter_sends").insert(sendPayload);
+    if (campaignId) {
+      await supabase.from("email_campaigns").update({ status, last_sent_at: new Date().toISOString(), batches_total: batchesTotal, error_summary: sendPayload.error_summary }).eq("id", campaignId);
+    }
+
     return new Response(JSON.stringify({ 
       success: true, 
       totalSent: successCount,
       totalFailed: failCount,
       totalRecipients: recipients.length,
+      batchesTotal,
+      status,
       failedRecipients: failedRecipients.length > 0 ? failedRecipients : undefined,
     }), {
       status: 200,
