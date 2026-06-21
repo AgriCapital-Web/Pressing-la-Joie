@@ -32,11 +32,13 @@ const AdminAnalytics = () => {
   const fetchAnalytics = async () => {
     setIsLoading(true);
     try {
-      // Total visits
-      const { count: total } = await supabase
-        .from("page_visits")
-        .select("*", { count: "exact", head: true });
-      setTotalVisits(total || 0);
+      const { data: publicCounter } = await (supabase as any)
+        .from("visitor_counters")
+        .select("total_visitors, weekly_visitors")
+        .eq("id", "public")
+        .maybeSingle();
+      setTotalVisits(Number(publicCounter?.total_visitors) || 0);
+      setWeekVisits(Number(publicCounter?.weekly_visitors) || 0);
 
       // Today visits
       const today = new Date();
@@ -46,15 +48,6 @@ const AdminAnalytics = () => {
         .select("*", { count: "exact", head: true })
         .gte("created_at", today.toISOString());
       setTodayVisits(todayCount || 0);
-
-      // Week visits
-      const weekAgo = new Date();
-      weekAgo.setDate(weekAgo.getDate() - 7);
-      const { count: weekCount } = await supabase
-        .from("page_visits")
-        .select("*", { count: "exact", head: true })
-        .gte("created_at", weekAgo.toISOString());
-      setWeekVisits(weekCount || 0);
 
       // Month visits
       const monthAgo = new Date();
