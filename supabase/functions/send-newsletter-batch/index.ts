@@ -118,9 +118,9 @@ const buildFormattedHtml = (html: string, preheader = "", mediaPreview: Newslett
 <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background-color:#f4f4f4;">
 <tr><td align="center" style="padding:20px 0;">
 <table role="presentation" width="600" cellpadding="0" cellspacing="0" style="max-width:600px;width:100%;background:#ffffff;border-radius:12px;overflow:hidden;box-shadow:0 4px 24px rgba(0,0,0,0.08);">
-  <tr><td style="background:linear-gradient(135deg,#166534 0%,#14532d 50%,#0f4c25 100%);padding:30px;text-align:center;">
-    <img src="${logoUrl}" alt="AgriCapital" width="92" style="display:block;margin:0 auto 12px;max-width:92px;height:auto;border:0;outline:none;text-decoration:none;">
-    <p style="color:rgba(255,255,255,0.9);font-size:13px;margin:8px 0 0;font-weight:700;line-height:1.4;">Investir la terre. Cultiver l'avenir.</p>
+  <tr><td style="background:#f5efe1;padding:30px;text-align:center;border-bottom:3px solid #166534;">
+    <img src="${logoUrl}" alt="AgriCapital" width="150" style="display:block;margin:0 auto 8px;max-width:150px;height:auto;border:0;outline:none;text-decoration:none;">
+    <p style="color:#ed7500;font-size:13px;margin:6px 0 0;font-weight:700;line-height:1.4;">Investir la terre. Cultiver l'avenir.</p>
   </td></tr>
   <tr><td style="padding:30px;font-size:15px;line-height:1.6;color:#333333;">
     ${mediaHtml}
