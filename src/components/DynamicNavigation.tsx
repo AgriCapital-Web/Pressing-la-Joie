@@ -7,7 +7,7 @@ import { useNavigate, useLocation } from "react-router-dom";
 import logo from "@/assets/logo-agricapital-v2.png";
 import { useVisitorCount } from "@/hooks/useVisitorCount";
 
-const CLIENT_PORTAL_URL = "https://pay.agricapital.ci";
+const CLIENT_PORTAL_URL = "https://client.agricapital.ci";
 const WHATSAPP_URL = "https://wa.me/2250564551717";
 const PHONE_URL = "tel:+2250564551717";
 
