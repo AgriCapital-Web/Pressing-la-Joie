@@ -43,7 +43,7 @@ const SEOJsonLD = () => {
     },
     "sameAs": [
       "https://www.facebook.com/agricapitalci",
-      "https://www.linkedin.com/company/agricapital"
+      "https://www.linkedin.com/company/agricapital-ci"
     ],
     "contactPoint": {
       "@type": "ContactPoint",
