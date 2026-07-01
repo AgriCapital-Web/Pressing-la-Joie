@@ -45,8 +45,9 @@ const TreasurePage = ({ type }: { type: PageKind }) => {
       <DynamicNavigation />
       <main>
         <section className="relative flex min-h-screen items-center justify-center overflow-hidden pt-20">
-          <img src={heroImage} alt={isFoncier ? "Foncier agricole ivoirien fertile" : "Régimes mûrs de palmier à huile"} className="absolute inset-0 h-full w-full object-cover" />
-          <div className="absolute inset-0 bg-gradient-to-br from-primary/92 via-primary/74 to-primary/52" />
+          <img src={heroImage} alt={isFoncier ? "Foncier agricole ivoirien fertile" : "Régimes mûrs de palmier à huile"} className="absolute inset-0 h-full w-full object-cover" loading="eager" />
+          {/* Overlay vert translucide : image bien visible en arrière plan, textes lisibles au premier plan */}
+          <div className="absolute inset-0 bg-gradient-to-b from-primary/55 via-primary/40 to-primary/70" />
           <div className="container relative mx-auto px-4 py-24 text-center text-primary-foreground">
             <p className="treasure-eyebrow">Le trésor caché</p>
             <h1 className="mx-auto max-w-5xl text-4xl font-black leading-tight md:text-7xl">{title}</h1>
