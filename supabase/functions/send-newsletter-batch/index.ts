@@ -50,10 +50,16 @@ const personalizeHtml = (html: string, recipient: Recipient): string => {
   const firstName = recipient.first_name?.trim() || "";
   const lastName = recipient.last_name?.trim() || "";
   const greeting = firstName ? `Bonjour ${[firstName, lastName].filter(Boolean).join(" ")},` : "Bonjour très cher,";
-  return html
+  const withGreeting = html
     .replace(/Bonjour\s*\{\{prenom\}\}\s*\{\{nom\}\}\s*,?/gi, greeting)
     .replace(/\{\{prenom\}\}/g, firstName || "")
     .replace(/\{\{nom\}\}/g, lastName || "");
+  const token = (recipient as any).unsubscribe_token || "";
+  const email = encodeURIComponent(recipient.email);
+  const unsubUrl = token
+    ? `https://hbdnleumrcrinedvkuim.supabase.co/functions/v1/newsletter-unsubscribe?token=${token}`
+    : `https://hbdnleumrcrinedvkuim.supabase.co/functions/v1/newsletter-unsubscribe?email=${email}`;
+  return withGreeting.replace(/\{\{unsubscribe_url\}\}/g, unsubUrl);
 };
 
 const getRecipients = async (supabase: any, request: NewsletterRequest): Promise<Recipient[]> => {
@@ -68,7 +74,7 @@ const getRecipients = async (supabase: any, request: NewsletterRequest): Promise
   });
 
   if (["all", "subscribers"].includes(audienceType)) {
-    const { data, error } = await supabase.from('newsletter_subscribers').select('email, first_name, last_name').eq('is_active', true);
+    const { data, error } = await supabase.from('newsletter_subscribers').select('email, first_name, last_name, unsubscribe_token').eq('is_active', true);
     if (error) throw error;
     add(data as Recipient[]);
   }
@@ -133,6 +139,10 @@ const buildFormattedHtml = (html: string, preheader = "", mediaPreview: Newslett
       <a href="https://www.agricapital.ci" style="color:#166534;text-decoration:none;">www.agricapital.ci</a> |
       <a href="mailto:contact@agricapital.ci" style="color:#166534;text-decoration:none;">contact@agricapital.ci</a> |
       <a href="tel:+2250564551717" style="color:#166534;text-decoration:none;">05 64 55 17 17</a>
+    </p>
+    <p style="color:#9ca3af;font-size:11px;margin:10px 0 0;line-height:1.5;">
+      Vous recevez ce message parce que vous êtes abonné à la newsletter AgriCapital.<br/>
+      <a href="{{unsubscribe_url}}" style="color:#9ca3af;text-decoration:underline;">Se désabonner en un clic</a>
     </p>
   </td></tr>
 </table>

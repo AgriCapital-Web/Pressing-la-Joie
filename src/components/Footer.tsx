@@ -1,7 +1,7 @@
 import logoWhite from "@/assets/logo-agricapital-v2-white.png";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { Link, useNavigate, useLocation } from "react-router-dom";
-import { HelpCircle } from "lucide-react";
+import { HelpCircle, Linkedin } from "lucide-react";
 import Newsletter from "./Newsletter";
 
 const Footer = () => {
@@ -99,7 +99,18 @@ const Footer = () => {
 
         <div className="border-t border-white/15 mt-12 pt-6 flex flex-col md:flex-row items-center justify-between gap-3">
           <p className="text-white/60 text-xs">© 2025 {t.footer.copyright}</p>
-          <p className="text-white/50 text-xs italic">Investir la terre. Cultiver l'avenir.</p>
+          <div className="flex items-center gap-3">
+            <a
+              href="https://www.linkedin.com/company/agricapital-ci"
+              target="_blank"
+              rel="noopener noreferrer"
+              aria-label="AgriCapital sur LinkedIn"
+              className="inline-flex items-center gap-1.5 text-white/80 hover:text-white text-xs bg-white/10 hover:bg-white/15 px-3 py-1.5 rounded-full transition-colors"
+            >
+              <Linkedin size={14} /> LinkedIn
+            </a>
+            <p className="text-white/50 text-xs italic">Investir la terre. Cultiver l'avenir.</p>
+          </div>
         </div>
       </div>
     </footer>

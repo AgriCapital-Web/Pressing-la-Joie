@@ -212,8 +212,8 @@ const DynamicNavigation = () => {
             >
               <Eye size={14} />
               <span className="tabular-nums">{totalVisitors.toLocaleString()}</span>
-              <span className="hidden sm:inline text-primary/50">·</span>
-              <span className="hidden sm:inline tabular-nums text-accent">{weeklyVisitors}</span>
+              <span className="text-primary/50">·</span>
+              <span className="tabular-nums text-accent">{weeklyVisitors}</span>
             </div>
             <a
               href={WHATSAPP_URL}
