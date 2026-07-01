@@ -128,10 +128,9 @@ const handler = async (req: Request): Promise<Response> => {
                 <td style="padding: 40px 20px;">
                   <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="600" style="margin: 0 auto; background-color: #ffffff; border-radius: 16px; overflow: hidden; box-shadow: 0 4px 24px rgba(0,0,0,0.1);">
                     <tr>
-                      <td style="background: linear-gradient(135deg, #1a5d3a 0%, #2d8f5e 50%, #3ab06a 100%); padding: 40px 40px 30px; text-align: center;">
-                        <img src="${logoUrl}" alt="AgriCapital" width="92" style="margin-bottom: 16px;display:inline-block;height:auto;">
-                        <h1 style="color: #ffffff; font-size: 28px; margin: 0; font-weight: 700; letter-spacing: -0.5px;">AgriCapital</h1>
-                        <p style="color: rgba(255,255,255,0.9); font-size: 14px; margin: 8px 0 0; font-weight: 400;">Investir la terre. Cultiver l'avenir.</p>
+                      <td style="background: #f5efe1; padding: 40px 40px 30px; text-align: center; border-bottom: 3px solid #1a5d3a;">
+                        <img src="${logoUrl}" alt="AgriCapital" width="140" style="margin-bottom: 12px;display:inline-block;height:auto;">
+                        <p style="color: #ed7500; font-size: 14px; margin: 4px 0 0; font-weight: 700; letter-spacing: 0.3px;">Investir la terre. Cultiver l'avenir.</p>
                       </td>
                     </tr>
                     <tr>
