@@ -8,8 +8,8 @@ import { ArrowRight, CheckCircle2, Leaf, MapPinned, Sprout } from "lucide-react"
 import palmFruit from "@/assets/palm-mature-fruits.jpg";
 import palmPlantation from "@/assets/palm-mature-plantation.jpg";
 import vavouaLand from "@/assets/vavoua-land-2026.jpg";
-import founderField from "@/assets/founder-palm-field.jpg";
-import nursery from "@/assets/nursery-pepiniere-daloa.jpg";
+import potentielAgricole from "@/assets/potentiel-agricole.jpg";
+import champSunset from "@/assets/champ-cultures-sunset.jpg";
 import prospectMeeting from "@/assets/prospect-meeting-10.jpg";
 import production from "@/assets/palm-oil-production.jpg";
 import leveTopoVideo from "@/assets/leve-topo.mp4";
@@ -46,8 +46,8 @@ const TreasurePage = ({ type }: { type: PageKind }) => {
       <main>
         <section className="relative flex min-h-screen items-center justify-center overflow-hidden pt-20">
           <img src={heroImage} alt={isFoncier ? "Foncier agricole ivoirien fertile" : "Régimes mûrs de palmier à huile"} className="absolute inset-0 h-full w-full object-cover" loading="eager" />
-          {/* Overlay vert translucide : image bien visible en arrière plan, textes lisibles au premier plan */}
-          <div className="absolute inset-0 bg-gradient-to-b from-primary/55 via-primary/40 to-primary/70" />
+          {/* Overlay orange translucide (foncier) / vert (palmier) */}
+          <div className={`absolute inset-0 ${isFoncier ? "bg-gradient-to-b from-accent/70 via-accent/55 to-accent/80" : "bg-gradient-to-b from-primary/55 via-primary/40 to-primary/70"}`} />
           <div className="container relative mx-auto px-4 py-24 text-center text-primary-foreground">
             <p className="treasure-eyebrow">Le trésor caché</p>
             <h1 className="mx-auto max-w-5xl text-4xl font-black leading-tight md:text-7xl">{title}</h1>
