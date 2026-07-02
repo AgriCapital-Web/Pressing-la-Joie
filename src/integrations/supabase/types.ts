@@ -192,28 +192,43 @@ export type Database = {
       }
       newsletter_subscribers: {
         Row: {
+          category: string
           email: string
           first_name: string
           id: string
           is_active: boolean
           last_name: string
+          source: string
           subscribed_at: string
+          tag: string
+          unsubscribe_token: string
+          unsubscribed_at: string | null
         }
         Insert: {
+          category?: string
           email: string
           first_name?: string
           id?: string
           is_active?: boolean
           last_name?: string
+          source?: string
           subscribed_at?: string
+          tag?: string
+          unsubscribe_token?: string
+          unsubscribed_at?: string | null
         }
         Update: {
+          category?: string
           email?: string
           first_name?: string
           id?: string
           is_active?: boolean
           last_name?: string
+          source?: string
           subscribed_at?: string
+          tag?: string
+          unsubscribe_token?: string
+          unsubscribed_at?: string | null
         }
         Relationships: []
       }
