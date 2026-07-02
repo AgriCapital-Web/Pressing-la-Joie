@@ -8,8 +8,8 @@ import { ArrowRight, CheckCircle2, Leaf, MapPinned, Sprout } from "lucide-react"
 import palmFruit from "@/assets/palm-mature-fruits.jpg";
 import palmPlantation from "@/assets/palm-mature-plantation.jpg";
 import vavouaLand from "@/assets/vavoua-land-2026.jpg";
-import founderField from "@/assets/founder-palm-field.jpg";
-import nursery from "@/assets/nursery-pepiniere-daloa.jpg";
+import potentielAgricole from "@/assets/potentiel-agricole.jpg";
+import champSunset from "@/assets/champ-cultures-sunset.jpg";
 import prospectMeeting from "@/assets/prospect-meeting-10.jpg";
 import production from "@/assets/palm-oil-production.jpg";
 import leveTopoVideo from "@/assets/leve-topo.mp4";
@@ -46,8 +46,8 @@ const TreasurePage = ({ type }: { type: PageKind }) => {
       <main>
         <section className="relative flex min-h-screen items-center justify-center overflow-hidden pt-20">
           <img src={heroImage} alt={isFoncier ? "Foncier agricole ivoirien fertile" : "Régimes mûrs de palmier à huile"} className="absolute inset-0 h-full w-full object-cover" loading="eager" />
-          {/* Overlay vert translucide : image bien visible en arrière plan, textes lisibles au premier plan */}
-          <div className="absolute inset-0 bg-gradient-to-b from-primary/55 via-primary/40 to-primary/70" />
+          {/* Overlay orange translucide (foncier) / vert (palmier) */}
+          <div className={`absolute inset-0 ${isFoncier ? "bg-gradient-to-b from-accent/70 via-accent/55 to-accent/80" : "bg-gradient-to-b from-primary/55 via-primary/40 to-primary/70"}`} />
           <div className="container relative mx-auto px-4 py-24 text-center text-primary-foreground">
             <p className="treasure-eyebrow">Le trésor caché</p>
             <h1 className="mx-auto max-w-5xl text-4xl font-black leading-tight md:text-7xl">{title}</h1>
@@ -68,9 +68,9 @@ const TreasurePage = ({ type }: { type: PageKind }) => {
 
 const FoncierContent = () => (
   <>
-    <section className="py-20"><div className="container mx-auto grid gap-10 px-4 lg:grid-cols-2 lg:items-center"><img src={founderField} alt="Agriculteur dans un champ" className="h-[460px] w-full rounded-xl object-cover shadow-strong" /><div><p className="belife-eyebrow">Le paradoxe</p><h2 className="mb-6 text-3xl font-bold md:text-5xl">Un continent riche de terres. Des familles appauvries faute de les valoriser.</h2><p className="text-lg leading-8 text-muted-foreground">En Afrique, des familles possèdent des dizaines d'hectares de bas-fonds, plateaux fertiles et zones agricoles. Pourtant ces terres ne produisent rien, ne génèrent aucun revenu et attendent une structure capable de les transformer.</p><p className="mt-5 font-bold text-primary">Ce n'est pas un manque de terres. C'est un manque d'accès à la bonne structure.</p></div></div></section>
+    <section className="py-20"><div className="container mx-auto grid gap-10 px-4 lg:grid-cols-2 lg:items-center"><img src={potentielAgricole} alt="Mains d'agriculteur tenant une terre fertile au coucher du soleil" className="h-[460px] w-full rounded-xl object-cover shadow-strong" /><div><p className="belife-eyebrow">Le paradoxe</p><h2 className="mb-6 text-3xl font-bold md:text-5xl">Un continent riche de terres. Des familles appauvries faute de les valoriser.</h2><p className="text-lg leading-8 text-muted-foreground">En Afrique, des familles possèdent des dizaines d'hectares de bas-fonds, plateaux fertiles et zones agricoles. Pourtant ces terres ne produisent rien, ne génèrent aucun revenu et attendent une structure capable de les transformer.</p><p className="mt-5 font-bold text-primary">Ce n'est pas un manque de terres. C'est un manque d'accès à la bonne structure.</p></div></div></section>
     <section className="bg-primary py-20 text-primary-foreground"><div className="container mx-auto px-4"><h2 className="mx-auto mb-10 max-w-4xl text-center text-3xl font-bold md:text-5xl">Ce que la plupart des Ivoiriens urbains ignorent sur le foncier agricole</h2><div className="grid gap-4 md:grid-cols-4">{stats.map(([value, label]) => <Card key={value} className="border-primary-foreground/20 bg-primary-foreground/10"><CardContent className="p-6 text-center"><p className="text-3xl font-black text-accent">{value}</p><p className="mt-3 text-sm text-primary-foreground/85">{label}</p></CardContent></Card>)}</div></div></section>
-    <section className="py-20"><div className="container mx-auto px-4"><h2 className="mb-10 text-center text-3xl font-bold md:text-5xl">Pourquoi le foncier agricole est un actif puissant</h2><div className="grid gap-6 md:grid-cols-3">{[[MapPinned,"Un actif tangible et durable",vavouaLand],[Sprout,"La terre produit sans s'épuiser",nursery],[Leaf,"Un patrimoine transmissible",prospectMeeting]].map(([Icon, title, image]: any) => <Card key={title} className="overflow-hidden"><img src={image} alt={title} className="h-52 w-full object-cover" /><CardContent className="p-6"><Icon className="mb-4 h-8 w-8 text-accent" /><h3 className="mb-3 text-xl font-bold">{title}</h3><p className="text-muted-foreground">Un foncier bien sécurisé et valorisé devient un patrimoine visible, productif et transmissible, capable de créer de la valeur pendant des décennies.</p></CardContent></Card>)}</div></div></section>
+    <section className="py-20"><div className="container mx-auto px-4"><h2 className="mb-10 text-center text-3xl font-bold md:text-5xl">Pourquoi le foncier agricole est un actif puissant</h2><div className="grid gap-6 md:grid-cols-3">{[[MapPinned,"Un actif tangible et durable",vavouaLand],[Sprout,"La terre produit sans s'épuiser",champSunset],[Leaf,"Un patrimoine transmissible",prospectMeeting]].map(([Icon, title, image]: any) => <Card key={title} className="overflow-hidden"><img src={image} alt={title} className="h-52 w-full object-cover" /><CardContent className="p-6"><Icon className="mb-4 h-8 w-8 text-accent" /><h3 className="mb-3 text-xl font-bold">{title}</h3><p className="text-muted-foreground">Un foncier bien sécurisé et valorisé devient un patrimoine visible, productif et transmissible, capable de créer de la valeur pendant des décennies.</p></CardContent></Card>)}</div></div></section>
     <TrustBridge />
   </>
 );

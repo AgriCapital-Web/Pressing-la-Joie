@@ -24,7 +24,7 @@
     --muted: 36 20% 95%;
     --muted-foreground: 160 8% 40%;
 
-    --accent: 22 78% 48%;
+    --accent: 28 95% 50%;
     --accent-foreground: 0 0% 100%;
 
     --destructive: 0 75% 50%;
@@ -39,9 +39,9 @@
     /* AgriCapital palette — Belife-inspired sober corporate */
     --agri-green: 152 50% 24%;
     --agri-green-light: 152 40% 38%;
-    /* Orange assagi (moins pur, meilleure lisibilité sur fond clair et foncé) */
-    --agri-orange: 28 88% 42%;
-    --agri-orange-light: 28 82% 52%;
+    /* Orange officiel AgriCapital (dérivé du slogan du logo) — lisible sur fond blanc ET sur fond vert */
+    --agri-orange: 28 95% 50%;
+    --agri-orange-light: 30 100% 60%;
     --agri-gray: 160 8% 30%;
     --agri-gray-light: 160 5% 55%;
     --agri-cream: 36 30% 96%;
@@ -49,7 +49,7 @@
     /* Gradients — refined */
     --gradient-primary: linear-gradient(160deg, hsl(152 50% 24%) 0%, hsl(152 42% 32%) 100%);
     --gradient-hero: linear-gradient(160deg, hsl(160 25% 12% / 0.78) 0%, hsl(152 50% 20% / 0.72) 100%);
-    --gradient-accent: linear-gradient(135deg, hsl(28 88% 42%) 0%, hsl(28 82% 52%) 100%);
+    --gradient-accent: linear-gradient(135deg, hsl(28 95% 50%) 0%, hsl(30 100% 60%) 100%);
     
     /* Shadows — more refined */
     --shadow-soft: 0 1px 3px 0 hsl(0 0% 0% / 0.04), 0 1px 2px -1px hsl(0 0% 0% / 0.04);
@@ -74,7 +74,7 @@
     --secondary-foreground: 40 10% 95%;
     --muted: 160 10% 18%;
     --muted-foreground: 40 10% 65%;
-    --accent: 28 85% 52%;
+    --accent: 30 100% 60%;
     --accent-foreground: 160 10% 8%;
     --destructive: 0 62.8% 30.6%;
     --destructive-foreground: 40 10% 95%;
