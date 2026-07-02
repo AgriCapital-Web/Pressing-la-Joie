@@ -125,9 +125,9 @@ const DynamicNavigation = () => {
 
   return (
     <nav
-      className={`fixed top-0 left-0 right-0 transition-all duration-300 ${
-        scrolled ? "bg-background/98 backdrop-blur-md shadow-medium" : "bg-background/95 backdrop-blur-sm"
-      } border-b border-border`}
+      className={`fixed top-0 left-0 right-0 transition-all duration-300 bg-white border-b border-border ${
+        scrolled ? "shadow-medium" : "shadow-soft"
+      }`}
       style={{ zIndex: 2147483000 }}
     >
       <div className="container mx-auto px-4 lg:px-6 overflow-visible">
