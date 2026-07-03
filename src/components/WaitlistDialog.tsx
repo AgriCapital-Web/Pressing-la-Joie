@@ -1,16 +1,16 @@
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
-import WaitlistForm from "@/components/WaitlistForm";
+import React from "react";
 
-const WaitlistDialog = ({ children, sourcePage }: { children: React.ReactNode; sourcePage?: string }) => (
-  <Dialog>
-    <DialogTrigger asChild>{children}</DialogTrigger>
-    <DialogContent className="max-h-[92vh] max-w-3xl overflow-y-auto">
-      <DialogHeader>
-        <DialogTitle>Rejoindre la liste d'attente AgriCapital</DialogTitle>
-      </DialogHeader>
-      <WaitlistForm sourcePage={sourcePage} />
-    </DialogContent>
-  </Dialog>
-);
+// Redirige tous les boutons "liste d'attente" vers le portail leads public
+const LEADS_URL = "https://app.agricapital.ci/leads/public";
+
+const WaitlistDialog = ({ children }: { children: React.ReactNode; sourcePage?: string }) => {
+  const child = React.Children.only(children) as React.ReactElement;
+  return React.cloneElement(child, {
+    onClick: (e: React.MouseEvent) => {
+      e.preventDefault();
+      window.open(LEADS_URL, "_blank", "noopener,noreferrer");
+    },
+  });
+};
 
 export default WaitlistDialog;
