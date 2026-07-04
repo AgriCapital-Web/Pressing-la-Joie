@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { useNavigate, useSearchParams } from "react-router-dom";
+import { useSearchParams, useLocation } from "react-router-dom";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Users, History, Send, Upload } from "lucide-react";
 import AdminNewsletter from "./AdminNewsletter";
@@ -10,9 +10,20 @@ import AdminImportEmails from "./AdminImportEmails";
 const TABS = ["abonnes", "campagnes", "historique", "import"] as const;
 type TabKey = typeof TABS[number];
 
+const pathToTab: Record<string, TabKey> = {
+  "/admin/newsletter": "abonnes",
+  "/admin/email-campaigns": "campagnes",
+  "/admin/newsletter-history": "historique",
+  "/admin/import-emails": "import",
+};
+
 const AdminCampagnes = () => {
   const [params, setParams] = useSearchParams();
-  const initial = (params.get("tab") as TabKey) || "abonnes";
+  const location = useLocation();
+  const initial =
+    (params.get("tab") as TabKey) ||
+    pathToTab[location.pathname] ||
+    "abonnes";
   const [tab, setTab] = useState<TabKey>(TABS.includes(initial) ? initial : "abonnes");
 
   useEffect(() => {
