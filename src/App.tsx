@@ -39,6 +39,7 @@ const AdminNewsletterHistory = lazy(() => import("./pages/admin/AdminNewsletterH
 const AdminEmailCampaigns = lazy(() => import("./pages/admin/AdminEmailCampaigns"));
 const AdminWaitlist = lazy(() => import("./pages/admin/AdminWaitlist"));
 const AdminImportEmails = lazy(() => import("./pages/admin/AdminImportEmails"));
+const AdminCampagnes = lazy(() => import("./pages/admin/AdminCampagnes"));
 const AdminPartnershipRequests = lazy(() => import("./pages/admin/AdminPartnershipRequests"));
 const AdminContactMessages = lazy(() => import("./pages/admin/AdminContactMessages"));
 const AdminAIConversations = lazy(() => import("./pages/admin/AdminAIConversations"));
@@ -130,11 +131,12 @@ const AppContent = () => {
 
         {/* Communication */}
         <Route path="/admin/contact-messages" element={<AdminContactMessages />} />
-        <Route path="/admin/newsletter" element={<AdminNewsletter />} />
-        <Route path="/admin/newsletter-history" element={<AdminNewsletterHistory />} />
-        <Route path="/admin/email-campaigns" element={<AdminEmailCampaigns />} />
+        <Route path="/admin/campagnes" element={<AdminCampagnes />} />
+        <Route path="/admin/newsletter" element={<AdminCampagnes />} />
+        <Route path="/admin/newsletter-history" element={<AdminCampagnes />} />
+        <Route path="/admin/email-campaigns" element={<AdminCampagnes />} />
+        <Route path="/admin/import-emails" element={<AdminCampagnes />} />
         <Route path="/admin/waitlist" element={<AdminWaitlist />} />
-        <Route path="/admin/import-emails" element={<AdminImportEmails />} />
         <Route path="/admin/partnership-requests" element={<AdminPartnershipRequests />} />
         <Route path="/admin/ai-conversations" element={<AdminAIConversations />} />
         <Route path="/admin/visitor-contacts" element={<AdminVisitorContacts />} />
