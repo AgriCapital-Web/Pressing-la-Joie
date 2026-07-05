@@ -60,6 +60,7 @@ const TreasurePage = ({ type }: { type: PageKind }) => {
         </section>
 
         {isFoncier ? <FoncierContent /> : <PalmierContent />}
+        <EspaceClientBlock />
       </main>
       <Footer />
     </div>
@@ -87,6 +88,30 @@ const PalmierContent = () => (
 
 const TrustBridge = () => (
   <section className="py-20"><div className="container mx-auto grid gap-10 px-4 lg:grid-cols-2 lg:items-center"><div><p className="belife-eyebrow">AgriCapital</p><h2 className="mb-6 text-3xl font-bold md:text-5xl">L'acteur de confiance qui fait le lien</h2><p className="text-lg leading-8 text-muted-foreground">AgriCapital identifie le foncier, sécurise contractuellement, développe les plantations, suit la production et accompagne la commercialisation. Vous investissez dans quelque chose de réel ; nous structurons le terrain.</p><div className="mt-6 space-y-3">{["Prospection terrain et validation agronomique", "Conventions sécurisées et cartographie GPS", "Plants certifiés, suivi technique et intrants", "Remise de plantation clé en main"].map((item) => <p key={item} className="flex items-center gap-3"><CheckCircle2 className="h-5 w-5 text-primary" /> {item}</p>)}</div><WaitlistDialog sourcePage="cta-tresor"><Button size="lg" className="mt-8 gap-2 bg-accent text-accent-foreground hover:bg-accent/90">Découvrir nos offres <ArrowRight className="h-4 w-4" /></Button></WaitlistDialog></div><video src={leveTopoVideo} poster={leveTopoPoster} className="h-[500px] w-full rounded-xl object-cover shadow-strong" autoPlay muted loop playsInline controls preload="metadata" aria-label="Levée topographique AgriCapital sur le terrain" /></div></section>
+);
+
+const EspaceClientBlock = () => (
+  <section className="py-16 bg-gradient-to-br from-primary/5 via-accent/5 to-primary/10">
+    <div className="container mx-auto px-4">
+      <div className="mx-auto max-w-4xl rounded-2xl border border-primary/20 bg-card p-8 md:p-12 shadow-strong text-center">
+        <p className="belife-eyebrow justify-center">Portail sécurisé</p>
+        <h2 className="mb-4 text-2xl md:text-4xl font-bold text-primary">Espace Client Digital AgriCapital</h2>
+        <p className="mx-auto max-w-2xl text-base md:text-lg text-muted-foreground leading-relaxed">
+          Un portail sécurisé vous permettant d'effectuer vos paiements mensuels, de suivre l'évolution de votre plantation, d'accéder à vos documents, rapports, photos et vidéos de terrain, et d'échanger avec nos équipes tout au long du cycle de production.
+        </p>
+        <a
+          href="https://client.agricapital.ci"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="inline-flex mt-8 items-center gap-2 rounded-full bg-accent px-8 py-4 text-white font-semibold shadow-medium hover:bg-accent/90 transition-all active:scale-95"
+        >
+          Accéder à mon Espace Client
+          <ArrowRight className="h-4 w-4" />
+        </a>
+        <p className="mt-4 text-xs text-muted-foreground">client.agricapital.ci</p>
+      </div>
+    </div>
+  </section>
 );
 
 export default TreasurePage;
