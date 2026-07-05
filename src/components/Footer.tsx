@@ -1,4 +1,5 @@
-import logoWhite from "@/assets/logo-agricapital-v2-white.png";
+import logoWhiteAsset from "@/assets/logo-agricapital-white-v3.png.asset.json";
+const logoWhite = logoWhiteAsset.url;
 import { useLanguage } from "@/contexts/LanguageContext";
 import { Link, useNavigate, useLocation } from "react-router-dom";
 import { HelpCircle, Linkedin } from "lucide-react";

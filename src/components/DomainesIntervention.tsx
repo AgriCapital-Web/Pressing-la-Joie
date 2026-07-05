@@ -1,7 +1,8 @@
 import { Sprout, Landmark, Microscope, Handshake, ArrowRight } from "lucide-react";
 import { useLanguage, Language } from "@/contexts/LanguageContext";
 
-import img1 from "@/assets/nursery-pepiniere-daloa.jpg";
+import img1Asset from "@/assets/plantation-cle-en-main.png.asset.json";
+const img1 = img1Asset.url;
 import img2 from "@/assets/vavoua-land-2026.jpg";
 import img3 from "@/assets/palm-mature-fruits.jpg";
 import img4 from "@/assets/palm-oil-production.jpg";
@@ -38,7 +39,7 @@ const domains: Domain[] = [
     image: img2,
     Icon: Landmark,
     title: {
-      fr: "Sécurisation foncière",
+      fr: "Sécurisation et accès au foncier agricole",
       en: "Land securing",
       ar: "تأمين الأراضي",
       es: "Aseguramiento de tierras",
@@ -46,7 +47,7 @@ const domains: Domain[] = [
       zh: "土地保障",
     },
     description: {
-      fr: "Identification, vérification et sécurisation juridique du foncier agricole (opposable aux tiers), en lien avec les autorités locales et coutumières.",
+      fr: "Nous identifions, analysons et sécurisons juridiquement les terres agricoles afin de garantir des projets fiables, structurés et durables.",
       en: "Identification, due diligence and legal securing of agricultural land, working with local and customary authorities.",
       ar: "تحديد الأراضي الزراعية والتحقق منها وتأمينها قانونياً، بالتنسيق مع السلطات المحلية والعرفية.",
       es: "Identificación, verificación y aseguramiento jurídico de tierras agrícolas, con autoridades locales y consuetudinarias.",

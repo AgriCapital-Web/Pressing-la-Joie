@@ -4,7 +4,8 @@ import { Button } from "@/components/ui/button";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { Language, languageNames } from "@/lib/translations";
 import { Link, useNavigate, useLocation } from "react-router-dom";
-import logo from "@/assets/logo-agricapital-v2.png";
+import logoAsset from "@/assets/logo-agricapital-main-v3.png.asset.json";
+const logo = logoAsset.url;
 
 const languages: Language[] = ["fr", "en", "ar", "es", "de", "zh"];
 
