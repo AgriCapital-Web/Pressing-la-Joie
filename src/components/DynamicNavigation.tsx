@@ -4,7 +4,8 @@ import { Button } from "@/components/ui/button";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { Language, languageNames } from "@/lib/translations";
 import { useNavigate, useLocation } from "react-router-dom";
-import logo from "@/assets/logo-agricapital-v2.png";
+import logoAsset from "@/assets/logo-agricapital-main-v3.png.asset.json";
+const logo = logoAsset.url;
 import { useVisitorCount } from "@/hooks/useVisitorCount";
 
 const CLIENT_PORTAL_URL = "https://client.agricapital.ci";
