@@ -29,6 +29,12 @@ function escapeHtml(text: string): string {
   return text.replace(/[&<>"']/g, (char) => map[char]);
 }
 
+const brevoFetch = (apiKey: string, path: string, init: RequestInit = {}) =>
+  fetch(`https://api.brevo.com/v3${path}`, {
+    ...init,
+    headers: { "api-key": apiKey, "Content-Type": "application/json", ...(init.headers || {}) },
+  });
+
 // Simple rate limiting storage
 const rateLimitMap = new Map<string, { count: number; resetTime: number }>();
 
@@ -112,16 +118,10 @@ const handler = async (req: Request): Promise<Response> => {
     `;
 
     const BREVO_API_KEY = Deno.env.get("BREVO_API_KEY");
-    const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
-    if (!BREVO_API_KEY || !LOVABLE_API_KEY) throw new Error("Brevo is not configured");
+    if (!BREVO_API_KEY) throw new Error("Brevo is not configured");
 
-    const emailResponse = await fetch("https://connector-gateway.lovable.dev/brevo/smtp/email", {
+    const emailResponse = await brevoFetch(BREVO_API_KEY, "/smtp/email", {
       method: "POST",
-      headers: {
-        "Authorization": `Bearer ${LOVABLE_API_KEY}`,
-        "X-Connection-Api-Key": BREVO_API_KEY,
-        "Content-Type": "application/json",
-      },
       body: JSON.stringify({
       sender: { name: "AgriCapital Contact", email: "contact@agricapital.ci" },
       to: [{ email: "contact@agricapital.ci" }, { email: "inocent.koffi@agricapital.ci" }, { email: "innocentkoffi1@gmail.com" }],

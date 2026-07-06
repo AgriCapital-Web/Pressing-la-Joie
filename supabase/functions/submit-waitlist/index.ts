@@ -27,6 +27,12 @@ const escapeHtml = (value: unknown) => String(value ?? "")
   .replace(/"/g, "&quot;")
   .replace(/'/g, "&#039;");
 
+const brevoFetch = (apiKey: string, path: string, init: RequestInit = {}) =>
+  fetch(`https://api.brevo.com/v3${path}`, {
+    ...init,
+    headers: { "api-key": apiKey, "Content-Type": "application/json", ...(init.headers || {}) },
+  });
+
 const toNumber = (value: unknown) => {
   if (value === "" || value === null || value === undefined) return null;
   const number = typeof value === "number" ? value : Number(String(value).replace(",", "."));
@@ -57,8 +63,7 @@ serve(async (req) => {
     if (error) throw error;
 
     const BREVO_API_KEY = Deno.env.get("BREVO_API_KEY");
-    const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
-    if (BREVO_API_KEY && LOVABLE_API_KEY) {
+    if (BREVO_API_KEY) {
       const html = `<h2>Nouvelle inscription liste d'attente AgriCapital</h2>
         <p><strong>Nom complet :</strong> ${escapeHtml(parsed.fullName)}</p>
         <p><strong>Email :</strong> ${escapeHtml(parsed.email)}</p>
@@ -71,13 +76,8 @@ serve(async (req) => {
         <p><strong>Message :</strong><br>${escapeHtml(parsed.message).replace(/\n/g, "<br>")}</p>
         <p><em>Source : ${escapeHtml(parsed.sourcePage)}</em></p>`;
 
-      const emailResponse = await fetch("https://connector-gateway.lovable.dev/brevo/smtp/email", {
+      const emailResponse = await brevoFetch(BREVO_API_KEY, "/smtp/email", {
         method: "POST",
-        headers: {
-          "Authorization": `Bearer ${LOVABLE_API_KEY}`,
-          "X-Connection-Api-Key": BREVO_API_KEY,
-          "Content-Type": "application/json",
-        },
         body: JSON.stringify({
           sender: { name: "AgriCapital", email: "contact@agricapital.ci" },
           to: [{ email: "innocentkoffi1@gmail.com" }, { email: "contact@agricapital.ci" }],

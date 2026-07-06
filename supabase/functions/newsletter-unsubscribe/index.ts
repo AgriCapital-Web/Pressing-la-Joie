@@ -18,6 +18,12 @@ p{color:#4b5563;line-height:1.6;margin:8px 0}
 a{color:#166534}</style></head>
 <body><div class="box"><p class="brand">AgriCapital · Investir la terre. Cultiver l'avenir.</p><h1>${title}</h1>${body}<p style="margin-top:20px;font-size:12px;color:#9ca3af">Vous pouvez toujours revenir sur <a href="https://www.agricapital.ci">www.agricapital.ci</a>.</p></div></body></html>`;
 
+const brevoFetch = (apiKey: string, path: string, init: RequestInit = {}) =>
+  fetch(`https://api.brevo.com/v3${path}`, {
+    ...init,
+    headers: { "api-key": apiKey, "Content-Type": "application/json", ...(init.headers || {}) },
+  });
+
 serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
 
@@ -53,16 +59,10 @@ serve(async (req) => {
 
     // Best-effort: mirror status to Brevo (contact blacklisted)
     const BREVO = Deno.env.get("BREVO_API_KEY");
-    const LOV = Deno.env.get("LOVABLE_API_KEY");
-    if (BREVO && LOV) {
+    if (BREVO) {
       try {
-        await fetch(`https://connector-gateway.lovable.dev/brevo/contacts/${encodeURIComponent(data.email)}`, {
+        await brevoFetch(BREVO, `/contacts/${encodeURIComponent(data.email)}`, {
           method: "PUT",
-          headers: {
-            "Authorization": `Bearer ${LOV}`,
-            "X-Connection-Api-Key": BREVO,
-            "Content-Type": "application/json",
-          },
           body: JSON.stringify({ emailBlacklisted: true }),
         });
       } catch (e) { console.log("Brevo blacklist warn:", e); }
