@@ -6,6 +6,12 @@ const corsHeaders = {
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
 };
 
+const brevoFetch = (apiKey: string, path: string, init: RequestInit = {}) =>
+  fetch(`https://api.brevo.com/v3${path}`, {
+    ...init,
+    headers: { "api-key": apiKey, "Content-Type": "application/json", ...(init.headers || {}) },
+  });
+
 // Cron entrypoint: picks the most recent 'ready' or 'draft' campaign and sends it.
 // If none is ready, generates a fresh newsletter via generate-newsletter and sends it.
 serve(async (req) => {
@@ -78,8 +84,7 @@ serve(async (req) => {
 
     const recipients = (subs || []).filter((s: any) => s.email && s.email.includes("@"));
     const BREVO = Deno.env.get("BREVO_API_KEY");
-    const LOV = Deno.env.get("LOVABLE_API_KEY");
-    if (!BREVO || !LOV) throw new Error("Brevo not configured");
+    if (!BREVO) throw new Error("Brevo not configured");
 
     const logoUrl = "https://www.agricapital.ci/favicon.png";
     const wrap = (inner: string, unsubUrl: string) => `<!DOCTYPE html><html lang="fr"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"></head><body style="margin:0;background:#f4f4f4;font-family:'Segoe UI',Arial,sans-serif;"><table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:#f4f4f4"><tr><td align="center" style="padding:20px 0"><table role="presentation" width="600" cellpadding="0" cellspacing="0" style="max-width:600px;background:#fff;border-radius:12px;overflow:hidden;box-shadow:0 4px 24px rgba(0,0,0,.08)"><tr><td style="background:#f5efe1;padding:30px;text-align:center;border-bottom:3px solid #166534"><img src="${logoUrl}" alt="AgriCapital" width="150" style="display:block;margin:0 auto 8px"><p style="color:#ed7500;font-size:13px;margin:6px 0 0;font-weight:700">Investir la terre. Cultiver l'avenir.</p></td></tr><tr><td style="padding:30px;font-size:15px;line-height:1.6;color:#333">${inner}</td></tr><tr><td style="background:#f9fafb;padding:20px 30px;text-align:center;border-top:1px solid #e5e7eb"><p style="color:#9ca3af;font-size:11px;margin:0"><a href="https://www.agricapital.ci" style="color:#166534;text-decoration:none">www.agricapital.ci</a></p><p style="color:#9ca3af;font-size:11px;margin:10px 0 0"><a href="${unsubUrl}" style="color:#9ca3af;text-decoration:underline">Se désabonner</a></p></td></tr></table></td></tr></table></body></html>`;
@@ -91,9 +96,8 @@ serve(async (req) => {
       await Promise.all(batch.map(async (r: any) => {
         const unsubUrl = `https://hbdnleumrcrinedvkuim.supabase.co/functions/v1/newsletter-unsubscribe?token=${r.unsubscribe_token || ""}&email=${encodeURIComponent(r.email)}`;
         try {
-          const res = await fetch("https://connector-gateway.lovable.dev/brevo/smtp/email", {
+          const res = await brevoFetch(BREVO, "/smtp/email", {
             method: "POST",
-            headers: { "Authorization": `Bearer ${LOV}`, "X-Connection-Api-Key": BREVO, "Content-Type": "application/json" },
             body: JSON.stringify({
               sender: { name: "AgriCapital", email: "contact@agricapital.ci" },
               to: [{ email: r.email, name: [r.first_name, r.last_name].filter(Boolean).join(" ") || undefined }],

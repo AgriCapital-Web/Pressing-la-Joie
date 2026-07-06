@@ -47,6 +47,12 @@ function escapeHtml(text: string): string {
   return text.replace(/[&<>"']/g, (char) => htmlEntities[char] || char);
 }
 
+const brevoFetch = (apiKey: string, path: string, init: RequestInit = {}) =>
+  fetch(`https://api.brevo.com/v3${path}`, {
+    ...init,
+    headers: { "api-key": apiKey, "Content-Type": "application/json", ...(init.headers || {}) },
+  });
+
 // Create admin notification for newsletter subscription
 async function createNewsletterNotification(firstName: string, lastName: string, email: string) {
   try {
@@ -96,11 +102,10 @@ const handler = async (req: Request): Promise<Response> => {
     }
 
     const BREVO_API_KEY = Deno.env.get("BREVO_API_KEY");
-    const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
 
     console.log("Sending welcome email to:", email);
 
-    if (!BREVO_API_KEY || !LOVABLE_API_KEY) {
+    if (!BREVO_API_KEY) {
       console.log("Brevo not configured, skipping email");
       return new Response(JSON.stringify({ success: true, message: "Email skipped - no API key" }), {
         status: 200,
@@ -154,13 +159,8 @@ const handler = async (req: Request): Promise<Response> => {
           </body>
           </html>`;
 
-    const emailResponse = await fetch("https://connector-gateway.lovable.dev/brevo/smtp/email", {
+    const emailResponse = await brevoFetch(BREVO_API_KEY, "/smtp/email", {
       method: "POST",
-      headers: {
-        Authorization: `Bearer ${LOVABLE_API_KEY}`,
-        "X-Connection-Api-Key": BREVO_API_KEY,
-        "Content-Type": "application/json",
-      },
       body: JSON.stringify({
         sender: { name: "AgriCapital Newsletter", email: "contact@agricapital.ci" },
         to: [{ email }],

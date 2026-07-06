@@ -44,6 +44,12 @@ const sanitizeHtml = (html: string): string => {
   return sanitized;
 };
 
+const brevoFetch = (apiKey: string, path: string, init: RequestInit = {}) =>
+  fetch(`https://api.brevo.com/v3${path}`, {
+    ...init,
+    headers: { "api-key": apiKey, "Content-Type": "application/json", ...(init.headers || {}) },
+  });
+
 const handler = async (req: Request): Promise<Response> => {
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
@@ -51,8 +57,7 @@ const handler = async (req: Request): Promise<Response> => {
 
   try {
     const BREVO_API_KEY = Deno.env.get("BREVO_API_KEY");
-    const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
-    if (!BREVO_API_KEY || !LOVABLE_API_KEY) {
+    if (!BREVO_API_KEY) {
       throw new Error("Brevo is not configured");
     }
 
@@ -148,13 +153,8 @@ const handler = async (req: Request): Promise<Response> => {
     // Log email send for audit
     console.log(`Email sent by admin ${user.email} to ${emailData.to.join(', ')}`);
 
-    const response = await fetch("https://connector-gateway.lovable.dev/brevo/smtp/email", {
+    const response = await brevoFetch(BREVO_API_KEY, "/smtp/email", {
       method: "POST",
-      headers: {
-        "Authorization": `Bearer ${LOVABLE_API_KEY}`,
-        "X-Connection-Api-Key": BREVO_API_KEY,
-        "Content-Type": "application/json",
-      },
       body: JSON.stringify(emailPayload),
     });
 

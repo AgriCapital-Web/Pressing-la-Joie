@@ -49,6 +49,11 @@ const escapeHtml = (value: unknown) => String(value ?? "")
 
 const stripHtml = (html: string) => html.replace(/<style[\s\S]*?<\/style>/gi, " ").replace(/<[^>]+>/g, " ").replace(/\s+/g, " ").trim();
 
+const SITE_ORIGIN = "https://www.agricapital.ci";
+const DEFAULT_IMAGE_URL = `${SITE_ORIGIN}/__l5e/assets-v1/fe11784f-7405-48a2-a5b4-3ce4b088b453/plantation-cle-en-main.png`;
+const DEFAULT_VIDEO_URL = `${SITE_ORIGIN}/__l5e/assets-v1/cb809930-adf4-4703-acc1-d41f3e54a02f/leve-topo.mp4`;
+const DEFAULT_VIDEO_POSTER_URL = `${SITE_ORIGIN}/__l5e/assets-v1/78d51e8c-edc2-4973-8b84-bb6aad9180d2/leve-topo-poster.webp`;
+
 serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
 
@@ -71,8 +76,8 @@ serve(async (req) => {
 
     const audience = audienceLabels[targetAudience] || audienceLabels.all;
     const mediaInstruction = [
-      includeImage ? "prévoir un bloc image avec une légende utile" : "ne pas insérer d'image",
-      includeVideo ? "prévoir un bloc vidéo sous forme de lien/bouton compatible email" : "ne pas insérer de vidéo",
+      includeImage ? "prévoir une image affichée directement dans l'email, jamais un texte 'voir ici'" : "ne pas insérer d'image",
+      includeVideo ? "prévoir une vidéo affichée en aperçu directement dans l'email, jamais un lien ni bouton 'voir la vidéo'" : "ne pas insérer de vidéo",
     ].join(" ; ");
 
     const systemPrompt = `Tu es un expert senior en marketing digital, communication institutionnelle, copywriting, acquisition client, relations investisseurs et fidélisation pour AgriCapital SARL.
@@ -86,8 +91,9 @@ Règles :
 - Types possibles : prospection, investisseurs, partenaires, événement, promotion, newsletter, relance, fidélisation, rendez-vous, institutionnel, collecte de fonds, recrutement, sensibilisation ou tout besoin futur.
 - ${mediaInstruction}.
 - Pas de prix inventé. Pas de promesse financière irréaliste.
+- Ne jamais écrire "voir ici", "cliquez ici", "voir la vidéo" ou un lien média redirigeant : les médias sont rendus par le gabarit HTML.
 - Salutation dynamique obligatoire : "Bonjour {{prenom}} {{nom}}," puis expliquer que si les champs sont absents le système utilisera "Bonjour très cher,".
-- Signature premium modifiable d'Inocent KOFFI, Fondateur & Gérant, AgriCapital SARL.
+- Signature institutionnelle : L'équipe AgriCapital SARL. Ne pas signer au nom d'une personne.
 - Retourne uniquement un JSON valide, sans markdown.
 
 Schéma JSON exact :
@@ -131,10 +137,17 @@ Schéma JSON exact :
     const content = data.choices?.[0]?.message?.content || "{}";
     const campaign = JSON.parse(content.match(/\{[\s\S]*\}/)?.[0] || content);
     const html = buildCampaignHtml(campaign, { includeImage, includeVideo });
+    const mediaPreview = [
+      ...(includeImage ? [{ type: "image", url: DEFAULT_IMAGE_URL, alt: campaign.imageSuggestion || "Plantation AgriCapital" }] : []),
+      ...(includeVideo ? [{ type: "video", url: DEFAULT_VIDEO_URL, poster: DEFAULT_VIDEO_POSTER_URL, alt: campaign.videoSuggestion || "Vidéo terrain AgriCapital" }] : []),
+    ];
 
     return new Response(JSON.stringify({
       ...campaign,
       html,
+      imageUrl: includeImage ? DEFAULT_IMAGE_URL : "",
+      videoUrl: includeVideo ? DEFAULT_VIDEO_URL : "",
+      mediaPreview,
       plainText: campaign.plainText || stripHtml(html),
     }), { headers: { ...corsHeaders, "Content-Type": "application/json" } });
   } catch (error) {
@@ -153,9 +166,9 @@ function buildCampaignHtml(data: any, media: { includeImage: boolean; includeVid
   `).join("");
 
   const trustHtml = trust.length ? `<div style="background:#F7F3EA;border-left:4px solid #E8960A;padding:16px 18px;margin:22px 0;border-radius:8px;"><p style="margin:0 0 8px;color:#1A5C38;font-weight:700;">Éléments de confiance</p><ul style="margin:0;padding-left:20px;color:#2f3a34;font-size:14px;line-height:1.6;">${trust.map((item: string) => `<li>${escapeHtml(item)}</li>`).join("")}</ul></div>` : "";
-  const imageHtml = media.includeImage ? `<div style="margin:24px 0;background:#F7F3EA;border:1px dashed #d8c9a4;border-radius:10px;padding:18px;text-align:center;color:#6b5a32;font-size:14px;">Image recommandée : ${escapeHtml(data.imageSuggestion || "photo terrain AgriCapital premium")}</div>` : "";
-  const videoHtml = media.includeVideo ? `<p style="text-align:center;margin:22px 0;"><a href="https://www.agricapital.ci" style="color:#1A5C38;font-weight:700;text-decoration:underline;">▶ Voir la vidéo AgriCapital</a></p>` : "";
+  const imageHtml = media.includeImage ? `<figure style="margin:24px 0;text-align:center;"><img src="${DEFAULT_IMAGE_URL}" alt="${escapeHtml(data.imageSuggestion || "Plantation AgriCapital")}" width="580" style="display:block;width:100%;max-width:580px;height:auto;margin:0 auto;border-radius:12px;border:0;outline:none;text-decoration:none;"><figcaption style="color:#66716b;font-size:12px;line-height:1.5;margin-top:8px;">${escapeHtml(data.imageSuggestion || "Aperçu terrain AgriCapital")}</figcaption></figure>` : "";
+  const videoHtml = media.includeVideo ? `<div style="margin:24px 0;text-align:center;"><video controls muted playsinline preload="metadata" poster="${DEFAULT_VIDEO_POSTER_URL}" style="display:block;width:100%;max-width:580px;height:auto;margin:0 auto;border-radius:12px;border:1px solid #EAE4D5;"><source src="${DEFAULT_VIDEO_URL}" type="video/mp4"><img src="${DEFAULT_VIDEO_POSTER_URL}" alt="${escapeHtml(data.videoSuggestion || "Aperçu vidéo AgriCapital")}" width="580" style="display:block;width:100%;max-width:580px;height:auto;border-radius:12px;"></video><p style="color:#66716b;font-size:12px;line-height:1.5;margin:8px 0 0;">Aperçu vidéo terrain intégré.</p></div>` : "";
   const cta = data.cta || {};
 
-  return `<!DOCTYPE html><html lang="fr"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0"></head><body style="margin:0;padding:0;background:#f4f1ea;font-family:Arial,Helvetica,sans-serif;"><div style="display:none;max-height:0;overflow:hidden;color:transparent;">${escapeHtml(data.preheader)}</div><table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:#f4f1ea;padding:20px 0;"><tr><td align="center"><table role="presentation" width="640" cellpadding="0" cellspacing="0" style="width:100%;max-width:640px;background:#ffffff;border-radius:12px;overflow:hidden;"><tr><td style="background:#f5efe1;padding:26px 28px;text-align:center;border-bottom:3px solid #1A5C38;"><img src="https://www.agricapital.ci/Logo_AgriCapital_-V2-4.png" alt="AgriCapital" width="200" style="display:block;margin:0 auto 8px;max-width:200px;height:auto;"><p style="color:#ed7500;font-size:13px;margin:0;font-weight:700;">Investir la terre. Cultiver l'avenir.</p></td></tr><tr><td style="padding:30px;"><p style="color:#66716b;font-size:14px;margin:0 0 16px;">${escapeHtml(data.greeting || "Bonjour {{prenom}} {{nom}},")}</p><h1 style="color:#14231b;font-size:28px;line-height:1.2;margin:0 0 16px;">${escapeHtml(data.headline)}</h1><p style="color:#2f3a34;font-size:16px;line-height:1.7;margin:0 0 18px;">${escapeHtml(data.intro)}</p>${imageHtml}${sectionHtml}${trustHtml}${videoHtml}<div style="text-align:center;margin:28px 0;"><p style="color:#2f3a34;font-size:15px;line-height:1.6;margin:0 0 14px;">${escapeHtml(cta.supportingText || "Échangeons sur votre projet.")}</p><a href="${escapeHtml(cta.url || "https://www.agricapital.ci/contact")}" style="display:inline-block;background:#E8960A;color:#ffffff;padding:14px 30px;border-radius:8px;text-decoration:none;font-weight:800;font-size:15px;">${escapeHtml(cta.label || "Nous contacter")}</a></div><p style="color:#2f3a34;font-size:15px;line-height:1.7;margin:22px 0;">${escapeHtml(data.closing)}</p><div style="border-top:2px solid #EAE4D5;margin-top:26px;padding-top:18px;color:#2f3a34;font-size:14px;line-height:1.6;"><p style="margin:0;font-weight:800;color:#14231b;">Inocent KOFFI</p><p style="margin:2px 0;">Fondateur & Gérant<br>AgriCapital SARL</p><p style="margin:8px 0 0;">🌐 www.agricapital.ci<br>📧 contact@agricapital.ci<br>📞 +225 05 64 55 17 17</p><p style="margin:8px 0 0;color:#E8960A;font-weight:700;">Investir la terre. Cultiver l'avenir.</p></div></td></tr></table></td></tr></table></body></html>`;
+  return `<!DOCTYPE html><html lang="fr"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0"></head><body style="margin:0;padding:0;background:#f4f1ea;font-family:Arial,Helvetica,sans-serif;"><div style="display:none;max-height:0;overflow:hidden;color:transparent;">${escapeHtml(data.preheader)}</div><table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:#f4f1ea;padding:20px 0;"><tr><td align="center"><table role="presentation" width="640" cellpadding="0" cellspacing="0" style="width:100%;max-width:640px;background:#ffffff;border-radius:12px;overflow:hidden;"><tr><td style="background:#f5efe1;padding:26px 28px;text-align:center;border-bottom:3px solid #1A5C38;"><img src="https://www.agricapital.ci/favicon.png" alt="AgriCapital" width="150" style="display:block;margin:0 auto 8px;max-width:150px;height:auto;"><p style="color:#ed7500;font-size:13px;margin:0;font-weight:700;">Investir la terre. Cultiver l'avenir.</p></td></tr><tr><td style="padding:30px;"><p style="color:#66716b;font-size:14px;margin:0 0 16px;">${escapeHtml(data.greeting || "Bonjour {{prenom}} {{nom}},")}</p><h1 style="color:#14231b;font-size:28px;line-height:1.2;margin:0 0 16px;">${escapeHtml(data.headline)}</h1><p style="color:#2f3a34;font-size:16px;line-height:1.7;margin:0 0 18px;">${escapeHtml(data.intro)}</p>${imageHtml}${sectionHtml}${trustHtml}${videoHtml}<div style="text-align:center;margin:28px 0;"><p style="color:#2f3a34;font-size:15px;line-height:1.6;margin:0 0 14px;">${escapeHtml(cta.supportingText || "Échangeons sur votre projet.")}</p><a href="${escapeHtml(cta.url || "https://www.agricapital.ci/contact")}" style="display:inline-block;background:#E8960A;color:#ffffff;padding:14px 30px;border-radius:8px;text-decoration:none;font-weight:800;font-size:15px;">${escapeHtml(cta.label || "Nous contacter")}</a></div><p style="color:#2f3a34;font-size:15px;line-height:1.7;margin:22px 0;">${escapeHtml(data.closing)}</p><div style="border-top:2px solid #EAE4D5;margin-top:26px;padding-top:18px;color:#2f3a34;font-size:14px;line-height:1.6;"><p style="margin:0;font-weight:800;color:#14231b;">L'équipe AgriCapital SARL</p><p style="margin:8px 0 0;">🌐 www.agricapital.ci<br>📧 contact@agricapital.ci<br>📞 +225 05 64 55 17 17</p><p style="margin:8px 0 0;color:#E8960A;font-weight:700;">Investir la terre. Cultiver l'avenir.</p></div></td></tr></table></td></tr></table></body></html>`;
 }

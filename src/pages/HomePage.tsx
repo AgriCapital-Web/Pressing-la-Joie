@@ -4,6 +4,7 @@ import DynamicNavigation from "@/components/DynamicNavigation";
 import Hero from "@/components/Hero";
 import AIChatbot from "@/components/AIChatbot";
 import DomainesIntervention from "@/components/DomainesIntervention";
+import ClientPortalSection from "@/components/ClientPortalSection";
 import Ambitions from "@/components/Ambitions";
 import About from "@/components/About";
 import Approach from "@/components/Approach";
@@ -111,6 +112,7 @@ const HomePage = () => {
       <AIChatbot />
       <DynamicNavigation />
       <Hero />
+      <ClientPortalSection />
       <DomainesIntervention />
       <About />
       <Ambitions />

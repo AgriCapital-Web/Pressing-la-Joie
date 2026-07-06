@@ -15,7 +15,7 @@ interface NewsletterRequest {
   retryEmails?: string[];
   campaignId?: string | null;
   scheduledAt?: string | null;
-  mediaPreview?: { type: "image" | "video"; url: string; alt?: string }[];
+  mediaPreview?: { type: "image" | "video"; url: string; alt?: string; poster?: string }[];
   processDue?: boolean;
 }
 
@@ -61,6 +61,12 @@ const personalizeHtml = (html: string, recipient: Recipient): string => {
     : `https://hbdnleumrcrinedvkuim.supabase.co/functions/v1/newsletter-unsubscribe?email=${email}`;
   return withGreeting.replace(/\{\{unsubscribe_url\}\}/g, unsubUrl);
 };
+
+const brevoFetch = (apiKey: string, path: string, init: RequestInit = {}) =>
+  fetch(`https://api.brevo.com/v3${path}`, {
+    ...init,
+    headers: { "api-key": apiKey, "Content-Type": "application/json", ...(init.headers || {}) },
+  });
 
 const getRecipients = async (supabase: any, request: NewsletterRequest): Promise<Recipient[]> => {
   if (request.retryEmails && Array.isArray(request.retryEmails) && request.retryEmails.length > 0) {
@@ -109,7 +115,9 @@ const buildFormattedHtml = (html: string, preheader = "", mediaPreview: Newslett
   const logoUrl = "https://www.agricapital.ci/favicon.png";
   const mediaHtml = (mediaPreview || []).filter((m) => m?.url).map((m) => {
     if (m.type === "video") {
-      return `<div style="margin:22px 0;text-align:center;"><video src="${escapeHtml(m.url)}" controls muted loop playsinline style="max-width:100%;border-radius:12px;border:1px solid #d8c9a4;display:block;margin:0 auto;">Votre messagerie ne permet pas l'aperçu vidéo intégré.</video></div>`;
+      const poster = (m as any).poster || "";
+      const fallback = poster ? `<img src="${escapeHtml(poster)}" alt="${escapeHtml(m.alt || "Aperçu vidéo AgriCapital")}" width="560" style="display:block;width:100%;max-width:560px;height:auto;border-radius:12px;margin:0 auto;">` : "";
+      return `<div style="margin:22px 0;text-align:center;"><video controls muted playsinline preload="metadata" ${poster ? `poster="${escapeHtml(poster)}"` : ""} style="width:100%;max-width:560px;border-radius:12px;border:1px solid #d8c9a4;display:block;margin:0 auto;"><source src="${escapeHtml(m.url)}" type="video/mp4">${fallback}</video><p style="font-size:12px;line-height:1.5;color:#6b7280;margin:8px 0 0;">Aperçu vidéo terrain intégré.</p></div>`;
     }
     return `<div style="margin:22px 0;text-align:center;"><img src="${escapeHtml(m.url)}" alt="${escapeHtml(m.alt || "Visuel AgriCapital")}" style="max-width:100%;height:auto;border-radius:12px;border:0;display:block;margin:0 auto;" /></div>`;
   }).join("");
@@ -161,13 +169,8 @@ const sendEmailWithRetry = async (
 ): Promise<{ success: boolean; error?: string }> => {
   for (let attempt = 1; attempt <= MAX_RETRIES; attempt++) {
     try {
-      const response = await fetch("https://connector-gateway.lovable.dev/brevo/smtp/email", {
+      const response = await brevoFetch(brevoKey, "/smtp/email", {
         method: "POST",
-        headers: {
-          "Authorization": `Bearer ${lovableApiKey}`,
-          "X-Connection-Api-Key": brevoKey,
-          "Content-Type": "application/json",
-        },
         body: JSON.stringify({
           sender: { name: "AgriCapital", email: "contact@agricapital.ci" },
           to: [{ email: recipient.email }],
@@ -216,8 +219,7 @@ const handler = async (req: Request): Promise<Response> => {
 
   try {
     const BREVO_API_KEY = Deno.env.get("BREVO_API_KEY");
-    const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
-    if (!BREVO_API_KEY || !LOVABLE_API_KEY) {
+    if (!BREVO_API_KEY) {
       throw new Error("Brevo is not configured");
     }
 
@@ -323,7 +325,7 @@ const handler = async (req: Request): Promise<Response> => {
     for (let i = 0; i < recipients.length; i += BATCH_SIZE) {
       const batch = recipients.slice(i, i + BATCH_SIZE);
       const results = await Promise.all(
-        batch.map(recipient => sendEmailWithRetry(BREVO_API_KEY, LOVABLE_API_KEY, recipient, subject, formattedHtml))
+        batch.map(recipient => sendEmailWithRetry(BREVO_API_KEY, "", recipient, subject, formattedHtml))
       );
 
       results.forEach((result, idx) => {

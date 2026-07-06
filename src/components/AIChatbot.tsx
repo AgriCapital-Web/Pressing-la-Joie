@@ -161,6 +161,24 @@ const translations = {
 const CHAT_URL = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/ai-chat`;
 const TTS_URL = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/elevenlabs-tts`;
 
+const cleanTextForSpeech = (text: string) => text
+  .replace(/```[\s\S]*?```/g, " ")
+  .replace(/`([^`]+)`/g, "$1")
+  .replace(/!\[([^\]]*)\]\([^)]*\)/g, "$1")
+  .replace(/\[([^\]]+)\]\([^)]+\)/g, "$1")
+  .replace(/^\s{0,3}#{1,6}\s+/gm, "")
+  .replace(/^\s{0,3}>\s?/gm, "")
+  .replace(/(\*\*|__)(.*?)\1/g, "$2")
+  .replace(/(\*|_)(.*?)\1/g, "$2")
+  .replace(/~~(.*?)~~/g, "$1")
+  .replace(/^\s*[-*_]{3,}\s*$/gm, " ")
+  .replace(/^\s*[-*+]\s+/gm, "")
+  .replace(/^\s*\d+\.\s+/gm, "")
+  .replace(/<[^>]+>/g, " ")
+  .replace(/[*_`~#>|]+/g, " ")
+  .replace(/\s+/g, " ")
+  .trim();
+
 const AIChatbot = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [messages, setMessages] = useState<Message[]>([]);
@@ -279,7 +297,7 @@ const AIChatbot = () => {
   const speakWithBrowser = useCallback((text: string) => {
     if (!('speechSynthesis' in window)) return;
     window.speechSynthesis.cancel();
-    const utterance = new SpeechSynthesisUtterance(text.slice(0, 500));
+    const utterance = new SpeechSynthesisUtterance(cleanTextForSpeech(text).slice(0, 500));
     const langMap: Record<string, string> = { fr: 'fr-FR', en: 'en-US', ar: 'ar-SA', es: 'es-ES', de: 'de-DE', zh: 'zh-CN' };
     utterance.lang = langMap[language] || 'fr-FR';
     utterance.rate = 0.95;
@@ -290,7 +308,8 @@ const AIChatbot = () => {
 
   // Text-to-Speech function with ElevenLabs + browser fallback
   const speakText = useCallback(async (text: string) => {
-    if (!isTTSEnabled || !text || text.length < 10) return;
+    const speechText = cleanTextForSpeech(text);
+    if (!isTTSEnabled || !speechText || speechText.length < 10) return;
     
     try {
       setIsPlayingAudio(true);
@@ -306,7 +325,7 @@ const AIChatbot = () => {
           "Content-Type": "application/json",
           Authorization: `Bearer ${import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}`,
         },
-        body: JSON.stringify({ text: text.slice(0, 500), language }),
+        body: JSON.stringify({ text: speechText.slice(0, 1200), language }),
       });
 
       // Check if response is JSON (error/fallback) or audio
@@ -315,7 +334,7 @@ const AIChatbot = () => {
         const data = await response.json();
         if (data?.fallback) {
           console.warn("ElevenLabs unavailable, using browser TTS");
-          speakWithBrowser(text);
+          speakWithBrowser(speechText);
           return;
         }
         setIsPlayingAudio(false);
@@ -324,7 +343,7 @@ const AIChatbot = () => {
 
       if (!response.ok) {
         console.warn("TTS failed, falling back to browser");
-        speakWithBrowser(text);
+        speakWithBrowser(speechText);
         return;
       }
 
@@ -341,13 +360,13 @@ const AIChatbot = () => {
       audio.onerror = () => {
         setIsPlayingAudio(false);
         URL.revokeObjectURL(audioUrl);
-        speakWithBrowser(text);
+        speakWithBrowser(speechText);
       };
 
       await audio.play();
     } catch (error) {
       console.error("TTS error:", error);
-      speakWithBrowser(text);
+      speakWithBrowser(speechText);
     }
   }, [isTTSEnabled, language, speakWithBrowser]);
 
