@@ -73,6 +73,14 @@ const audienceOptions: { value: Audience; label: string; help: string }[] = [
 ];
 
 const stripHtml = (html: string) => html.replace(/<style[\s\S]*?<\/style>/gi, " ").replace(/<[^>]+>/g, " ").replace(/\s+/g, " ").trim();
+const sanitizeFileName = (name: string) => name.toLowerCase().replace(/[^a-z0-9._-]+/g, "-").replace(/-+/g, "-");
+
+const absolutizeUrl = (url: string) => {
+  if (!url) return "";
+  if (url.startsWith("http") || url.startsWith("data:")) return url;
+  return `${window.location.origin}${url.startsWith("/") ? url : `/${url}`}`;
+};
+
 const validateCampaign = (form: typeof emptyForm) => {
   const errors: string[] = [];
   if (!form.name.trim()) errors.push("Nom interne requis");
@@ -138,6 +146,8 @@ const AdminEmailCampaigns = () => {
         preheader: data.preheader || "",
         html_content: data.html || "",
         plain_text: data.plainText || stripHtml(data.html || ""),
+        image_url: f.include_image ? (data.imageUrl || data.mediaPreview?.find?.((m: any) => m.type === "image")?.url || f.image_url) : f.image_url,
+        video_url: f.include_video ? (data.videoUrl || data.mediaPreview?.find?.((m: any) => m.type === "video")?.url || f.video_url) : f.video_url,
         status: "ready",
       }));
       setShowPreview(true);
@@ -196,8 +206,8 @@ const AdminEmailCampaigns = () => {
   };
 
   const buildMediaPreview = () => [
-    ...(form.image_url ? [{ type: "image", url: form.image_url, alt: form.name || "Visuel AgriCapital" }] : []),
-    ...(form.video_url ? [{ type: "video", url: form.video_url, alt: form.name || "Vidéo AgriCapital" }] : []),
+    ...(form.image_url ? [{ type: "image", url: absolutizeUrl(form.image_url), alt: form.name || "Visuel AgriCapital" }] : []),
+    ...(form.video_url ? [{ type: "video", url: absolutizeUrl(form.video_url), alt: form.name || "Vidéo AgriCapital" }] : []),
   ];
 
   const estimateRecipients = (_audience: Audience) => 25;
@@ -250,11 +260,19 @@ const AdminEmailCampaigns = () => {
     else { toast.success("Campagne supprimée"); fetchCampaigns(); }
   };
 
-  const handleMedia = (kind: "image" | "video", file?: File) => {
+  const handleMedia = async (kind: "image" | "video", file?: File) => {
     if (!file) return;
-    const reader = new FileReader();
-    reader.onload = () => setForm((f) => ({ ...f, [kind === "image" ? "image_url" : "video_url"]: String(reader.result) }));
-    reader.readAsDataURL(file);
+    try {
+      const path = `email-campaigns/${kind}/${Date.now()}-${sanitizeFileName(file.name)}`;
+      const { error } = await supabase.storage.from("media").upload(path, file, { upsert: false, contentType: file.type });
+      if (error) throw error;
+      const { data } = supabase.storage.from("media").getPublicUrl(path);
+      const publicUrl = data.publicUrl;
+      setForm((f) => ({ ...f, [kind === "image" ? "image_url" : "video_url"]: publicUrl }));
+      toast.success(kind === "image" ? "Image prête pour l'email" : "Vidéo prête pour l'email");
+    } catch (err: any) {
+      toast.error(err?.message || "Import média impossible");
+    }
   };
 
   const validationErrors = validateCampaign(form);
