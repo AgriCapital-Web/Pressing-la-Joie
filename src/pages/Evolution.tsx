@@ -85,9 +85,9 @@ const Evolution = () => {
   const milestones = [
     { ...t.m1, status: "completed", icon: Target, year: "2025", image: "/inauguration/terrain-prospection.webp" },
     { ...t.m2, status: "completed", icon: Sprout, year: "2025", image: "/inauguration/pepiniere-plants-palmier.webp" },
-    { ...t.m3, status: "completed", icon: MapPin, year: "2026", image: "/inauguration/bureau-gonate-enseigne.webp" },
-    { ...t.m5, status: "completed", icon: Users, year: "2026", image: "/formation/formation-groupe-cohorte.webp" },
-    { ...t.m4, status: "in_progress", icon: Users, year: "2026", image: "/inauguration/inauguration-accueil-client.webp" },
+    { ...t.m3, status: "completed", icon: MapPin, year: "2026", image: "/inauguration/inauguration-assemblee.webp" },
+    { ...t.m5, status: "completed", icon: Users, year: "2026", image: "/formation/formation-prise-parole.webp" },
+    { ...t.m4, status: "in_progress", icon: Users, year: "2026", image: "/formation/formation-groupe-cohorte.webp" },
   ];
 
   const curatedPhotos = [
