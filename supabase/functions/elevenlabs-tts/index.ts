@@ -1,4 +1,5 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
+import { checkRateLimit, clientKey, rateLimitResponse } from "../_shared/rate-limit.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -66,12 +67,25 @@ serve(async (req) => {
   }
 
   try {
+    // Rate limiting : 15 synthèses / minute et 120 / heure par IP.
+    const minute = checkRateLimit(clientKey(req, "tts:m"), { limit: 15, windowMs: 60_000 });
+    if (!minute.allowed) return rateLimitResponse(minute, corsHeaders);
+    const hour = checkRateLimit(clientKey(req, "tts:h"), { limit: 120, windowMs: 3_600_000 });
+    if (!hour.allowed) return rateLimitResponse(hour, corsHeaders);
+
     const { text, language = "fr" } = await req.json();
 
-    if (!text) {
+    if (!text || typeof text !== "string") {
       return new Response(
         JSON.stringify({ error: "Text is required" }),
         { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
+
+    if (text.length > 20_000) {
+      return new Response(
+        JSON.stringify({ error: "Texte trop long (max 20 000 caractères)." }),
+        { status: 413, headers: { ...corsHeaders, "Content-Type": "application/json" } }
       );
     }
 
