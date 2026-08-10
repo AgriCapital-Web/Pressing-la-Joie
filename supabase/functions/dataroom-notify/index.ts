@@ -1,5 +1,6 @@
 // AgriCapital Cloud — notifications e-mail aux signataires
 // Événements : changement de statut (brouillon → en revue → publié) et changement de permission.
+// Réservé aux administrateurs authentifiés (JWT Supabase + rôle admin).
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.45.4";
 
 const corsHeaders = {
@@ -33,17 +34,38 @@ const shell = (title: string, body: string) => `
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
   try {
+    const supabase = createClient(
+      Deno.env.get("SUPABASE_URL")!,
+      Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!,
+    );
+
+    // --- Contrôle d'accès : administrateur uniquement ---
+    const jwt = (req.headers.get("Authorization") ?? "").replace("Bearer ", "").trim();
+    if (!jwt) {
+      return new Response(JSON.stringify({ error: "Authentification requise" }), {
+        status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+    const { data: userRes } = await supabase.auth.getUser(jwt);
+    const user = userRes?.user;
+    if (!user) {
+      return new Response(JSON.stringify({ error: "Session invalide" }), {
+        status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+    const { data: isAdmin } = await supabase.rpc("has_role", { _user_id: user.id, _role: "admin" });
+    if (!isAdmin) {
+      return new Response(JSON.stringify({ error: "Accès réservé aux administrateurs" }), {
+        status: 403, headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
     const { publication_id, event, from, to } = await req.json();
     if (!publication_id || !event) {
       return new Response(JSON.stringify({ error: "publication_id et event requis" }), {
         status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
-
-    const supabase = createClient(
-      Deno.env.get("SUPABASE_URL")!,
-      Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!,
-    );
 
     const { data: pub } = await supabase
       .from("dataroom_publications")
