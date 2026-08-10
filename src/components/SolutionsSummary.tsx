@@ -3,7 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { ArrowRight } from "lucide-react";
 import { solutions, services } from "@/data/offerings";
-import WaitlistDialog from "@/components/WaitlistDialog";
+import ContactCTA, { contactCtaLabel } from "@/components/ContactCTA";
 
 const SolutionsSummary = () => {
   // Show 3 flagship solutions + 2 services to keep it concise
@@ -61,9 +61,9 @@ const SolutionsSummary = () => {
         </div>
 
         <div className="flex flex-col sm:flex-row gap-3">
-          <WaitlistDialog sourcePage="solutions-summary">
-            <Button size="lg">Rejoindre la liste d'attente</Button>
-          </WaitlistDialog>
+          <ContactCTA>
+            <Button size="lg">{contactCtaLabel()}</Button>
+          </ContactCTA>
           <Button asChild size="lg" variant="outline">
             <Link to="/partenariats">Découvrir les partenariats</Link>
           </Button>

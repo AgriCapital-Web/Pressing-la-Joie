@@ -6,7 +6,7 @@ import { Briefcase, Factory, Wrench, Heart, CheckCircle2, Handshake } from "luci
 import lesPalmistesLogo from "@/assets/les-palmistes-logo.jpeg";
 import { useLanguage } from "@/contexts/LanguageContext";
 import PartnershipRequestForm from "@/components/PartnershipRequestForm";
-import WaitlistDialog from "@/components/WaitlistDialog";
+import ContactCTA from "@/components/ContactCTA";
 import {
   Carousel,
   CarouselContent,
@@ -137,11 +137,11 @@ const Partnership = () => {
                   <div className="text-accent mb-4">{opp.icon}</div>
                   <h4 className="text-xl font-bold text-foreground mb-4">{opp.title}</h4>
                   <p className="text-muted-foreground leading-relaxed mb-6">{opp.description}</p>
-                  <WaitlistDialog sourcePage="partenariat-opportunite">
+                  <ContactCTA>
                     <Button variant="outline" className="border-accent text-accent hover:bg-accent hover:text-white transition-smooth">
                       {t.partnership.cta}
                     </Button>
-                  </WaitlistDialog>
+                  </ContactCTA>
                 </CardContent>
               </Card>
             ))}

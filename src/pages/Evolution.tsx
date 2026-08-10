@@ -38,9 +38,9 @@ const Evolution = () => {
       hectares: "ha de pépinière active",
       lands: "ha de terre identifiés à Daloa",
       available: "ha disponible pour déploiement immédiat",
-      waitlist: "souscripteurs en liste d'attente",
+      waitlist: "souscripteurs accompagnés",
       ctaTitle: "Créez votre patrimoine agricole",
-      ctaSubtitle: "Rejoignez la liste d'attente et soyez parmi les premiers souscripteurs d'AgriCapital.",
+      ctaSubtitle: "Faites-vous contacter et soyez parmi les premiers souscripteurs d'AgriCapital.",
       contactUs: "Nous contacter",
       daloaTitle: "Pépinière de Daloa — 120 hectares",
       daloaDesc: "Site pleinement opérationnel : système d'irrigation autonome, plants certifiés Tenera, équipe technique mobilisée.",
@@ -50,7 +50,7 @@ const Evolution = () => {
       m2: { date: "Nov – Déc 2025", title: "Pépinière Daloa — 120 ha", desc: "Installation complète de la pépinière de 120 hectares à Daloa avec irrigation autonome et plants certifiés Tenera." },
       m3: { date: "1er Août 2026", title: "Inauguration du 1er bureau de proximité — Gonaté", desc: "AgriCapital a inauguré son premier bureau de proximité à Gonaté (département de Daloa), en présence de plus de 100 participants : autorités locales, propriétaires fonciers, partenaires techniques, investisseurs, clients, jeunes et femmes. Cette ouverture marque le lancement officiel du déploiement opérationnel du modèle de création et de gestion d'actifs agricoles au plus près des territoires ruraux." },
       m5: { date: "5 Août 2026", title: "Première session de formation du réseau commercial", desc: "Onze (11) conseillers commerciaux ont rejoint la première cohorte AgriCapital. Au-delà des offres, la session a transmis l'histoire, la vision, le modèle de création et de gestion d'actifs agricoles ainsi que les exigences de qualité qui encadrent chaque engagement pris auprès des propriétaires fonciers et des souscripteurs." },
-      m4: { date: "En cours", title: "Déploiement Commercial", desc: "Ouverture de la liste d'attente, prospection communautaire active et premiers engagements de clients intéressés par nos formules." },
+      m4: { date: "En cours", title: "Déploiement Commercial", desc: "Déploiement du réseau commercial, prospection communautaire active et premiers engagements de clients intéressés par nos formules." },
     },
     en: {
       title: "Project Evolution",
@@ -64,9 +64,9 @@ const Evolution = () => {
       hectares: "ha of active nursery",
       lands: "ha of land identified in Daloa",
       available: "ha available for immediate deployment",
-      waitlist: "subscribers on waitlist",
+      waitlist: "supported subscribers",
       ctaTitle: "Create your agricultural heritage",
-      ctaSubtitle: "Join the waitlist and be among the first AgriCapital subscribers.",
+      ctaSubtitle: "Get contacted and be among the first AgriCapital subscribers.",
       contactUs: "Contact us",
       daloaTitle: "Daloa Nursery — 120 hectares",
       daloaDesc: "Fully operational site: autonomous irrigation, certified Tenera seedlings, mobilized technical team.",
@@ -76,7 +76,7 @@ const Evolution = () => {
       m2: { date: "Nov – Dec 2025", title: "Daloa Nursery — 120 ha", desc: "Complete installation of the 120-hectare nursery in Daloa with autonomous irrigation and certified Tenera plants." },
       m3: { date: "August 1, 2026", title: "First local office opened — Gonaté", desc: "AgriCapital opened its first local office in Gonaté (Daloa department) with over 100 attendees: local authorities, landowners, technical partners, investors, clients, youth and women. It marks the official launch of the operational rollout of our agricultural asset creation and management model." },
       m5: { date: "August 5, 2026", title: "First sales network training session", desc: "Eleven (11) sales advisors joined AgriCapital's first cohort. Beyond the offering, the session shared our history, vision, agricultural asset creation and management model, and the quality standards framing every commitment made to landowners and subscribers." },
-      m4: { date: "Ongoing", title: "Commercial Deployment", desc: "Waitlist opening, active community prospecting and first client commitments." },
+      m4: { date: "Ongoing", title: "Commercial Deployment", desc: "Sales network rollout, active community prospecting and first client commitments." },
     },
   };
 
@@ -85,9 +85,9 @@ const Evolution = () => {
   const milestones = [
     { ...t.m1, status: "completed", icon: Target, year: "2025", image: "/inauguration/terrain-prospection.webp" },
     { ...t.m2, status: "completed", icon: Sprout, year: "2025", image: "/inauguration/pepiniere-plants-palmier.webp" },
-    { ...t.m3, status: "completed", icon: MapPin, year: "2026", image: "/inauguration/bureau-gonate-enseigne.webp" },
-    { ...t.m5, status: "completed", icon: Users, year: "2026", image: "/formation/formation-groupe-cohorte.webp" },
-    { ...t.m4, status: "in_progress", icon: Users, year: "2026", image: "/inauguration/inauguration-accueil-client.webp" },
+    { ...t.m3, status: "completed", icon: MapPin, year: "2026", image: "/inauguration/inauguration-assemblee.webp" },
+    { ...t.m5, status: "completed", icon: Users, year: "2026", image: "/formation/formation-prise-parole.webp" },
+    { ...t.m4, status: "in_progress", icon: Users, year: "2026", image: "/formation/formation-groupe-cohorte.webp" },
   ];
 
   const curatedPhotos = [

@@ -2,7 +2,7 @@ import { useState, useEffect, useCallback } from "react";
 import { Button } from "@/components/ui/button";
 import { ArrowRight, ChevronLeft, ChevronRight } from "lucide-react";
 import { useLanguage, Language } from "@/contexts/LanguageContext";
-import WaitlistDialog from "@/components/WaitlistDialog";
+import ContactCTA, { contactCtaLabel } from "@/components/ContactCTA";
 import { Link } from "react-router-dom";
 
 import slide1 from "@/assets/nursery-pepiniere-daloa.jpg";
@@ -223,15 +223,15 @@ const Hero = () => {
                         {t(s.description)}
                       </p>
                       <div className="flex flex-col sm:flex-row gap-3">
-                        <WaitlistDialog sourcePage="hero">
+                        <ContactCTA>
                           <Button
                             size="lg"
                             className="bg-accent hover:bg-accent/90 text-white border-0 rounded-full font-semibold group min-h-[48px] px-6"
                           >
-                            {language === "en" ? "Join the waitlist" : language === "ar" ? "انضم إلى قائمة الانتظار" : language === "es" ? "Unirse a la lista" : language === "de" ? "Warteliste beitreten" : language === "zh" ? "加入候补名单" : "Rejoindre la liste d'attente"}
+                            {contactCtaLabel(language)}
                             <ArrowRight className="ml-2 w-4 h-4 group-hover:translate-x-1 transition-transform" />
                           </Button>
-                        </WaitlistDialog>
+                        </ContactCTA>
                         <Button
                           size="lg"
                           onClick={() => scrollToSection("contact")}

@@ -30,7 +30,6 @@ const menuItems: MenuItem[] = [
 
   { divider: true, label: "Communication" },
   { icon: Mail, label: "Messages contact", path: "/admin/contact-messages" },
-  { icon: Users, label: "Liste d'attente", path: "/admin/waitlist" },
   { icon: Send, label: "Campagnes & Newsletter", path: "/admin/campagnes" },
   { icon: Handshake, label: "Demandes partenariat", path: "/admin/partnership-requests" },
   { icon: Bot, label: "Conversations IA", path: "/admin/ai-conversations" },
