@@ -78,19 +78,4 @@
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>
   </url>
-  <url>
-    <loc>https://agricapital.ci/actualites/agricapital-accelere-deploiement-organisation-operationnelle</loc>
-    <changefreq>monthly</changefreq>
-    <priority>0.8</priority>
-  </url>
-  <url>
-    <loc>https://agricapital.ci/actualites/inauguration-premier-bureau-proximite-gonate</loc>
-    <changefreq>monthly</changefreq>
-    <priority>0.8</priority>
-  </url>
-  <url>
-    <loc>https://agricapital.ci/actualites/agricapital-publication-information-memorandum-palmier-huile</loc>
-    <changefreq>monthly</changefreq>
-    <priority>0.8</priority>
-  </url>
 </urlset>
