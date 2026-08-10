@@ -1,7 +1,7 @@
 import DynamicNavigation from "@/components/DynamicNavigation";
 import Footer from "@/components/Footer";
 import SEOHead from "@/components/SEOHead";
-import WaitlistDialog from "@/components/WaitlistDialog";
+import ContactCTA from "@/components/ContactCTA";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { ArrowRight, CheckCircle2, Leaf, MapPinned, Sprout } from "lucide-react";
