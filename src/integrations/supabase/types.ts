@@ -14,6 +14,36 @@ export type Database = {
   }
   public: {
     Tables: {
+      dataroom_sessions: {
+        Row: {
+          created_at: string
+          expires_at: string
+          id: string
+          ip_address: string | null
+          signatory_id: string
+          token_hash: string
+          user_agent: string | null
+        }
+        Insert: {
+          created_at?: string
+          expires_at: string
+          id?: string
+          ip_address?: string | null
+          signatory_id: string
+          token_hash: string
+          user_agent?: string | null
+        }
+        Update: {
+          created_at?: string
+          expires_at?: string
+          id?: string
+          ip_address?: string | null
+          signatory_id?: string
+          token_hash?: string
+          user_agent?: string | null
+        }
+        Relationships: []
+      }
       email_campaigns: {
         Row: {
           audience_type: string
