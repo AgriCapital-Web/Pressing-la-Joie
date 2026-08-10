@@ -29,6 +29,16 @@ export function enforceCanonicalHost() {
 
   if (!isPreview && isCanonicalHost(host)) return;
 
+  // Redirection dure : aucun miroir public (*.lovable.app, *.vercel.app…) ne
+  // doit rester accessible ni indexable. Les environnements de développement
+  // (localhost, preview interne Lovable) sont exclus de la redirection.
+  const isLocal = /localhost$/i.test(host) || /^127\./.test(host) || host === "";
+  const isInternalPreview = /^id-preview--/i.test(host) || /lovableproject\.com$/i.test(host);
+  if (!isLocal && !isInternalPreview) {
+    window.location.replace(`${CANONICAL_ORIGIN}${window.location.pathname}${window.location.search}${window.location.hash}`);
+    return;
+  }
+
   // Block indexation of every non-canonical host so search engines never
   // surface the *.lovable.app / *.vercel.app mirrors.
   let robots = document.querySelector('meta[name="robots"]') as HTMLMetaElement | null;
