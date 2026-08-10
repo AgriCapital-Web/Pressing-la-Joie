@@ -17,6 +17,15 @@ serve(async (req) => {
       throw new Error("No audio data provided");
     }
 
+    // Cap payload size (~6 MB of base64 audio) before hitting the AI gateway
+    const MAX_BASE64_LENGTH = 8_000_000;
+    if (typeof audio !== "string" || audio.length > MAX_BASE64_LENGTH) {
+      return new Response(JSON.stringify({ error: "Audio trop volumineux (max ~6 Mo)." }), {
+        status: 413,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
     const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
     if (!LOVABLE_API_KEY) {
       throw new Error("LOVABLE_API_KEY not configured");
