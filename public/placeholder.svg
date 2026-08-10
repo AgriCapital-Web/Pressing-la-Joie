@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="630" viewBox="0 0 1200 630" role="img" aria-label="AgriCapital">
+  <rect width="1200" height="630" fill="#0f4f2f"/>
+  <circle cx="600" cy="255" r="96" fill="#f59e0b" opacity="0.92"/>
+  <path d="M520 270c92-118 198-92 260-30-92-8-145 108-260 30Z" fill="#ffffff"/>
+  <text x="600" y="430" text-anchor="middle" fill="#ffffff" font-family="Arial, sans-serif" font-size="58" font-weight="800">AgriCapital</text>
+  <text x="600" y="492" text-anchor="middle" fill="#f59e0b" font-family="Arial, sans-serif" font-size="32" font-weight="700">Investir la terre. Cultiver l'avenir.</text>
+</svg>

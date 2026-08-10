@@ -95,7 +95,6 @@ export default function Dataroom() {
       if (error) throw error;
       if (data?.signatory) {
         localStorage.setItem("dataroom_signatory", JSON.stringify(data.signatory));
-        if (data.session_token) localStorage.setItem("dataroom_session", data.session_token);
         toast({ title: "Bienvenue", description: `Bonjour ${data.signatory.full_name}` });
         navigate("/dataroom/vault");
       }

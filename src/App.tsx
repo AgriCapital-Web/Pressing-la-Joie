@@ -2,12 +2,14 @@ import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { BrowserRouter, Routes, Route, useLocation, useNavigate } from "react-router-dom";
 import { LanguageProvider } from "@/contexts/LanguageContext";
 import { usePageTracking } from "@/hooks/usePageTracking";
-import { lazy, Suspense } from "react";
+import { lazy, Suspense, useEffect } from "react";
 import { Loader2 } from "lucide-react";
 import ScrollToTop from "@/components/ScrollToTop";
+import { isDataroomHost } from "@/lib/canonical-host";
+
 
 import HomePage from "./pages/HomePage";
 import NotFound from "./pages/NotFound";
@@ -28,6 +30,11 @@ const OfferingDetail = lazy(() => import("./pages/OfferingDetail"));
 const Partenariats = lazy(() => import("./pages/Partenariats"));
 const TreasurePage = lazy(() => import("./pages/TreasurePage"));
 const WaitlistPage = lazy(() => import("./pages/WaitlistPage"));
+const Dataroom = lazy(() => import("./pages/Dataroom"));
+const DataroomVault = lazy(() => import("./pages/DataroomVault"));
+const AdminDataroom = lazy(() => import("./pages/admin/AdminDataroom"));
+const AdminDataroomLinks = lazy(() => import("./pages/admin/AdminDataroomLinks"));
+const AdminBrokenImages = lazy(() => import("./pages/admin/AdminBrokenImages"));
 
 // Lazy-loaded admin pages — vitrine: minimal & focused
 const AdminAnalytics = lazy(() => import("./pages/admin/AdminAnalytics"));
@@ -62,9 +69,22 @@ const LoadingFallback = () => (
 
 const AppContent = () => {
   usePageTracking();
+  const location = useLocation();
+  const navigate = useNavigate();
+
+  // data.agricapital.ci (or dataroom.*) serves the Data Room directly,
+  // no DNS-side rewrite or extra deployment needed.
+  useEffect(() => {
+    if (!isDataroomHost()) return;
+    if (location.pathname === "/" || location.pathname === "/index.html" || location.pathname === "/data") {
+      navigate("/dataroom", { replace: true });
+    }
+  }, [location.pathname, navigate]);
+
   return (
     <Suspense fallback={<LoadingFallback />}>
       <Routes>
+
         {/* Public */}
         <Route path="/" element={<HomePage />} />
         <Route path="/accueil" element={<HomePage />} />
@@ -98,6 +118,17 @@ const AppContent = () => {
         <Route path="/services/:slug" element={<OfferingDetail type="service" />} />
         <Route path="/partenariats" element={<Partenariats />} />
         <Route path="/partnerships" element={<Partenariats />} />
+
+        {/* AgriCapital Cloud — Data Room */}
+        <Route path="/data" element={<Dataroom />} />
+        <Route path="/data/vault" element={<DataroomVault />} />
+        <Route path="/cloud" element={<Dataroom />} />
+        <Route path="/agricapital-cloud" element={<Dataroom />} />
+        <Route path="/dataroom" element={<Dataroom />} />
+        <Route path="/dataroom/vault" element={<DataroomVault />} />
+        <Route path="/admin/dataroom" element={<AdminDataroom />} />
+        <Route path="/admin/dataroom-links" element={<AdminDataroomLinks />} />
+        <Route path="/admin/broken-images" element={<AdminBrokenImages />} />
 
         {/* English aliases */}
         <Route path="/home" element={<HomePage />} />

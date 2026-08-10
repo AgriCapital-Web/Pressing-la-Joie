@@ -1,6 +1,6 @@
 // AgriCapital Cloud — liste des publications visibles pour un signataire
 // Le portail signataire n'utilise pas Supabase Auth : l'accès est validé ici via
-// un jeton de session opaque émis par dataroom-login (haché en base), puis filtré par niveau.
+// l'identifiant du signataire (stocké côté client après login) puis filtré par niveau.
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.45.4";
 
 const corsHeaders = {
@@ -12,11 +12,6 @@ const corsHeaders = {
 const json = (body: unknown, status = 200) =>
   new Response(JSON.stringify(body), { status, headers: { ...corsHeaders, "Content-Type": "application/json" } });
 
-async function sha256(v: string): Promise<string> {
-  const buf = await crypto.subtle.digest("SHA-256", new TextEncoder().encode(v));
-  return Array.from(new Uint8Array(buf)).map((b) => b.toString(16).padStart(2, "0")).join("");
-}
-
 // Hiérarchie des permissions
 const TIERS: Record<string, string[]> = {
   public: ["public"],
@@ -27,37 +22,26 @@ const TIERS: Record<string, string[]> = {
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
   try {
-    const body = await req.json().catch(() => ({}));
-    const { publication_id, action } = body ?? {};
-    const headerToken = req.headers.get("x-dataroom-session") ?? "";
-    const sessionToken = String(body?.session_token ?? headerToken ?? "").trim();
-
-    if (!sessionToken) {
-      return json({ error: "Session invalide. Veuillez vous reconnecter." }, 401);
-    }
+    const { signatory_id, email, publication_id, action } = await req.json().catch(() => ({}));
 
     const admin = createClient(
       Deno.env.get("SUPABASE_URL")!,
       Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!,
     );
 
-    // Résolution du signataire à partir de la session serveur uniquement
-    const { data: session } = await admin
-      .from("dataroom_sessions")
-      .select("signatory_id, expires_at")
-      .eq("token_hash", await sha256(sessionToken))
-      .maybeSingle();
-
-    if (!session || new Date(session.expires_at).getTime() < Date.now()) {
-      return json({ error: "Session expirée. Veuillez vous reconnecter." }, 401);
+    // Résolution du signataire
+    let sig: any = null;
+    if (signatory_id) {
+      const { data } = await admin.from("dataroom_signatories")
+        .select("id, full_name, email, profile_type, access_level").eq("id", signatory_id).maybeSingle();
+      sig = data;
     }
-
-    const { data: sig } = await admin
-      .from("dataroom_signatories")
-      .select("id, full_name, email, profile_type, access_level")
-      .eq("id", session.signatory_id)
-      .maybeSingle();
-
+    if (!sig && email) {
+      const { data } = await admin.from("dataroom_signatories")
+        .select("id, full_name, email, profile_type, access_level")
+        .ilike("email", String(email).trim().toLowerCase()).limit(1);
+      sig = data?.[0] ?? null;
+    }
     if (!sig) return json({ error: "Session invalide. Veuillez vous reconnecter." }, 401);
 
     const level = (sig.access_level as string) ?? "nda";
@@ -115,6 +99,6 @@ Deno.serve(async (req) => {
     });
   } catch (e) {
     console.error("dataroom-list error", e);
-    return json({ error: "Erreur interne" }, 500);
+    return json({ error: String((e as Error).message ?? e) }, 500);
   }
 });
