@@ -15,6 +15,8 @@ const missingAssetFallback = () => ({
     let resolved: string | null = null;
     if (source.startsWith("@/")) {
       resolved = path.resolve(__dirname, "./src", source.slice(2));
+    } else if (path.isAbsolute(source)) {
+      resolved = source;
     } else if (source.startsWith(".") && importer) {
       resolved = path.resolve(path.dirname(importer), source);
     }
