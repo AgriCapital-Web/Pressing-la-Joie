@@ -31,6 +31,9 @@ interface AuditLog {
 }
 
 const actionIcons: Record<string, any> = {
+  CREATE: Plus,
+  UPDATE: Edit,
+  DELETE: Trash2,
   create: Plus,
   update: Edit,
   delete: Trash2,
@@ -40,6 +43,9 @@ const actionIcons: Record<string, any> = {
 };
 
 const actionColors: Record<string, string> = {
+  CREATE: "bg-green-500/10 text-green-600 border-green-500/20",
+  UPDATE: "bg-blue-500/10 text-blue-600 border-blue-500/20",
+  DELETE: "bg-red-500/10 text-red-600 border-red-500/20",
   create: "bg-green-500/10 text-green-600 border-green-500/20",
   update: "bg-blue-500/10 text-blue-600 border-blue-500/20",
   delete: "bg-red-500/10 text-red-600 border-red-500/20",
@@ -87,6 +93,9 @@ const AdminAuditLog = () => {
 
   const getActionLabel = (action: string) => {
     const labels: Record<string, string> = {
+      CREATE: "Création",
+      UPDATE: "Modification",
+      DELETE: "Suppression",
       create: "Création",
       update: "Modification",
       delete: "Suppression",
@@ -111,6 +120,10 @@ const AdminAuditLog = () => {
       site_settings: "Paramètres",
       user_roles: "Rôles utilisateurs",
       profiles: "Profils",
+      dataroom_publications: "Data Room — Documents",
+      dataroom_versions: "Data Room — Versions",
+      dataroom_review_comments: "Data Room — Validation",
+      dataroom_signatories: "Data Room — Signataires",
     };
     return labels[entity] || entity;
   };
@@ -118,9 +131,9 @@ const AdminAuditLog = () => {
   const stats = {
     total: logs.length,
     today: logs.filter(l => new Date(l.created_at).toDateString() === new Date().toDateString()).length,
-    creates: logs.filter(l => l.action === "create").length,
-    updates: logs.filter(l => l.action === "update").length,
-    deletes: logs.filter(l => l.action === "delete").length,
+    creates: logs.filter(l => l.action.toLowerCase() === "create").length,
+    updates: logs.filter(l => l.action.toLowerCase() === "update").length,
+    deletes: logs.filter(l => l.action.toLowerCase() === "delete").length,
   };
 
   return (

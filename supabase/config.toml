@@ -38,3 +38,18 @@ verify_jwt = false
 
 [functions.generate-article]
 verify_jwt = false
+
+[functions.dataroom-signup]
+verify_jwt = false
+
+[functions.dataroom-login]
+verify_jwt = false
+
+[functions.dataroom-notify]
+verify_jwt = false
+
+[functions.dataroom-download-link]
+verify_jwt = false
+
+[functions.dataroom-list]
+verify_jwt = false

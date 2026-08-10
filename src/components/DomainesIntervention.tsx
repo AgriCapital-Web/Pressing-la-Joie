@@ -1,8 +1,7 @@
 import { Sprout, Landmark, Microscope, Handshake, ArrowRight } from "lucide-react";
 import { useLanguage, Language } from "@/contexts/LanguageContext";
 
-import img1Asset from "@/assets/plantation-cle-en-main.png.asset.json";
-const img1 = img1Asset.url;
+const img1 = "/plantation-cle-main.png";
 import img2 from "@/assets/vavoua-land-2026.jpg";
 import img3 from "@/assets/palm-mature-fruits.jpg";
 import img4 from "@/assets/palm-oil-production.jpg";

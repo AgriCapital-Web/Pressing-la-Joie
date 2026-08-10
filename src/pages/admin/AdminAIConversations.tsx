@@ -39,6 +39,12 @@ interface ChatLog {
   assistant_response: string;
   language: string | null;
   created_at: string;
+  status?: string | null;
+  model?: string | null;
+  duration_ms?: number | null;
+  tokens_total?: number | null;
+  retry_count?: number | null;
+  error_message?: string | null;
 }
 
 interface VisitorContact {
@@ -257,7 +263,7 @@ const AdminAIConversations = () => {
   });
 
   const exportToCSV = () => {
-    const rows: string[] = ['Session ID,Visiteur,Email,Téléphone,Date,Langue,Message Utilisateur,Réponse Assistant'];
+    const rows: string[] = ['Session ID,Visiteur,Email,Téléphone,Date,Langue,Statut,Modèle,Temps ms,Tokens,Retry,Erreur,Message Utilisateur,Réponse Assistant'];
     conversations.forEach(conv => {
       conv.messages.forEach(msg => {
         const visitor = conv.visitor;
@@ -265,7 +271,7 @@ const AdminAIConversations = () => {
         const userMsg = msg.user_message.replace(/"/g, '""').replace(/\n/g, ' ');
         const assistantMsg = msg.assistant_response.replace(/"/g, '""').replace(/\n/g, ' ');
         rows.push(
-          `"${msg.session_id}","${visitorName}","${visitor?.email || ''}","${visitor?.phone || ''}","${format(new Date(msg.created_at), 'dd/MM/yyyy HH:mm')}","${msg.language || 'fr'}","${userMsg}","${assistantMsg}"`
+          `"${msg.session_id}","${visitorName}","${visitor?.email || ''}","${visitor?.phone || ''}","${format(new Date(msg.created_at), 'dd/MM/yyyy HH:mm')}","${msg.language || 'fr'}","${msg.status || ''}","${msg.model || ''}","${msg.duration_ms || ''}","${msg.tokens_total || ''}","${msg.retry_count ?? ''}","${msg.error_message || ''}","${userMsg}","${assistantMsg}"`
         );
       });
     });
@@ -545,6 +551,16 @@ const AdminAIConversations = () => {
                                       Vocal
                                     </Badge>
                                   )}
+                                  <Badge variant={msg.status === 'failure' ? 'destructive' : 'secondary'} className="text-xs">
+                                    {msg.status === 'failure' ? 'Échec' : 'Succès'}
+                                  </Badge>
+                                </div>
+                                <div className="flex flex-wrap gap-2 mb-2 text-[11px] text-muted-foreground">
+                                  <span>Modèle : {msg.model || '—'}</span>
+                                  <span>Temps : {msg.duration_ms ? `${msg.duration_ms} ms` : '—'}</span>
+                                  <span>Tokens : {msg.tokens_total ?? '—'}</span>
+                                  <span>Retry : {msg.retry_count ?? 0}</span>
+                                  {msg.error_message && <span className="text-destructive">Erreur : {msg.error_message}</span>}
                                 </div>
                                 <div className="bg-blue-50 dark:bg-blue-900/20 rounded-lg p-3 text-sm break-words">
                                   {msg.user_message}

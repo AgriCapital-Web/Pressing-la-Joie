@@ -2,6 +2,7 @@ import { Link } from "react-router-dom";
 import { Helmet } from "react-helmet-async";
 import DynamicNavigation from "@/components/DynamicNavigation";
 import Footer from "@/components/Footer";
+
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { CheckCircle2, Handshake } from "lucide-react";
@@ -125,6 +126,7 @@ const Partenariats = () => {
         </section>
       </main>
 
+      
       <Footer />
     </div>
   );

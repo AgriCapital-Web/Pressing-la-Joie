@@ -132,7 +132,7 @@ const buildFormattedHtml = (html: string, preheader = "", mediaPreview: Newslett
 <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background-color:#f4f4f4;">
 <tr><td align="center" style="padding:20px 0;">
 <table role="presentation" width="600" cellpadding="0" cellspacing="0" style="max-width:600px;width:100%;background:#ffffff;border-radius:12px;overflow:hidden;box-shadow:0 4px 24px rgba(0,0,0,0.08);">
-  <tr><td style="background:#f5efe1;padding:30px;text-align:center;border-bottom:3px solid #166534;">
+  <tr><td style="background:#f3f4f6;padding:30px;text-align:center;border-bottom:3px solid #166534;">
     <img src="${logoUrl}" alt="AgriCapital" width="150" style="display:block;margin:0 auto 8px;max-width:150px;height:auto;border:0;outline:none;text-decoration:none;">
     <p style="color:#ed7500;font-size:13px;margin:6px 0 0;font-weight:700;line-height:1.4;">Investir la terre. Cultiver l'avenir.</p>
   </td></tr>

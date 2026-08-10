@@ -7,6 +7,7 @@ import DOMPurify from "dompurify";
 import DynamicNavigation from "@/components/DynamicNavigation";
 import Footer from "@/components/Footer";
 import SEOHead from "@/components/SEOHead";
+import ArticleJsonLD from "@/components/ArticleJsonLD";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
@@ -226,6 +227,20 @@ const NewsArticle = () => {
   return (
     <>
       <SEOHead type="article" title={seoTitle} description={seoDescription} image={seoImage} />
+      <ArticleJsonLD
+        type="NewsArticle"
+        headline={seoTitle}
+        description={seoDescription}
+        image={seoImage}
+        datePublished={article.published_at || article.created_at}
+        dateModified={article.updated_at || article.published_at || article.created_at}
+        path={`/actualites/${article.slug}`}
+        section={article.category || "Actualité"}
+        breadcrumbs={[
+          { name: "Actualités", path: "/actualites" },
+          { name: seoTitle, path: `/actualites/${article.slug}` },
+        ]}
+      />
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(articleJsonLd) }} />
       <DynamicNavigation />
       

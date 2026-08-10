@@ -2,10 +2,9 @@ import { Link, useLocation } from "react-router-dom";
 import {
   BarChart3, MessageSquare, Users, Handshake,
   Mail, Settings, Bell, Database,
-  Bot, UserCircle, Newspaper, Home, Shield, History, Image, Send, Upload,
+  Bot, UserCircle, Newspaper, Home, Shield, History, Image, Send, Upload, Cloud, Link2,
 } from "lucide-react";
-import logoAsset from "@/assets/logo-agricapital-main-v3.png.asset.json";
-const logoUrl = logoAsset.url;
+const logoUrl = "/logo-agricapital.png";
 import { cn } from "@/lib/utils";
 import { ScrollArea } from "@/components/ui/scroll-area";
 
@@ -21,6 +20,9 @@ const menuItems: MenuItem[] = [
   { icon: BarChart3, label: "Tableau de bord", path: "/admin/dashboard" },
   { icon: BarChart3, label: "Analytiques", path: "/admin/analytics" },
 
+  { divider: true, label: "AgriCapital Cloud" },
+  { icon: Cloud, label: "AgriCapital Cloud", path: "/admin/dataroom" },
+  { icon: Link2, label: "Liens de téléchargement", path: "/admin/dataroom-links" },
   { divider: true, label: "Contenu" },
   { icon: Newspaper, label: "Actualités", path: "/admin/news" },
   { icon: Image, label: "Galerie photo", path: "/admin/gallery" },
@@ -38,6 +40,7 @@ const menuItems: MenuItem[] = [
   { divider: true, label: "Configuration" },
   { icon: Shield, label: "Utilisateurs & Rôles", path: "/admin/users" },
   { icon: Database, label: "Base de données", path: "/admin/database" },
+  { icon: Image, label: "Images cassées", path: "/admin/broken-images" },
   { icon: Settings, label: "Paramètres", path: "/admin/settings" },
 ];
 

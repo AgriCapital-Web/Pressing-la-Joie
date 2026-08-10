@@ -4,8 +4,7 @@ import { Button } from "@/components/ui/button";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { Language, languageNames } from "@/lib/translations";
 import { useNavigate, useLocation } from "react-router-dom";
-import logoAsset from "@/assets/logo-agricapital-main-v3.png.asset.json";
-const logo = logoAsset.url;
+const logo = "/logo-agricapital.png";
 import { useVisitorCount } from "@/hooks/useVisitorCount";
 
 const CLIENT_PORTAL_URL = "https://client.agricapital.ci";
@@ -37,8 +36,10 @@ const menuConfig: MenuItem[] = [
     children: [
       { label: { fr: "À Propos", en: "About", ar: "من نحن", es: "Nosotros", de: "Über uns", zh: "关于" }, action: "apropos" },
       { label: { fr: "Notre Capacité", en: "Capacity", ar: "القدرة", es: "Capacidad", de: "Kapazität", zh: "能力" }, action: "impact" },
+      { label: { fr: "Inauguration Gonaté", en: "Gonaté Opening", ar: "افتتاح غوناتي", es: "Inauguración Gonaté", de: "Eröffnung Gonaté", zh: "戈纳特开业" }, action: "inauguration" },
       { label: { fr: "Évolution", en: "Evolution", ar: "التطور", es: "Evolución", de: "Entwicklung", zh: "发展" }, action: "/evolution", isRoute: true },
     ],
+
   },
   {
     label: { fr: "Nos Offres", en: "Offers", ar: "عروضنا", es: "Ofertas", de: "Angebote", zh: "方案" },
@@ -94,13 +95,15 @@ const DynamicNavigation = () => {
     setIsOpen(false);
     setOpenSubmenu(null);
     setOpenMobileSubmenu(null);
-    const isHome = location.pathname === "/" || location.pathname.match(/^\/(fr|en|ar|es|de|zh)$/);
-    if (isHome) {
-      document.getElementById(id)?.scrollIntoView({ behavior: "smooth" });
-    } else {
-      navigate(`/#${id}`);
+    const element = document.getElementById(id);
+    if (element) {
+      const top = element.getBoundingClientRect().top + window.scrollY - 80;
+      window.scrollTo({ top, behavior: "smooth" });
+      return;
     }
+    navigate(`/#${id}`);
   };
+
 
   const handleItemClick = (action: string, isRoute?: boolean) => {
     if (isRoute) {

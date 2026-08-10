@@ -7,6 +7,7 @@ import { useState } from "react";
 import { toast } from "sonner";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { supabase } from "@/integrations/supabase/client";
+import LocationMap from "@/components/LocationMap";
 
 const Contact = () => {
   const { t } = useLanguage();
@@ -204,6 +205,10 @@ const Contact = () => {
               </CardContent>
             </Card>
           </div>
+        </div>
+
+        <div className="max-w-6xl mx-auto mt-10">
+          <LocationMap />
         </div>
       </div>
     </section>

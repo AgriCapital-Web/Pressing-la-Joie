@@ -14,6 +14,7 @@ import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
 import { Plus, Pencil, Trash2, Eye, EyeOff, Upload, Image, Video, Calendar, Loader2, Sparkles, Wand2, Hash, FileText, Globe, Languages, ImagePlus, Clapperboard, ImageIcon, Film, Images, FileImage, Type } from "lucide-react";
 import WYSIWYGEditor from "@/components/admin/WYSIWYGEditor";
+import { buildExternalMediaArticle, buildPressReleaseArticle } from "@/lib/news-templates";
 
 // Enhanced markdown to HTML converter
 const markdownToHtml = (md: string): string => {
@@ -584,7 +585,35 @@ const AdminNews = () => {
                   </div>
 
                   <div className="space-y-2">
-                    <Label>Contenu / Idée (Français) *</Label>
+                    <div className="flex items-center justify-between flex-wrap gap-2">
+                      <Label>Contenu / Idée (Français) *</Label>
+                      <div className="flex gap-2">
+                        <Button
+                          type="button"
+                          variant="outline"
+                          size="sm"
+                          onClick={() => setFormData(prev => ({
+                            ...prev,
+                            category: prev.category || "Revue de presse",
+                            content_fr: buildExternalMediaArticle(),
+                          }))}
+                        >
+                          Gabarit « Média externe »
+                        </Button>
+                        <Button
+                          type="button"
+                          variant="outline"
+                          size="sm"
+                          onClick={() => setFormData(prev => ({
+                            ...prev,
+                            category: prev.category || "Communiqué",
+                            content_fr: buildPressReleaseArticle(),
+                          }))}
+                        >
+                          Gabarit « Communiqué »
+                        </Button>
+                      </div>
+                    </div>
                     <WYSIWYGEditor
                       content={formData.content_fr}
                       onChange={(content) => setFormData(prev => ({ ...prev, content_fr: content }))}

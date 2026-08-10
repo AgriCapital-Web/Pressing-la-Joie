@@ -1,0 +1,1 @@
+ALTER VIEW public.visitor_counters SET (security_invoker = on);

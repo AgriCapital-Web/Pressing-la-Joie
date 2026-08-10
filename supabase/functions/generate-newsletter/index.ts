@@ -75,6 +75,30 @@ serve(async (req) => {
     if (!LOVABLE_API_KEY) throw new Error("LOVABLE_API_KEY is not configured");
 
     const audience = audienceLabels[targetAudience] || audienceLabels.all;
+
+    // Contexte réel du site : dernières actualités publiées (évite les emails vides ou génériques)
+    const svc = createClient(Deno.env.get("SUPABASE_URL")!, Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!);
+    let newsItems: { title: string; excerpt: string; slug: string; date: string }[] = [];
+    try {
+      const { data: news } = await svc
+        .from("news")
+        .select("slug, title_fr, excerpt_fr, published_at")
+        .eq("is_published", true)
+        .order("published_at", { ascending: false })
+        .limit(5);
+      newsItems = (news ?? []).map((n: any) => ({
+        title: n.title_fr ?? "",
+        excerpt: stripHtml(n.excerpt_fr ?? "").slice(0, 320),
+        slug: n.slug,
+        date: n.published_at ? new Date(n.published_at).toLocaleDateString("fr-FR") : "",
+      }));
+    } catch (e) {
+      console.error("news context error", e);
+    }
+
+    const newsContext = newsItems.length
+      ? `\n\nActualités réelles AgriCapital à exploiter (ne rien inventer au-delà) :\n${newsItems.map((n) => `- ${n.date} — ${n.title} : ${n.excerpt} (${SITE_ORIGIN}/actualites/${n.slug})`).join("\n")}`
+      : "";
     const mediaInstruction = [
       includeImage ? "prévoir une image affichée directement dans l'email, jamais un texte 'voir ici'" : "ne pas insérer d'image",
       includeVideo ? "prévoir une vidéo affichée en aperçu directement dans l'email, jamais un lien ni bouton 'voir la vidéo'" : "ne pas insérer de vidéo",
@@ -112,7 +136,9 @@ Schéma JSON exact :
   "plainText": "version texte brut complète",
   "imageSuggestion": "description d'image si demandée, sinon chaîne vide",
   "videoSuggestion": "description ou lien vidéo si demandé, sinon chaîne vide"
-}`;
+}
+
+Obligations de complétude : chaque champ du schéma doit être rempli avec du contenu réel et utile. "sections" doit contenir 2 à 4 blocs complets, "trustElements" 3 éléments, "intro" et "closing" au moins deux phrases. Aucun champ vide, aucun texte de remplissage.${newsContext}`;
 
     const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
       method: "POST",
@@ -134,8 +160,16 @@ Schéma JSON exact :
     }
 
     const data = await response.json();
-    const content = data.choices?.[0]?.message?.content || "{}";
-    const campaign = JSON.parse(content.match(/\{[\s\S]*\}/)?.[0] || content);
+    const content = data.choices?.[0]?.message?.content || "";
+    let parsed: any = {};
+    try {
+      parsed = JSON.parse(content.match(/\{[\s\S]*\}/)?.[0] || content || "{}");
+    } catch (_e) {
+      console.error("Campaign JSON parse failed, using fallback structure");
+      parsed = {};
+    }
+
+    const campaign = normalizeCampaign(parsed, { prompt, audience, news: newsItems });
     const html = buildCampaignHtml(campaign, { includeImage, includeVideo });
     const mediaPreview = [
       ...(includeImage ? [{ type: "image", url: DEFAULT_IMAGE_URL, alt: campaign.imageSuggestion || "Plantation AgriCapital" }] : []),
@@ -170,5 +204,81 @@ function buildCampaignHtml(data: any, media: { includeImage: boolean; includeVid
   const videoHtml = media.includeVideo ? `<div style="margin:24px 0;text-align:center;"><video controls muted playsinline preload="metadata" poster="${DEFAULT_VIDEO_POSTER_URL}" style="display:block;width:100%;max-width:580px;height:auto;margin:0 auto;border-radius:12px;border:1px solid #EAE4D5;"><source src="${DEFAULT_VIDEO_URL}" type="video/mp4"><img src="${DEFAULT_VIDEO_POSTER_URL}" alt="${escapeHtml(data.videoSuggestion || "Aperçu vidéo AgriCapital")}" width="580" style="display:block;width:100%;max-width:580px;height:auto;border-radius:12px;"></video><p style="color:#66716b;font-size:12px;line-height:1.5;margin:8px 0 0;">Aperçu vidéo terrain intégré.</p></div>` : "";
   const cta = data.cta || {};
 
-  return `<!DOCTYPE html><html lang="fr"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0"></head><body style="margin:0;padding:0;background:#f4f1ea;font-family:Arial,Helvetica,sans-serif;"><div style="display:none;max-height:0;overflow:hidden;color:transparent;">${escapeHtml(data.preheader)}</div><table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:#f4f1ea;padding:20px 0;"><tr><td align="center"><table role="presentation" width="640" cellpadding="0" cellspacing="0" style="width:100%;max-width:640px;background:#ffffff;border-radius:12px;overflow:hidden;"><tr><td style="background:#f5efe1;padding:26px 28px;text-align:center;border-bottom:3px solid #1A5C38;"><img src="https://www.agricapital.ci/favicon.png" alt="AgriCapital" width="150" style="display:block;margin:0 auto 8px;max-width:150px;height:auto;"><p style="color:#ed7500;font-size:13px;margin:0;font-weight:700;">Investir la terre. Cultiver l'avenir.</p></td></tr><tr><td style="padding:30px;"><p style="color:#66716b;font-size:14px;margin:0 0 16px;">${escapeHtml(data.greeting || "Bonjour {{prenom}} {{nom}},")}</p><h1 style="color:#14231b;font-size:28px;line-height:1.2;margin:0 0 16px;">${escapeHtml(data.headline)}</h1><p style="color:#2f3a34;font-size:16px;line-height:1.7;margin:0 0 18px;">${escapeHtml(data.intro)}</p>${imageHtml}${sectionHtml}${trustHtml}${videoHtml}<div style="text-align:center;margin:28px 0;"><p style="color:#2f3a34;font-size:15px;line-height:1.6;margin:0 0 14px;">${escapeHtml(cta.supportingText || "Échangeons sur votre projet.")}</p><a href="${escapeHtml(cta.url || "https://www.agricapital.ci/contact")}" style="display:inline-block;background:#E8960A;color:#ffffff;padding:14px 30px;border-radius:8px;text-decoration:none;font-weight:800;font-size:15px;">${escapeHtml(cta.label || "Nous contacter")}</a></div><p style="color:#2f3a34;font-size:15px;line-height:1.7;margin:22px 0;">${escapeHtml(data.closing)}</p><div style="border-top:2px solid #EAE4D5;margin-top:26px;padding-top:18px;color:#2f3a34;font-size:14px;line-height:1.6;"><p style="margin:0;font-weight:800;color:#14231b;">L'équipe AgriCapital SARL</p><p style="margin:8px 0 0;">🌐 www.agricapital.ci<br>📧 contact@agricapital.ci<br>📞 +225 05 64 55 17 17</p><p style="margin:8px 0 0;color:#E8960A;font-weight:700;">Investir la terre. Cultiver l'avenir.</p></div></td></tr></table></td></tr></table></body></html>`;
+  return `<!DOCTYPE html><html lang="fr"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0"></head><body style="margin:0;padding:0;background:#f3f4f6;font-family:Arial,Helvetica,sans-serif;"><div style="display:none;max-height:0;overflow:hidden;color:transparent;">${escapeHtml(data.preheader)}</div><table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:#f3f4f6;padding:20px 0;"><tr><td align="center"><table role="presentation" width="640" cellpadding="0" cellspacing="0" style="width:100%;max-width:640px;background:#ffffff;border-radius:12px;overflow:hidden;"><tr><td style="background:#f3f4f6;padding:26px 28px;text-align:center;border-bottom:3px solid #1A5C38;"><img src="https://www.agricapital.ci/favicon.png" alt="AgriCapital" width="150" style="display:block;margin:0 auto 8px;max-width:150px;height:auto;"><p style="color:#ed7500;font-size:13px;margin:0;font-weight:700;">Investir la terre. Cultiver l'avenir.</p></td></tr><tr><td style="padding:30px;"><p style="color:#66716b;font-size:14px;margin:0 0 16px;">${escapeHtml(data.greeting || "Bonjour {{prenom}} {{nom}},")}</p><h1 style="color:#14231b;font-size:28px;line-height:1.2;margin:0 0 16px;">${escapeHtml(data.headline)}</h1><p style="color:#2f3a34;font-size:16px;line-height:1.7;margin:0 0 18px;">${escapeHtml(data.intro)}</p>${imageHtml}${sectionHtml}${trustHtml}${videoHtml}<div style="text-align:center;margin:28px 0;"><p style="color:#2f3a34;font-size:15px;line-height:1.6;margin:0 0 14px;">${escapeHtml(cta.supportingText || "Échangeons sur votre projet.")}</p><a href="${escapeHtml(cta.url || "https://www.agricapital.ci/contact")}" style="display:inline-block;background:#E8960A;color:#ffffff;padding:14px 30px;border-radius:8px;text-decoration:none;font-weight:800;font-size:15px;">${escapeHtml(cta.label || "Nous contacter")}</a></div><p style="color:#2f3a34;font-size:15px;line-height:1.7;margin:22px 0;">${escapeHtml(data.closing)}</p><div style="border-top:2px solid #EAE4D5;margin-top:26px;padding-top:18px;color:#2f3a34;font-size:14px;line-height:1.6;"><p style="margin:0;font-weight:800;color:#14231b;">L'équipe AgriCapital SARL</p><p style="margin:8px 0 0;">🌐 www.agricapital.ci<br>📧 contact@agricapital.ci<br>📞 +225 05 64 55 17 17</p><p style="margin:8px 0 0;color:#E8960A;font-weight:700;">Investir la terre. Cultiver l'avenir.</p></div></td></tr></table></td></tr></table></body></html>`;
+}
+// Garantit qu'aucune campagne ne part vide ou tronquée, même si l'IA renvoie un JSON partiel.
+function normalizeCampaign(
+  raw: any,
+  ctx: { prompt: string; audience: string; news: { title: string; excerpt: string; slug: string; date: string }[] },
+) {
+  const c = raw && typeof raw === "object" ? { ...raw } : {};
+  const firstNews = ctx.news[0];
+
+  const fallbackSections = ctx.news.length
+    ? ctx.news.slice(0, 3).map((n) => ({
+        title: n.title,
+        body: n.excerpt || "Retrouvez le détail de cette étape du déploiement d'AgriCapital sur notre site.",
+        bullets: [],
+      }))
+    : [
+        {
+          title: "Créer et sécuriser des actifs agricoles durables",
+          body: "AgriCapital SARL structure, développe et gère des plantations professionnelles de palmier à huile en Côte d'Ivoire, avec un foncier sécurisé et un accompagnement complet, de l'identification du terrain jusqu'à la production.",
+          bullets: [],
+        },
+        {
+          title: "Une organisation en déploiement",
+          body: "Bureau de proximité, réseau de conseillers formés, pépinière opérationnelle et parcelles identifiées : notre capacité d'action se renforce étape par étape.",
+          bullets: [],
+        },
+      ];
+
+  const out = {
+    name: String(c.name || `Campagne AgriCapital — ${new Date().toLocaleDateString("fr-FR")}`),
+    subject: String(c.subject || firstNews?.title || "AgriCapital — l'actualité de nos plantations et de notre déploiement").slice(0, 120),
+    preheader: String(c.preheader || "Investir la terre. Cultiver l'avenir. Les avancées concrètes d'AgriCapital.").slice(0, 160),
+    headline: String(c.headline || firstNews?.title || "AgriCapital avance, étape par étape"),
+    greeting: String(c.greeting || "Bonjour {{prenom}} {{nom}},"),
+    intro: String(
+      c.intro ||
+        `Voici les dernières avancées d'AgriCapital SARL, promoteur agricole ivoirien basé à Daloa. Nous partageons régulièrement avec ${ctx.audience} l'évolution concrète de nos plantations, de notre organisation et de nos engagements.`,
+    ),
+    sections: Array.isArray(c.sections) && c.sections.length
+      ? c.sections
+          .filter((s: any) => s && (s.title || s.body))
+          .map((s: any) => ({
+            title: String(s.title || "AgriCapital"),
+            body: String(s.body || ""),
+            bullets: Array.isArray(s.bullets) ? s.bullets.filter(Boolean).map(String) : [],
+          }))
+      : fallbackSections,
+    trustElements: Array.isArray(c.trustElements) && c.trustElements.length
+      ? c.trustElements.filter(Boolean).map(String)
+      : [
+          "Entreprise ivoirienne enregistrée (AgriCapital SARL), basée à Daloa",
+          "Foncier agricole sécurisé et contrats certifiés",
+          "Bureau de proximité et équipe terrain dédiée",
+        ],
+    cta: {
+      label: String(c.cta?.label || "Échanger avec notre équipe"),
+      url: String(c.cta?.url || `${SITE_ORIGIN}/contact`),
+      supportingText: String(c.cta?.supportingText || "Vous souhaitez développer ou sécuriser un projet agricole ? Parlons-en."),
+    },
+    closing: String(
+      c.closing ||
+        "Merci de votre confiance et de l'intérêt que vous portez à notre démarche. Nous restons disponibles pour répondre à vos questions et étudier votre projet.",
+    ),
+    signature: String(c.signature || "L'équipe AgriCapital SARL"),
+    plainText: typeof c.plainText === "string" ? c.plainText : "",
+    imageSuggestion: String(c.imageSuggestion || "Plantation professionnelle AgriCapital"),
+    videoSuggestion: String(c.videoSuggestion || "Levé topographique sur le terrain"),
+  };
+
+  // Un bloc sans corps rendrait l'email « à moitié vide »
+  out.sections = out.sections.map((s: any) => ({
+    ...s,
+    body: s.body || "Retrouvez le détail de cette étape sur www.agricapital.ci.",
+  }));
+
+  return out;
 }
