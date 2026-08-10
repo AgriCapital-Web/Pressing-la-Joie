@@ -29,7 +29,7 @@ const Solutions = lazy(() => import("./pages/Solutions"));
 const OfferingDetail = lazy(() => import("./pages/OfferingDetail"));
 const Partenariats = lazy(() => import("./pages/Partenariats"));
 const TreasurePage = lazy(() => import("./pages/TreasurePage"));
-const WaitlistPage = lazy(() => import("./pages/WaitlistPage"));
+
 const Dataroom = lazy(() => import("./pages/Dataroom"));
 const DataroomVault = lazy(() => import("./pages/DataroomVault"));
 const AdminDataroom = lazy(() => import("./pages/admin/AdminDataroom"));
@@ -44,7 +44,7 @@ const AdminTestimonials = lazy(() => import("./pages/admin/AdminTestimonials"));
 const AdminNewsletter = lazy(() => import("./pages/admin/AdminNewsletter"));
 const AdminNewsletterHistory = lazy(() => import("./pages/admin/AdminNewsletterHistory"));
 const AdminEmailCampaigns = lazy(() => import("./pages/admin/AdminEmailCampaigns"));
-const AdminWaitlist = lazy(() => import("./pages/admin/AdminWaitlist"));
+
 const AdminImportEmails = lazy(() => import("./pages/admin/AdminImportEmails"));
 const AdminCampagnes = lazy(() => import("./pages/admin/AdminCampagnes"));
 const AdminPartnershipRequests = lazy(() => import("./pages/admin/AdminPartnershipRequests"));
@@ -107,7 +107,7 @@ const AppContent = () => {
         <Route path="/actualites/:slug" element={<NewsArticle />} />
         <Route path="/news" element={<News />} />
         <Route path="/news/:slug" element={<NewsArticle />} />
-        <Route path="/souscrire" element={<WaitlistPage />} />
+
         <Route path="/tresor-foncier" element={<TreasurePage type="foncier" />} />
         <Route path="/tresor-palmier" element={<TreasurePage type="palmier" />} />
 
@@ -167,7 +167,7 @@ const AppContent = () => {
         <Route path="/admin/newsletter-history" element={<AdminCampagnes />} />
         <Route path="/admin/email-campaigns" element={<AdminCampagnes />} />
         <Route path="/admin/import-emails" element={<AdminCampagnes />} />
-        <Route path="/admin/waitlist" element={<AdminWaitlist />} />
+
         <Route path="/admin/partnership-requests" element={<AdminPartnershipRequests />} />
         <Route path="/admin/ai-conversations" element={<AdminAIConversations />} />
         <Route path="/admin/visitor-contacts" element={<AdminVisitorContacts />} />
