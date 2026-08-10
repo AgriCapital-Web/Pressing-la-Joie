@@ -1,4 +1,5 @@
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
+import { checkRateLimit, clientKey, rateLimitResponse } from "../_shared/rate-limit.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -11,6 +12,12 @@ serve(async (req) => {
   }
 
   try {
+    // Rate limiting : 10 transcriptions / minute et 60 / heure par IP.
+    const minute = checkRateLimit(clientKey(req, "stt:m"), { limit: 10, windowMs: 60_000 });
+    if (!minute.allowed) return rateLimitResponse(minute, corsHeaders);
+    const hour = checkRateLimit(clientKey(req, "stt:h"), { limit: 60, windowMs: 3_600_000 });
+    if (!hour.allowed) return rateLimitResponse(hour, corsHeaders);
+
     const { audio, mimeType } = await req.json();
     
     if (!audio) {
