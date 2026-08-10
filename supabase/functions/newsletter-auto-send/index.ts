@@ -3,8 +3,28 @@ import { createClient } from "https://esm.sh/@supabase/supabase-js@2.39.3";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
-  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
+  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type, x-cron-secret",
 };
+
+// Autorise uniquement : le planificateur (secret cron / clé service) ou un administrateur authentifié.
+async function isAuthorized(req: Request): Promise<boolean> {
+  const serviceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
+  const cronSecret = Deno.env.get("CRON_SECRET") ?? "";
+  const bearer = (req.headers.get("Authorization") ?? "").replace("Bearer ", "").trim();
+  const headerSecret = (req.headers.get("x-cron-secret") ?? "").trim();
+
+  if (cronSecret && headerSecret === cronSecret) return true;
+  if (bearer && bearer === serviceKey) return true;
+  if (cronSecret && bearer === cronSecret) return true;
+  if (!bearer) return false;
+
+  const supabase = createClient(Deno.env.get("SUPABASE_URL")!, serviceKey);
+  const { data: userRes } = await supabase.auth.getUser(bearer);
+  const user = userRes?.user;
+  if (!user) return false;
+  const { data: isAdmin } = await supabase.rpc("has_role", { _user_id: user.id, _role: "admin" });
+  return !!isAdmin;
+}
 
 const brevoFetch = (apiKey: string, path: string, init: RequestInit = {}) =>
   fetch(`https://api.brevo.com/v3${path}`, {
@@ -18,6 +38,12 @@ serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
 
   try {
+    if (!(await isAuthorized(req))) {
+      return new Response(JSON.stringify({ error: "Non autorisé" }), {
+        status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
     const body = await req.json().catch(() => ({}));
     const trigger: string = body?.trigger || "manual";
 
@@ -144,7 +170,7 @@ serve(async (req) => {
     });
   } catch (err) {
     console.error("newsletter-auto-send error", err);
-    return new Response(JSON.stringify({ error: err instanceof Error ? err.message : String(err) }), {
+    return new Response(JSON.stringify({ error: "Erreur interne" }), {
       status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
   }
