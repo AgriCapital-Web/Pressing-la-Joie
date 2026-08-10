@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="800" viewBox="0 0 1200 800" role="img" aria-label="AgriCapital">
+  <defs>
+    <linearGradient id="g" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#0f5132"/>
+      <stop offset="100%" stop-color="#1a7f4b"/>
+    </linearGradient>
+  </defs>
+  <rect width="1200" height="800" fill="url(#g)"/>
+  <text x="600" y="390" font-family="Arial, Helvetica, sans-serif" font-size="64" font-weight="bold" fill="#ffffff" text-anchor="middle">AgriCapital</text>
+  <text x="600" y="450" font-family="Arial, Helvetica, sans-serif" font-size="30" fill="#f59e0b" text-anchor="middle">Investir la terre. Cultiver l'avenir.</text>
+</svg>
