@@ -550,7 +550,79 @@ export type Database = {
       }
     }
     Views: {
-      [_ in never]: never
+      order_comments_safe: {
+        Row: {
+          author_id: string | null
+          author_name: string | null
+          comment: string | null
+          created_at: string | null
+          id: string | null
+          order_id: number | null
+        }
+        Insert: {
+          author_id?: string | null
+          author_name?: never
+          comment?: string | null
+          created_at?: string | null
+          id?: string | null
+          order_id?: number | null
+        }
+        Update: {
+          author_id?: string | null
+          author_name?: never
+          comment?: string | null
+          created_at?: string | null
+          id?: string | null
+          order_id?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "order_comments_order_id_fkey"
+            columns: ["order_id"]
+            isOneToOne: false
+            referencedRelation: "orders"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      order_history_safe: {
+        Row: {
+          action: string | null
+          created_at: string | null
+          details: string | null
+          id: string | null
+          order_id: number | null
+          performed_by: string | null
+          performer_name: string | null
+        }
+        Insert: {
+          action?: string | null
+          created_at?: string | null
+          details?: string | null
+          id?: string | null
+          order_id?: number | null
+          performed_by?: string | null
+          performer_name?: never
+        }
+        Update: {
+          action?: string | null
+          created_at?: string | null
+          details?: string | null
+          id?: string | null
+          order_id?: number | null
+          performed_by?: string | null
+          performer_name?: never
+        }
+        Relationships: [
+          {
+            foreignKeyName: "order_history_order_id_fkey"
+            columns: ["order_id"]
+            isOneToOne: false
+            referencedRelation: "orders"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Functions: {
       get_orders_by_phone: {
@@ -592,6 +664,7 @@ export type Database = {
         Returns: boolean
       }
       is_staff: { Args: { _user_id: string }; Returns: boolean }
+      purge_expired_dataroom_sessions: { Args: never; Returns: number }
     }
     Enums: {
       app_role: "admin" | "manager"
