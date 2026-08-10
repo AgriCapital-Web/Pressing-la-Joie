@@ -33,12 +33,58 @@ const shell = (title: string, body: string) => `
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
   try {
+    // --- Admin authentication (required) ---
+    const authHeader = req.headers.get("Authorization") ?? "";
+    if (!authHeader.startsWith("Bearer ")) {
+      return new Response(JSON.stringify({ error: "Unauthorized" }), {
+        status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+    const authClient = createClient(
+      Deno.env.get("SUPABASE_URL")!,
+      Deno.env.get("SUPABASE_ANON_KEY")!,
+      { global: { headers: { Authorization: authHeader } } },
+    );
+    const { data: userData, error: userErr } = await authClient.auth.getUser(
+      authHeader.replace("Bearer ", ""),
+    );
+    if (userErr || !userData?.user) {
+      return new Response(JSON.stringify({ error: "Unauthorized" }), {
+        status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+    const { data: isAdmin } = await authClient.rpc("has_role", {
+      _user_id: userData.user.id,
+      _role: "admin",
+    });
+    if (!isAdmin) {
+      return new Response(JSON.stringify({ error: "Forbidden" }), {
+        status: 403, headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
     const { publication_id, event, from, to } = await req.json();
     if (!publication_id || !event) {
       return new Response(JSON.stringify({ error: "publication_id et event requis" }), {
         status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
+
+    // --- Strict allowlist validation (no attacker-controlled text in the email) ---
+    if (event !== "visibility" && event !== "workflow") {
+      return new Response(JSON.stringify({ error: "event invalide" }), {
+        status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+    const allowed = event === "visibility" ? VISIBILITY_LABEL : WORKFLOW_LABEL;
+    const isAllowed = (v: unknown) => v === undefined || v === null || (typeof v === "string" && v in allowed);
+    if (!isAllowed(from) || typeof to !== "string" || !(to in allowed)) {
+      return new Response(JSON.stringify({ error: "from/to invalides" }), {
+        status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+    const fromLabel = from ? allowed[from as string] : "—";
+    const toLabel = allowed[to];
 
     const supabase = createClient(
       Deno.env.get("SUPABASE_URL")!,
@@ -64,15 +110,15 @@ Deno.serve(async (req) => {
     const isVisibility = event === "visibility";
     const subject = isVisibility
       ? `Permissions mises à jour — ${pub.title}`
-      : `${WORKFLOW_LABEL[to] ?? to} — ${pub.title}`;
+      : `${toLabel} — ${pub.title}`;
 
     const bodyHtml = isVisibility
       ? `<p>Le niveau d'accès du document <strong>${pub.title}</strong> a été modifié :</p>
-         <p style="font-size:16px"><strong>${VISIBILITY_LABEL[from] ?? from ?? "—"}</strong> → <strong>${VISIBILITY_LABEL[to] ?? to}</strong></p>
+         <p style="font-size:16px"><strong>${fromLabel}</strong> → <strong>${toLabel}</strong></p>
          <p>Connectez-vous à AgriCapital Cloud avec votre code d'accès pour consulter les documents disponibles.</p>
          <p style="font-size:12px;color:#666">La consultation est en ligne uniquement : le téléchargement direct est désactivé.</p>`
       : `<p>Le document <strong>${pub.title}</strong>${pub.category ? ` (${pub.category})` : ""} a changé de statut :</p>
-         <p style="font-size:16px"><strong>${WORKFLOW_LABEL[from] ?? from ?? "—"}</strong> → <strong>${WORKFLOW_LABEL[to] ?? to}</strong></p>
+         <p style="font-size:16px"><strong>${fromLabel}</strong> → <strong>${toLabel}</strong></p>
          ${to === "published" ? "<p>Le document est désormais consultable dans votre espace AgriCapital Cloud.</p>" : "<p>Vous serez notifié dès sa publication.</p>"}
          <p style="font-size:12px;color:#666">La consultation est en ligne uniquement : le téléchargement direct est désactivé.</p>`;
 
