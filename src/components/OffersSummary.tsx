@@ -46,7 +46,7 @@ const OffersSummary = () => (
                 <span className="inline-flex h-11 w-11 items-center justify-center rounded-lg bg-primary/10 text-primary">
                   <Icon className="h-5 w-5" />
                 </span>
-                <span className="rounded-full bg-accent/15 px-3 py-1 text-[11px] font-bold uppercase tracking-wider text-accent-foreground">
+                <span className="rounded-full bg-secondary px-3 py-1 text-[11px] font-bold uppercase tracking-wider text-foreground">
                   {tag}
                 </span>
               </div>
