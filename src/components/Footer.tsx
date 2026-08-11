@@ -98,7 +98,7 @@ const Footer = () => {
         </div>
 
         <div className="border-t border-white/15 mt-12 pt-6 flex flex-col md:flex-row items-center justify-between gap-3">
-          <p className="text-white/60 text-xs">© 2025 {t.footer.copyright}</p>
+          <p className="text-white/60 text-xs">© {new Date().getFullYear()} {t.footer.copyright}</p>
           <div className="flex items-center gap-3">
             <a
               href="https://www.linkedin.com/company/agricapital-ci"
