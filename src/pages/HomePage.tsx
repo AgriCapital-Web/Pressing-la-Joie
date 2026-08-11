@@ -52,6 +52,8 @@ const sectionMap: Record<string, string> = {
   'solutions': 'solutions',
   'services': 'solutions',
   'domaines': 'domaines',
+  'offres': 'offres',
+  'offers': 'offres',
   'espace-client': 'espace-client',
   'client-portal': 'espace-client',
   'inauguration': 'inauguration',
