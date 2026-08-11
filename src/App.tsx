@@ -27,6 +27,7 @@ const NewsArticle = lazy(() => import("./pages/NewsArticle"));
 const TestimonialsPage = lazy(() => import("./pages/TestimonialsPage"));
 const Solutions = lazy(() => import("./pages/Solutions"));
 const OfferingDetail = lazy(() => import("./pages/OfferingDetail"));
+const OffrePage = lazy(() => import("./pages/OffrePage"));
 const Partenariats = lazy(() => import("./pages/Partenariats"));
 const TreasurePage = lazy(() => import("./pages/TreasurePage"));
 
@@ -114,6 +115,10 @@ const AppContent = () => {
         {/* Solutions / Services / Partenariats */}
         <Route path="/solutions" element={<Solutions />} />
         <Route path="/services" element={<Solutions />} />
+        <Route path="/palminvest" element={<OffrePage offer="palminvest" />} />
+        <Route path="/palminvest-plus" element={<OffrePage offer="palminvest" />} />
+        <Route path="/terrapalm" element={<OffrePage offer="terrapalm" />} />
+        <Route path="/terrapalm-plus" element={<OffrePage offer="terrapalm" />} />
         <Route path="/solutions/:slug" element={<OfferingDetail type="solution" />} />
         <Route path="/services/:slug" element={<OfferingDetail type="service" />} />
         <Route path="/partenariats" element={<Partenariats />} />
