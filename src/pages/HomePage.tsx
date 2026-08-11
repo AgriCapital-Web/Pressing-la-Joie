@@ -13,6 +13,7 @@ import Founder from "@/components/Founder";
 import Team from "@/components/Team";
 import Partnership from "@/components/Partnership";
 import SolutionsSummary from "@/components/SolutionsSummary";
+import OffersSummary from "@/components/OffersSummary";
 import InaugurationSection from "@/components/InaugurationSection";
 
 
@@ -145,7 +146,8 @@ const HomePage = () => {
       <AIChatbot />
       <DynamicNavigation />
       <Hero />
-      
+
+      <OffersSummary />
       <ClientPortalSection />
       <DomainesIntervention />
       <InaugurationSection />
