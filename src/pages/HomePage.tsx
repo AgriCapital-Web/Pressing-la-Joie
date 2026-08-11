@@ -13,6 +13,7 @@ import Founder from "@/components/Founder";
 import Team from "@/components/Team";
 import Partnership from "@/components/Partnership";
 import SolutionsSummary from "@/components/SolutionsSummary";
+import OffersSummary from "@/components/OffersSummary";
 import InaugurationSection from "@/components/InaugurationSection";
 
 
@@ -51,6 +52,8 @@ const sectionMap: Record<string, string> = {
   'solutions': 'solutions',
   'services': 'solutions',
   'domaines': 'domaines',
+  'offres': 'offres',
+  'offers': 'offres',
   'espace-client': 'espace-client',
   'client-portal': 'espace-client',
   'inauguration': 'inauguration',
@@ -145,7 +148,8 @@ const HomePage = () => {
       <AIChatbot />
       <DynamicNavigation />
       <Hero />
-      
+
+      <OffersSummary />
       <ClientPortalSection />
       <DomainesIntervention />
       <InaugurationSection />

@@ -3,18 +3,18 @@ import { Card } from "@/components/ui/card";
 import { MapPin, Navigation, ExternalLink, Map as MapIcon, Satellite } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
-// Coordonnées AgriCapital — Daloa, Côte d'Ivoire (géocodées)
-const AGRICAPITAL_COORDS = { lat: 6.8770, lng: -6.4502 };
-const ADDRESS_LABEL = "AgriCapital — Daloa, Côte d'Ivoire";
+// Coordonnées AgriCapital — Bureau de proximité de Gonaté (Plus Code WP4X+RRM)
+const AGRICAPITAL_COORDS = { lat: 7.158189, lng: -6.525408 };
+const ADDRESS_LABEL = "AgriCapital — Bureau de Gonaté, Côte d'Ivoire";
 
 const LocationMap = () => {
   const [mapType, setMapType] = useState<"m" | "k">("m"); // m=plan, k=satellite
   const { lat, lng } = AGRICAPITAL_COORDS;
 
   // Iframe embed sans clé API — fonctionne partout, y compris production Vercel
-  const bbox = `${lng - 0.03},${lat - 0.02},${lng + 0.03},${lat + 0.02}`;
+  const bbox = `${lng - 0.02},${lat - 0.013},${lng + 0.02},${lat + 0.013}`;
   const osmSrc = `https://www.openstreetmap.org/export/embed.html?bbox=${bbox}&layer=mapnik&marker=${lat},${lng}`;
-  const googleSrc = `https://maps.google.com/maps?q=${lat},${lng}&z=14&t=${mapType}&output=embed`;
+  const googleSrc = `https://maps.google.com/maps?q=${lat},${lng}&z=16&t=${mapType}&output=embed`;
 
   const directionsUrl = `https://www.google.com/maps/dir/?api=1&destination=${lat},${lng}`;
   const viewUrl = `https://www.google.com/maps/search/?api=1&query=${lat},${lng}`;
@@ -23,9 +23,17 @@ const LocationMap = () => {
     <Card className="overflow-hidden border-border">
       <div className="flex items-center justify-between gap-3 px-4 py-3 bg-card border-b border-border">
         <div className="flex items-center gap-2 min-w-0">
-          <MapPin className="w-5 h-5 text-primary flex-shrink-0" />
+          <span className="relative flex h-5 w-5 flex-shrink-0 items-center justify-center">
+            <span className="absolute inline-flex h-5 w-5 animate-ping rounded-full bg-primary/40" />
+            <MapPin className="relative w-5 h-5 text-primary" />
+          </span>
           <div className="min-w-0">
-            <h3 className="font-semibold text-foreground text-sm truncate">Nous localiser</h3>
+            <h3 className="font-semibold text-foreground text-sm truncate flex items-center gap-2">
+              Nous localiser
+              <span className="inline-flex items-center gap-1 rounded-full bg-primary/10 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider text-primary">
+                <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-primary" /> En direct
+              </span>
+            </h3>
             <p className="text-xs text-muted-foreground truncate">{ADDRESS_LABEL}</p>
           </div>
         </div>
@@ -74,6 +82,9 @@ const LocationMap = () => {
             (e.currentTarget as HTMLIFrameElement).src = osmSrc;
           }}
         />
+        <div className="pointer-events-none absolute left-1/2 top-1/2 z-10 -translate-x-1/2 -translate-y-1/2">
+          <span className="block h-16 w-16 animate-ping rounded-full bg-primary/25" />
+        </div>
       </div>
     </Card>
   );

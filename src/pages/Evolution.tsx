@@ -12,6 +12,7 @@ import ArticleJsonLD from "@/components/ArticleJsonLD";
 import { supabase } from "@/integrations/supabase/client";
 
 import nurseryPepiniere from "@/assets/nursery-pepiniere-daloa.jpg";
+import lancementTerrainAsset from "@/assets/lancement-operations-terrain.jpg.asset.json";
 import nurserySite from "@/assets/nursery-palm.jpg";
 import nurseryInspection from "@/assets/nursery-inspection-2026.jpg";
 import palmFruits from "@/assets/palm-mature-fruits.jpg";
@@ -83,8 +84,8 @@ const Evolution = () => {
   const t = texts[language as keyof typeof texts] || texts.fr;
 
   const milestones = [
-    { ...t.m1, status: "completed", icon: Target, year: "2025", image: "/inauguration/terrain-prospection.webp" },
-    { ...t.m2, status: "completed", icon: Sprout, year: "2025", image: "/inauguration/pepiniere-plants-palmier.webp" },
+    { ...t.m1, status: "completed", icon: Target, year: "2025", image: lancementTerrainAsset.url },
+    { ...t.m2, status: "completed", icon: Sprout, year: "2025", image: "/inauguration/terrain-prospection.webp" },
     { ...t.m3, status: "completed", icon: MapPin, year: "2026", image: "/inauguration/inauguration-assemblee.webp" },
     { ...t.m5, status: "completed", icon: Users, year: "2026", image: "/formation/formation-prise-parole.webp" },
     { ...t.m4, status: "in_progress", icon: Users, year: "2026", image: "/formation/formation-groupe-cohorte.webp" },
